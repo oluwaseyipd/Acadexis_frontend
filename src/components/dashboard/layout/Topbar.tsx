@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Search, Bell, HelpCircle, X } from "lucide-react";
+import { Search, Bell, HelpCircle, X, Menu } from "lucide-react";
 import Link from "next/link";
 
 // ─── Props ────────────────────────────────────────────────────────────────────
@@ -11,14 +11,16 @@ interface TopBarProps {
   avatarColor?: string;
   notificationCount?: number;
   onSearch?: (query: string) => void;
+  onMenuClick?: () => void;
 }
 
 export default function TopBar({
   userName = "Student",
   userInitials = "S",
-  avatarColor = "bg-orange-400",
+  avatarColor = "bg-brand-primary",
   notificationCount = 0,
   onSearch,
+  onMenuClick,
 }: TopBarProps) {
   const [query, setQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false);
@@ -42,24 +44,36 @@ export default function TopBar({
   };
 
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between h-14 px-6 py-8 bg-white border-b border-gray-100 gap-4">
+    <header className="sticky top-0 z-30 flex items-center justify-between h-14 px-6 py-8 bg-background border-b border-border gap-4">
       <div className="flex gap-24 items-center flex-1">
               {/* Brand */}
-      <Link
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={onMenuClick}
+          className="md:hidden p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          aria-label="Open sidebar"
+        >
+          <Menu size={18} />
+        </button>
+
+       <Link
         href="/dashboard/student"
-        className="text-md font-bold text-[#0f173e] tracking-tight shrink-0 hover:text-green-600 transition-colors"
+        className="text-md font-bold text-foreground tracking-tight shrink-0 hover:text-brand-primary transition-colors"
       >
         The Academic Curator
       </Link>
+      </div>
+     
 
       {/* Search */}
       <form
         onSubmit={handleSearch}
-        className={`flex items-center gap-2 flex-1 max-w-[400px] bg-gray-100 rounded-full p-3 transition-all duration-200 ${
-          isFocused ? "ring-2 ring-green-400/50 bg-white shadow-sm" : ""
+        className={`hidden md:flex items-center gap-2 flex-1 max-w-100 bg-muted rounded-full p-3 transition-all duration-200 ${
+          isFocused ? "ring-2 ring-brand-primary/50 bg-card shadow-sm" : ""
         }`}
       >
-        <Search size={14} strokeWidth={2} className="text-gray-400 shrink-0" />
+        <Search size={14} strokeWidth={2} className="text-muted-foreground shrink-0" />
         <input
           type="search"
           value={query}
@@ -67,14 +81,14 @@ export default function TopBar({
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           placeholder="Search study materials..."
-          className="bg-transparent text-sm text-gray-700 placeholder-gray-400 outline-none flex-1 min-w-0"
+          className="bg-transparent text-sm text-foreground placeholder-muted-foreground outline-none flex-1 min-w-0"
           aria-label="Search study materials"
         />
         {query && (
           <button
             type="button"
             onClick={() => setQuery("")}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-muted-foreground hover:text-foreground transition-colors"
             aria-label="Clear search"
           >
             <X size={13} strokeWidth={2} />
@@ -90,7 +104,7 @@ export default function TopBar({
         <div className="relative" ref={notifsRef}>
           <button
             onClick={() => setShowNotifs((v) => !v)}
-            className="relative p-2 text-gray-400 hover:text-[#0f173e] hover:bg-gray-100 rounded-lg transition-colors"
+            className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
             aria-label="Notifications"
           >
             <Bell size={18} strokeWidth={1.8} />
@@ -101,16 +115,16 @@ export default function TopBar({
 
           {/* Notification dropdown */}
           {showNotifs && (
-            <div className="absolute right-0 top-full mt-2 w-[280px] bg-white rounded-xl shadow-[0_4px_24px_rgba(0,0,0,0.1)] border border-gray-100 py-2 z-50">
-              <p className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+            <div className="absolute right-0 top-full mt-2 w-70 bg-card rounded-xl shadow-[0_4px_24px_rgba(0,0,0,0.1)] border border-border py-2 z-50">
+              <p className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 Notifications
               </p>
               {notificationCount === 0 ? (
-                <p className="px-4 py-3 text-sm text-gray-400">
+                <p className="px-4 py-3 text-sm text-muted-foreground">
                   No new notifications
                 </p>
               ) : (
-                <div className="px-4 py-3 text-sm text-gray-600 border-t border-gray-50">
+                <div className="px-4 py-3 text-sm text-foreground border-t border-border">
                   You have {notificationCount} new notification
                   {notificationCount > 1 ? "s" : ""}
                 </div>
@@ -122,7 +136,7 @@ export default function TopBar({
         {/* Help */}
         <Link
           href="/support"
-          className="p-2 text-gray-400 hover:text-[#0f173e] hover:bg-gray-100 rounded-lg transition-colors"
+          className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
           aria-label="Help"
         >
           <HelpCircle size={18} strokeWidth={1.8} />

@@ -30,6 +30,7 @@ export default function DashboardLayout({
   courseContext,
 }: DashboardLayoutProps) {
   const [aiOpen, setAiOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-[#f4f6f9]">
@@ -39,18 +40,27 @@ export default function DashboardLayout({
           userInitials={userInitials}
           avatarColor={avatarColor}
           notificationCount={notificationCount}
+          onMenuClick={() => setSidebarOpen(true)}
         />
-
-      
 
       {/* ── Main area ─────────────────────────────────────────────────────── */}
       <div className="flex flex-1 min-w-0 overflow-hidden">
-       {/* ── Sidebar ───────────────────────────────────────────────────────── */}
-      <Sidebar
-        userName={userName}
-        userSubtitle={userSubtitle}
-        onAITutorClick={() => setAiOpen(true)}
-      />
+        {/* ── Sidebar ───────────────────────────────────────────────────────── */}
+        <Sidebar
+          userName={userName}
+          userSubtitle={userSubtitle}
+          onAITutorClick={() => setAiOpen(true)}
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+        />
+
+        {sidebarOpen && (
+          <div
+            className="fixed inset-0 z-30 bg-black/30 md:hidden"
+            onClick={() => setSidebarOpen(false)}
+            aria-hidden="true"
+          />
+        )}
 
         {/* Page content */}
         <main className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">

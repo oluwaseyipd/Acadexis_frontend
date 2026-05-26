@@ -15,23 +15,53 @@ import {
   CheckCircle2,
   Lock,
   Loader2,
+  BookCheck,
 } from "lucide-react";
-import apiService, { Course, Module, Recommendation } from "@/services/apiService";
+import { api, type Course } from "@/services/api";
 
-interface ModuleWithIcon extends Module {
-  iconComponent?: React.ComponentType<any>;
+// Mock module and recommendation data
+interface Module {
+  id: string;
+  title: string;
+  description: string;
+  duration: string;
+  tag?: string;
+  completed: number;
+  total: number;
+  studyGroup?: boolean;
+  memberCount?: number;
 }
+
+interface Recommendation {
+  body: string;
+  actions: { label: string; primary?: boolean; accent?: boolean }[];
+}
+
+interface CurriculumItem {
+  id: string;
+  title: string;
+  done: boolean;
+  locked: boolean;
+  active: boolean;
+  duration: string;
+}
+
+const mockCurriculum: CurriculumItem[] = [
+  { id: "cu1", title: "Introduction & Course Overview", done: true, locked: false, active: false, duration: "45 min" },
+  { id: "cu2", title: "Fundamentals of Machine Learning", done: true, locked: false, active: true, duration: "60 min" },
+  { id: "cu3", title: "Supervised Learning Models", done: false, locked: false, active: false, duration: "90 min" },
+  { id: "cu4", title: "Neural Networks Basics", done: false, locked: false, active: false, duration: "120 min" },
+  { id: "cu5", title: "Backpropagation Algorithm", done: false, locked: true, active: false, duration: "110 min" },
+];
 
 export default function CourseDetailPage() {
   const router = useRouter();
   const params = useParams();
   const courseId = params?.courseId as string;
 
-  const [course, setCourse] = useState<Course | null>(null);
+  const [course, setCourse] = useState<(Course & { progress: number; featuredModuleId: string; curriculum: CurriculumItem[] }) | null>(null);
   const [modules, setModules] = useState<Module[]>([]);
-  const [recommendation, setRecommendation] = useState<Recommendation | null>(
-    null
-  );
+  const [recommendation, setRecommendation] = useState<Recommendation | null>(null);
   const [showCurriculum, setShowCurriculum] = useState(false);
   const [aiDismissed, setAiDismissed] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -43,19 +73,66 @@ export default function CourseDetailPage() {
         setLoading(true);
         setError(null);
 
-        // Fetch course data
-        const courseRes = await apiService.courses.getById(courseId);
-        setCourse(courseRes.data);
-
-        // Fetch modules for this course
-        const modulesRes = await apiService.courses.getModules(courseId);
-        setModules(modulesRes.data);
-
-        // Fetch recommendations
-        const recsRes = await apiService.courses.getRecommendations(courseId);
-        if (recsRes.data.length > 0) {
-          setRecommendation(recsRes.data[0]);
+        // Fetch course data from mock API
+        const fetchedCourse = await api.getCourse(courseId);
+        if (!fetchedCourse) {
+          setError("Course not found");
+          setLoading(false);
+          return;
         }
+
+        // Enrich course with additional data
+        const enrichedCourse = {
+          ...fetchedCourse,
+          progress: Math.floor(Math.random() * 100),
+          featuredModuleId: "m1",
+          curriculum: mockCurriculum,
+        };
+        setCourse(enrichedCourse);
+
+        // Set mock modules
+        const mockModules: Module[] = [
+          {
+            id: "m1",
+            title: "Fundamentals of Neural Networks",
+            description: "Learn the basic concepts and architecture of neural networks, including perceptrons and activation functions.",
+            duration: "2h 30m",
+            tag: "Featured",
+            completed: 3,
+            total: 8,
+          },
+          {
+            id: "m2",
+            title: "Backpropagation Deep Dive",
+            description: "Master the backpropagation algorithm with step-by-step implementations and visual explanations.",
+            duration: "1h 45m",
+            completed: 2,
+            total: 5,
+            studyGroup: true,
+            memberCount: 12,
+          },
+          {
+            id: "m3",
+            title: "Optimization Techniques",
+            description: "Explore gradient descent variants, momentum, and adaptive learning rates.",
+            duration: "1h 20m",
+            completed: 0,
+            total: 4,
+            studyGroup: true,
+            memberCount: 8,
+          },
+        ];
+        setModules(mockModules);
+
+        // Set mock recommendation
+        setRecommendation({
+          body: "Based on your learning patterns, we recommend diving deeper into backpropagation concepts. You've been spending significant time on optimization questions, and a solid understanding of how gradients flow through networks will help you master advanced topics.",
+          actions: [
+            { label: "Start Study Session", primary: true },
+            { label: "View Resources", accent: true },
+            { label: "Bookmark", primary: false },
+          ],
+        });
       } catch (err) {
         console.error("Failed to fetch course data:", err);
         setError("Failed to load course data. Please try again.");
@@ -101,11 +178,11 @@ export default function CourseDetailPage() {
   const sideModules = modules.filter((m) => m.id !== course.featuredModuleId);
 
   return (
-    <div className="max-w-[1500px] mx-auto px-8 py-8 flex flex-col gap-8">
+    <div className="max-w-[1500px] mx-auto px-8 py-8 flex flex-col gap-8 font-sans">
       {/* ── Breadcrumb ─────────────────────────────────────────────────── */}
       <nav className="flex items-center gap-1.5 text-xs text-gray-400 font-medium tracking-wide uppercase">
         <Link
-          href="/dashboard/student/courses"
+          href="/dashboard/student/manage-courses"
           className="hover:text-green-600 transition-colors"
         >
           Courses
@@ -118,10 +195,10 @@ export default function CourseDetailPage() {
       <div className="flex flex-col gap-4">
         <div className="flex items-start justify-between gap-4">
           <div className="flex flex-col gap-2 flex-1">
-            <h1 className="text-4xl font-bold text-[#0f173e] tracking-tight leading-tight font-serif">
+            <h1 className="text-4xl font-bold text-foreground tracking-tight leading-tight">
               {course.title}
             </h1>
-            <p className="text-sm text-gray-500 leading-relaxed max-w-[480px]">
+            <p className="text-sm text-muted-foreground leading-relaxed max-w-[480px]">
               {course.description}
             </p>
           </div>
@@ -146,7 +223,7 @@ export default function CourseDetailPage() {
       {/* ── Latest Modules ─────────────────────────────────────────────── */}
       <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-[#0f173e] font-serif">
+          <h2 className="text-lg font-bold text-foreground">
             Latest Modules
           </h2>
           <button
@@ -231,24 +308,32 @@ export default function CourseDetailPage() {
                   </span>
                 )}
                 <div className="flex flex-col gap-2">
-                  <h3 className="text-2xl font-bold text-white leading-tight font-serif">
+                  <h3 className="text-2xl font-bold text-white leading-tight">
                     {featuredModule.title}
                   </h3>
                   <p className="text-sm text-white/60 leading-relaxed max-w-[380px]">
                     {featuredModule.description}
                   </p>
-                </div>
-                <div className="flex items-center gap-3 mt-1">
-                  <button className="flex items-center gap-2 bg-white text-[#0f173e] font-semibold text-sm px-5 py-2.5 rounded-xl hover:bg-green-50 active:scale-[0.97] transition-all duration-150">
-                    <Play size={14} strokeWidth={2.5} fill="currentColor" />
-                    Start Learning
-                  </button>
                   {featuredModule.duration && (
-                    <span className="flex items-center gap-1.5 text-xs text-white/40">
+                    <span className="flex items-center gap-1.5 text-xs text-green-300">
                       <Clock size={13} strokeWidth={1.8} />
                       {featuredModule.duration}
                     </span>
                   )}
+                </div>
+                <div className="flex items-center gap-3 mt-1">
+                  <button className="flex items-center gap-2 cursor-pointer bg-white text-[#0f173e] font-semibold text-sm px-5 py-2.5 rounded-xl hover:bg-green-50 active:scale-[0.97] transition-all duration-150">
+                    <Play size={14} strokeWidth={2.5} fill="currentColor" />
+                    Start Learning
+                  </button>
+
+                  <button 
+                    onClick={() => router.push(`/dashboard/student/manage-courses/${courseId}/quiz`)}
+                    className="flex items-center gap-2 cursor-pointer bg-white text-[#0f173e] font-semibold text-sm px-5 py-2.5 rounded-xl hover:bg-green-50 active:scale-[0.97] transition-all duration-150">
+                    <BookCheck size={14} strokeWidth={1.8} fill="currentColor" />
+                    Take Quiz
+                  </button>
+                
                 </div>
               </div>
             </div>
@@ -375,7 +460,7 @@ export default function CourseDetailPage() {
       {/* ── Continue Learning strip ────────────────────────────────────── */}
       <section className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-[#0f173e] font-serif">
+          <h2 className="text-lg font-bold text-foreground">
             More in this Course
           </h2>
         </div>

@@ -2,6 +2,7 @@
   "courses": [
     {
       "id": "course-001",
+      "code": "CS101",
       "title": "Data Structures",
       "description": "A comprehensive exploration of abstract data types and the algorithms that manage them. Master complexity, optimization, and spatial reasoning.",
       "progress": 64,
@@ -59,6 +60,7 @@
     },
     {
       "id": "course-002",
+      "code": "CS101",
       "title": "Web Development Fundamentals",
       "description": "Master HTML, CSS, and JavaScript to build responsive, interactive web applications. Learn modern frameworks and best practices.",
       "progress": 48,
@@ -116,6 +118,7 @@
     },
     {
       "id": "course-003",
+      "code": "CS101",
       "title": "Database Design & SQL",
       "description": "Learn relational database design principles, SQL queries, indexing strategies, and optimization techniques.",
       "progress": 72,
@@ -173,6 +176,7 @@
     },
     {
       "id": "course-004",
+      "code": "CS101",
       "title": "Machine Learning Essentials",
       "description": "Introduction to ML algorithms, supervised learning, classification, regression, and practical applications with Python.",
       "progress": 35,
@@ -230,6 +234,7 @@
     },
     {
       "id": "course-005",
+      "code": "CS101",
       "title": "Cloud Computing with AWS",
       "description": "Deploy, scale, and manage applications on Amazon Web Services. Learn EC2, S3, Lambda, RDS, and more.",
       "progress": 56,
@@ -287,6 +292,7 @@
     },
     {
       "id": "course-006",
+      "code": "CS101",
       "title": "Mobile App Development",
       "description": "Build cross-platform mobile applications using React Native and Flutter. Deploy to iOS and Android.",
       "progress": 41,
@@ -344,6 +350,7 @@
     },
     {
       "id": "course-007",
+      "code": "CS101",
       "title": "DevOps & CI/CD",
       "description": "Master continuous integration, continuous deployment, Docker containerization, and Kubernetes orchestration.",
       "progress": 68,
@@ -401,6 +408,7 @@
     },
     {
       "id": "course-008",
+      "code": "CS101",
       "title": "Cybersecurity Fundamentals",
       "description": "Understand security threats, encryption, network security, and best practices to protect systems and data.",
       "progress": 52,
@@ -458,6 +466,7 @@
     },
     {
       "id": "course-009",
+      "code": "CS101",
       "title": "Advanced Python Programming",
       "description": "Deep dive into Python with decorators, generators, metaprogramming, and building production-grade applications.",
       "progress": 77,
@@ -515,6 +524,7 @@
     },
     {
       "id": "course-010",
+      "code": "CS101",
       "title": "UI/UX Design Principles",
       "description": "Learn design fundamentals, user research, prototyping, and creating delightful user experiences with Figma.",
       "progress": 59,
@@ -568,6 +578,208 @@
           "active": false,
           "locked": true
         }
+      ]
+    }
+  ],
+  "quizzes": [
+    {
+      "courseId": "course-001",
+      "title": "Data Structures Quiz",
+      "description": "Test your knowledge of abstract data types, algorithms, and complexity analysis.",
+      "totalQuestions": 10,
+      "timeLimit": 15,
+      "passingScore": 70,
+      "questions": [
+        {"id": "q-001-01", "question": "What is the time complexity of accessing an element in an array by index?", "options": ["O(n)", "O(log n)", "O(1)", "O(n²)"], "correctIndex": 2, "explanation": "Array index access is O(1) — constant time — because elements are stored contiguously in memory."},
+        {"id": "q-001-02", "question": "Which data structure operates on a Last-In-First-Out (LIFO) principle?", "options": ["Queue", "Stack", "Linked List", "Heap"], "correctIndex": 1, "explanation": "A Stack follows LIFO: the last element pushed is the first one popped."},
+        {"id": "q-001-03", "question": "What is the worst-case time complexity of QuickSort?", "options": ["O(n log n)", "O(n)", "O(n²)", "O(log n)"], "correctIndex": 2, "explanation": "QuickSort degrades to O(n²) when the pivot is consistently the smallest or largest element."},
+        {"id": "q-001-04", "question": "In Big O notation, which describes the fastest growth rate?", "options": ["O(n log n)", "O(2ⁿ)", "O(n³)", "O(n!)"], "correctIndex": 3, "explanation": "O(n!) — factorial time — grows faster than exponential O(2ⁿ) and polynomial complexities."},
+        {"id": "q-001-05", "question": "Which traversal visits the root node first in a binary tree?", "options": ["Inorder", "Postorder", "Preorder", "Level-order"], "correctIndex": 2, "explanation": "Preorder traversal visits: Root → Left → Right."},
+        {"id": "q-001-06", "question": "What is the average-case lookup time for a Hash Table?", "options": ["O(n)", "O(log n)", "O(n log n)", "O(1)"], "correctIndex": 3, "explanation": "Hash tables provide O(1) average lookup using a hash function to directly address memory."},
+        {"id": "q-001-07", "question": "A linked list node contains which of the following?", "options": ["Only data", "Data and a pointer to the next node", "Only a pointer", "Index and data"], "correctIndex": 1, "explanation": "Each linked list node stores data and a reference (pointer) to the next node in the chain."},
+        {"id": "q-001-08", "question": "Which data structure is best suited for implementing a breadth-first search?", "options": ["Stack", "Heap", "Queue", "Array"], "correctIndex": 2, "explanation": "BFS uses a Queue to process nodes level by level, ensuring FIFO ordering."},
+        {"id": "q-001-09", "question": "What property must a Max-Heap satisfy?", "options": ["Parent is always smaller than its children", "Parent is always greater than or equal to its children", "Left child is always greater than right child", "All leaves must be at the same level"], "correctIndex": 1, "explanation": "In a Max-Heap, every parent node is ≥ its children, ensuring the maximum is always at the root."},
+        {"id": "q-001-10", "question": "What is the space complexity of Merge Sort?", "options": ["O(1)", "O(log n)", "O(n)", "O(n²)"], "correctIndex": 2, "explanation": "Merge Sort requires O(n) auxiliary space to hold the temporary arrays during merging."}
+      ]
+    },
+    {
+      "courseId": "course-002",
+      "title": "Web Development Fundamentals Quiz",
+      "description": "Assess your grasp of HTML, CSS, JavaScript, and modern web development practices.",
+      "totalQuestions": 10,
+      "timeLimit": 15,
+      "passingScore": 70,
+      "questions": [
+        {"id": "q-002-01", "question": "Which HTML element is used to define the main content of a document?", "options": ["<section>", "<article>", "<main>", "<body>"], "correctIndex": 2, "explanation": "<main> represents the dominant content of the <body>, unique to the document."},
+        {"id": "q-002-02", "question": "In CSS Flexbox, which property aligns items along the cross axis?", "options": ["justify-content", "align-items", "flex-direction", "flex-wrap"], "correctIndex": 1, "explanation": "align-items controls alignment perpendicular to the main axis (the cross axis)."},
+        {"id": "q-002-03", "question": "What does the JavaScript `typeof null` return?", "options": ["'null'", "'undefined'", "'object'", "'boolean'"], "correctIndex": 2, "explanation": "This is a known JavaScript bug — typeof null returns 'object' due to legacy implementation."},
+        {"id": "q-002-04", "question": "Which method is used to add an event listener to a DOM element?", "options": ["element.on()", "element.addEvent()", "element.addEventListener()", "element.listen()"], "correctIndex": 2, "explanation": "addEventListener() is the standard method for attaching event handlers to DOM elements."},
+        {"id": "q-002-05", "question": "What is the output of `Promise.resolve(1).then(x => x + 1).then(x => x * 2)`?", "options": ["2", "3", "4", "6"], "correctIndex": 2, "explanation": "1 + 1 = 2, then 2 * 2 = 4. Each .then() chains the resolved value forward."},
+        {"id": "q-002-06", "question": "Which CSS property controls the stacking order of elements?", "options": ["order", "z-index", "position", "layer"], "correctIndex": 1, "explanation": "z-index determines which elements appear on top when they overlap, on positioned elements."},
+        {"id": "q-002-07", "question": "In React, what hook would you use to run a side effect after render?", "options": ["useState", "useContext", "useEffect", "useRef"], "correctIndex": 2, "explanation": "useEffect runs after every render by default, ideal for API calls, subscriptions, and DOM mutations."},
+        {"id": "q-002-08", "question": "What HTTP status code indicates a resource was successfully created?", "options": ["200", "204", "301", "201"], "correctIndex": 3, "explanation": "201 Created is returned when a POST request successfully creates a new resource."},
+        {"id": "q-002-09", "question": "Which of the following is NOT a valid way to declare a variable in modern JavaScript?", "options": ["let x = 1", "const x = 1", "var x = 1", "def x = 1"], "correctIndex": 3, "explanation": "`def` is not a JavaScript keyword — it's used in Python. JS uses var, let, and const."},
+        {"id": "q-002-10", "question": "What does CSS `box-sizing: border-box` do?", "options": ["Adds a visible border to all elements", "Includes padding and border in the element's total width/height", "Removes default margins from elements", "Sets the box shadow on all sides"], "correctIndex": 1, "explanation": "border-box makes width/height include padding and border, preventing layout overflow surprises."}
+      ]
+    },
+    {
+      "courseId": "course-003",
+      "title": "Database Design & SQL Quiz",
+      "description": "Challenge your knowledge of relational databases, SQL queries, and optimization strategies.",
+      "totalQuestions": 10,
+      "timeLimit": 15,
+      "passingScore": 70,
+      "questions": [
+        {"id": "q-003-01", "question": "Which SQL clause is used to filter grouped results?", "options": ["WHERE", "HAVING", "FILTER", "GROUP BY"], "correctIndex": 1, "explanation": "HAVING filters groups after GROUP BY; WHERE filters rows before grouping."},
+        {"id": "q-003-02", "question": "What is a PRIMARY KEY in a relational database?", "options": ["A key that can contain NULL values", "A foreign reference to another table", "A unique, non-null identifier for each row", "An index on multiple columns"], "correctIndex": 2, "explanation": "A PRIMARY KEY uniquely identifies each record and cannot be NULL."},
+        {"id": "q-003-03", "question": "Which JOIN returns all rows from both tables, with NULLs where there is no match?", "options": ["INNER JOIN", "LEFT JOIN", "RIGHT JOIN", "FULL OUTER JOIN"], "correctIndex": 3, "explanation": "FULL OUTER JOIN returns all rows from both tables, filling NULLs where matches don't exist."},
+        {"id": "q-003-04", "question": "What is database normalization primarily designed to reduce?", "options": ["Query speed", "Data redundancy", "Table count", "Index size"], "correctIndex": 1, "explanation": "Normalization organizes data to minimize redundancy and dependency anomalies."},
+        {"id": "q-003-05", "question": "Which SQL command removes all rows from a table without logging individual row deletions?", "options": ["DELETE", "DROP", "TRUNCATE", "REMOVE"], "correctIndex": 2, "explanation": "TRUNCATE is faster than DELETE as it deallocates data pages without logging each row removal."},
+        {"id": "q-003-06", "question": "What does an index in a database primarily improve?", "options": ["Write performance", "Storage efficiency", "Read/query performance", "Data integrity"], "correctIndex": 2, "explanation": "Indexes speed up SELECT queries by allowing the database to find rows without a full table scan."},
+        {"id": "q-003-07", "question": "Which normal form eliminates transitive dependencies?", "options": ["1NF", "2NF", "3NF", "BCNF"], "correctIndex": 2, "explanation": "3NF eliminates transitive dependencies — non-key columns depending on other non-key columns."},
+        {"id": "q-003-08", "question": "What does ACID stand for in database transactions?", "options": ["Atomic, Consistent, Isolated, Durable", "Accurate, Complete, Indexed, Defined", "Async, Cached, Integrated, Distributed", "Automated, Committed, Isolated, Dynamic"], "correctIndex": 0, "explanation": "ACID ensures reliable transactions: Atomicity, Consistency, Isolation, Durability."},
+        {"id": "q-003-09", "question": "Which SQL function returns the number of rows in a result set?", "options": ["SUM()", "TOTAL()", "COUNT()", "LENGTH()"], "correctIndex": 2, "explanation": "COUNT() returns the number of rows matching the query criteria."},
+        {"id": "q-003-10", "question": "What is a composite index?", "options": ["An index on a JSON column", "An index created on multiple columns", "A clustered index on the primary key", "An index that covers all columns"], "correctIndex": 1, "explanation": "A composite index spans multiple columns and is most effective when queries filter by those columns in order."}
+      ]
+    },
+    {
+      "courseId": "course-004",
+      "title": "Machine Learning Essentials Quiz",
+      "description": "Test your understanding of ML algorithms, model evaluation, and practical applications.",
+      "totalQuestions": 10,
+      "timeLimit": 15,
+      "passingScore": 70,
+      "questions": [
+        {"id": "q-004-01", "question": "What is overfitting in machine learning?", "options": ["Model performs well on training and test data", "Model performs poorly on all data", "Model performs well on training data but poorly on unseen data", "Model trains too slowly"], "correctIndex": 2, "explanation": "Overfitting occurs when a model memorizes training data and fails to generalize to new examples."},
+        {"id": "q-004-02", "question": "Which metric is most appropriate for evaluating a classification model with imbalanced classes?", "options": ["Accuracy", "F1 Score", "Mean Squared Error", "R² Score"], "correctIndex": 1, "explanation": "F1 Score balances precision and recall, making it ideal when class distribution is uneven."},
+        {"id": "q-004-03", "question": "What does a gradient descent algorithm minimize?", "options": ["Training data size", "Number of features", "Loss function", "Learning rate"], "correctIndex": 2, "explanation": "Gradient descent iteratively adjusts parameters to minimize the model's loss (error) function."},
+        {"id": "q-004-04", "question": "Which technique is used to prevent overfitting by penalizing large weights?", "options": ["Normalization", "Regularization", "Activation", "Batching"], "correctIndex": 1, "explanation": "Regularization (L1/L2) adds a penalty term to the loss function to discourage overly complex models."},
+        {"id": "q-004-05", "question": "In supervised learning, what is the training data composed of?", "options": ["Unlabeled examples", "Input features only", "Input-output pairs (features and labels)", "Output labels only"], "correctIndex": 2, "explanation": "Supervised learning requires labeled examples — pairs of input features and their correct output labels."},
+        {"id": "q-004-06", "question": "What is the purpose of a validation set in model training?", "options": ["To train the final model", "To tune hyperparameters and detect overfitting during training", "To replace the test set", "To augment training data"], "correctIndex": 1, "explanation": "The validation set helps tune hyperparameters and monitor for overfitting without touching the test set."},
+        {"id": "q-004-07", "question": "Which algorithm builds a model by combining multiple weak learners?", "options": ["Linear Regression", "K-Nearest Neighbors", "Random Forest", "PCA"], "correctIndex": 2, "explanation": "Random Forest is an ensemble method that combines many decision trees to produce better predictions."},
+        {"id": "q-004-08", "question": "What does PCA (Principal Component Analysis) primarily do?", "options": ["Classifies data into categories", "Reduces dimensionality while preserving variance", "Imputes missing values", "Normalizes feature scales"], "correctIndex": 1, "explanation": "PCA transforms data into fewer dimensions (principal components) capturing the most variance."},
+        {"id": "q-004-09", "question": "Which activation function is most commonly used in hidden layers of deep neural networks?", "options": ["Sigmoid", "Softmax", "ReLU", "Tanh"], "correctIndex": 2, "explanation": "ReLU (Rectified Linear Unit) is preferred for hidden layers as it mitigates the vanishing gradient problem."},
+        {"id": "q-004-10", "question": "What is cross-validation used for?", "options": ["Augmenting training data", "Estimating how well a model generalizes to independent data", "Cleaning noisy datasets", "Selecting the right activation function"], "correctIndex": 1, "explanation": "Cross-validation (e.g. k-fold) estimates generalization performance by testing on different data splits."}
+      ]
+    },
+    {
+      "courseId": "course-005",
+      "title": "Cloud Computing with AWS Quiz",
+      "description": "Evaluate your knowledge of AWS services, architecture patterns, and cloud best practices.",
+      "totalQuestions": 10,
+      "timeLimit": 15,
+      "passingScore": 70,
+      "questions": [
+        {"id": "q-005-01", "question": "What AWS service provides scalable object storage?", "options": ["EC2", "RDS", "S3", "Lambda"], "correctIndex": 2, "explanation": "Amazon S3 (Simple Storage Service) provides durable, scalable object storage in the cloud."},
+        {"id": "q-005-02", "question": "Which AWS service allows you to run code without provisioning servers?", "options": ["EC2", "ECS", "Lambda", "Lightsail"], "correctIndex": 2, "explanation": "AWS Lambda is a serverless compute service that runs code in response to events without managing servers."},
+        {"id": "q-005-03", "question": "What does 'elasticity' mean in cloud computing?", "options": ["Data stretches across regions", "Resources automatically scale up or down based on demand", "Services are always available", "Data is encrypted at rest"], "correctIndex": 1, "explanation": "Elasticity means cloud resources can automatically scale in or out to match workload demand."},
+        {"id": "q-005-04", "question": "Which AWS service manages relational databases with automated backups?", "options": ["DynamoDB", "ElastiCache", "RDS", "Redshift"], "correctIndex": 2, "explanation": "Amazon RDS (Relational Database Service) automates provisioning, patching, and backups for relational DBs."},
+        {"id": "q-005-05", "question": "What is an AWS Availability Zone?", "options": ["A geographic region containing AWS data centers", "A single isolated data center within a region", "One or more discrete data centers with redundant power in a region", "A content delivery endpoint"], "correctIndex": 2, "explanation": "An Availability Zone is one or more data centers in a region designed for fault isolation."},
+        {"id": "q-005-06", "question": "Which service provides a global content delivery network (CDN)?", "options": ["Route 53", "CloudFront", "VPC", "API Gateway"], "correctIndex": 1, "explanation": "Amazon CloudFront is AWS's CDN, caching content at edge locations for low-latency global delivery."},
+        {"id": "q-005-07", "question": "What AWS pricing model offers the largest discount for committing to 1 or 3 year terms?", "options": ["On-Demand", "Spot Instances", "Reserved Instances", "Dedicated Hosts"], "correctIndex": 2, "explanation": "Reserved Instances offer up to 72% discount over On-Demand pricing for committed 1 or 3 year usage."},
+        {"id": "q-005-08", "question": "Which AWS service is used to define and provision infrastructure as code?", "options": ["Elastic Beanstalk", "CloudFormation", "CodeDeploy", "OpsWorks"], "correctIndex": 1, "explanation": "AWS CloudFormation lets you model and provision AWS resources using JSON or YAML templates."},
+        {"id": "q-005-09", "question": "What does IAM stand for in AWS?", "options": ["Internal Access Management", "Identity and Access Management", "Integrated Application Monitoring", "Infrastructure Automation Module"], "correctIndex": 1, "explanation": "IAM (Identity and Access Management) controls who can access AWS resources and what actions they can take."},
+        {"id": "q-005-10", "question": "Which storage class in S3 is most cost-effective for infrequently accessed data?", "options": ["S3 Standard", "S3 Intelligent-Tiering", "S3 Standard-IA", "S3 Glacier"], "correctIndex": 3, "explanation": "S3 Glacier offers the lowest storage cost for archival data that is rarely accessed (retrieval in minutes to hours)."}
+      ]
+    },
+    {
+      "courseId": "course-006",
+      "title": "Mobile App Development Quiz",
+      "description": "Test your knowledge of mobile architecture, React Native, and app performance optimization.",
+      "totalQuestions": 10,
+      "timeLimit": 15,
+      "passingScore": 70,
+      "questions": [
+        {"id": "q-006-01", "question": "What is React Native's bridge used for?", "options": ["Connecting to databases", "Communicating between JavaScript and native code", "Routing between screens", "Managing app state"], "correctIndex": 1, "explanation": "The React Native bridge allows JavaScript to communicate with native iOS/Android modules asynchronously."},
+        {"id": "q-006-02", "question": "Which lifecycle method in React Native is equivalent to componentDidMount for functional components?", "options": ["useCallback", "useMemo", "useEffect with empty deps []", "useState"], "correctIndex": 2, "explanation": "useEffect with an empty dependency array [] runs once after the first render, equivalent to componentDidMount."},
+        {"id": "q-006-03", "question": "What is the purpose of FlatList in React Native?", "options": ["To display flat (non-nested) navigation", "To efficiently render large scrollable lists", "To manage form inputs", "To create flat design components"], "correctIndex": 1, "explanation": "FlatList renders only visible items in a list, providing memory-efficient scrolling for large datasets."},
+        {"id": "q-006-04", "question": "Which state management library is most commonly used in large React Native apps?", "options": ["MobX", "Zustand", "Redux", "Recoil"], "correctIndex": 2, "explanation": "Redux is the most widely adopted state management solution for complex React/React Native applications."},
+        {"id": "q-006-05", "question": "What does APK stand for in Android development?", "options": ["Application Package Kit", "Android Package", "Application Program Key", "Android Programming Kit"], "correctIndex": 1, "explanation": "APK (Android Package) is the file format used to distribute and install applications on Android."},
+        {"id": "q-006-06", "question": "Which approach in React Native allows you to write platform-specific code?", "options": ["Using .ios.js and .android.js file extensions", "Using platform variables only", "Writing separate apps per platform", "Using CSS media queries"], "correctIndex": 0, "explanation": "React Native automatically picks the correct file by using .ios.js or .android.js extensions."},
+        {"id": "q-006-07", "question": "What is deep linking in mobile apps?", "options": ["Linking to deeply nested components", "Navigating to a specific screen from an external URL or notification", "Connecting to deep database tables", "Loading large images efficiently"], "correctIndex": 1, "explanation": "Deep linking allows external URLs or push notifications to open specific screens inside your app."},
+        {"id": "q-006-08", "question": "Which tool is used to inspect and debug React Native apps?", "options": ["Xcode only", "Chrome DevTools only", "React Native Debugger / Flipper", "Android Studio only"], "correctIndex": 2, "explanation": "React Native Debugger and Flipper are the primary tools for inspecting components, network, and state."},
+        {"id": "q-006-09", "question": "What is the purpose of AsyncStorage in React Native?", "options": ["To make asynchronous API calls", "To persist key-value data locally on the device", "To manage async Redux actions", "To store images offline"], "correctIndex": 1, "explanation": "AsyncStorage provides simple, unencrypted, asynchronous key-value storage for persisting data on device."},
+        {"id": "q-006-10", "question": "What does 'code splitting' achieve in mobile app optimization?", "options": ["Splits code into separate Git repositories", "Divides team responsibilities for code ownership", "Reduces initial bundle size by loading code on demand", "Separates business logic from UI code"], "correctIndex": 2, "explanation": "Code splitting defers loading of non-critical code bundles, reducing startup time and initial memory usage."}
+      ]
+    },
+    {
+      "courseId": "course-007",
+      "title": "DevOps & CI/CD Quiz",
+      "description": "Assess your expertise in DevOps culture, CI/CD pipelines, containerization, and automation.",
+      "totalQuestions": 10,
+      "timeLimit": 15,
+      "passingScore": 70,
+      "questions": [
+        {"id": "q-007-01", "question": "What does CI stand for in CI/CD?", "options": ["Code Integration", "Continuous Integration", "Cloud Infrastructure", "Container Isolation"], "correctIndex": 1, "explanation": "Continuous Integration (CI) is the practice of frequently merging code changes and running automated tests."},
+        {"id": "q-007-02", "question": "Which Docker command builds an image from a Dockerfile?", "options": ["docker run", "docker pull", "docker build", "docker create"], "correctIndex": 2, "explanation": "`docker build` reads the Dockerfile instructions and creates a new image layer by layer."},
+        {"id": "q-007-03", "question": "What is a Kubernetes Pod?", "options": ["A physical server in a cluster", "The smallest deployable unit containing one or more containers", "A load balancer configuration", "A persistent storage volume"], "correctIndex": 1, "explanation": "A Pod is Kubernetes' smallest unit — it wraps one or more containers that share network and storage."},
+        {"id": "q-007-04", "question": "What is the purpose of infrastructure as code (IaC)?", "options": ["Writing application code on cloud servers", "Managing and provisioning infrastructure through machine-readable configuration files", "Documenting server configurations in code comments", "Automating code reviews"], "correctIndex": 1, "explanation": "IaC tools like Terraform and CloudFormation allow infrastructure to be versioned, tested, and reproduced consistently."},
+        {"id": "q-007-05", "question": "Which branching strategy uses short-lived feature branches merged frequently into main?", "options": ["GitFlow", "Trunk-Based Development", "Feature Flags", "Blue-Green Deployment"], "correctIndex": 1, "explanation": "Trunk-Based Development minimizes merge conflicts by keeping branches short-lived and merging to trunk often."},
+        {"id": "q-007-06", "question": "What is a blue-green deployment?", "options": ["Deploying updates on weekdays vs weekends", "Running two identical environments and switching traffic between them", "Using two separate coding teams", "Deploying with blue for dev and green for prod environments"], "correctIndex": 1, "explanation": "Blue-green deployment maintains two production environments — traffic switches from old (blue) to new (green) instantly."},
+        {"id": "q-007-07", "question": "Which file format is most commonly used to configure GitHub Actions workflows?", "options": ["JSON", "XML", "TOML", "YAML"], "correctIndex": 3, "explanation": "GitHub Actions uses YAML (.yml) files stored in .github/workflows/ to define CI/CD pipelines."},
+        {"id": "q-007-08", "question": "What is the main benefit of containerizing an application with Docker?", "options": ["Faster network speeds", "Consistent environment across development, staging, and production", "Automatic code testing", "Reduced code complexity"], "correctIndex": 1, "explanation": "Containers package code with its dependencies, ensuring the app runs identically in every environment."},
+        {"id": "q-007-09", "question": "What does a rollback in deployment mean?", "options": ["Rolling server logs backward", "Reverting to a previous stable version after a failed deployment", "Deploying updates in reverse order", "Rotating encryption keys"], "correctIndex": 1, "explanation": "A rollback reverts a failed or problematic deployment to the last known working version quickly."},
+        {"id": "q-007-10", "question": "What is the primary purpose of a load balancer in DevOps?", "options": ["Balancing developer workloads", "Distributing incoming traffic across multiple server instances", "Compressing code for deployment", "Managing database read/write operations"], "correctIndex": 1, "explanation": "Load balancers distribute traffic across servers to prevent overload, improve availability, and enable scaling."}
+      ]
+    },
+    {
+      "courseId": "course-008",
+      "title": "Cybersecurity Fundamentals Quiz",
+      "description": "Test your knowledge of security principles, threats, cryptography, and defence strategies.",
+      "totalQuestions": 10,
+      "timeLimit": 15,
+      "passingScore": 70,
+      "questions": [
+        {"id": "q-008-01", "question": "What does the CIA Triad stand for in cybersecurity?", "options": ["Code, Integrity, Access", "Confidentiality, Integrity, Availability", "Credentials, Identity, Authorization", "Cryptography, Infrastructure, Authentication"], "correctIndex": 1, "explanation": "The CIA Triad — Confidentiality, Integrity, Availability — represents the three core security objectives."},
+        {"id": "q-008-02", "question": "What type of attack tricks users into revealing credentials via a fake website?", "options": ["SQL Injection", "Man-in-the-Middle", "Phishing", "Brute Force"], "correctIndex": 2, "explanation": "Phishing uses deceptive emails or fake websites to steal credentials by impersonating trusted entities."},
+        {"id": "q-008-03", "question": "What is a zero-day vulnerability?", "options": ["A bug that only affects day zero of deployment", "A flaw unknown to the vendor with no available patch", "A vulnerability discovered on January 1st", "A security hole that lasts zero seconds"], "correctIndex": 1, "explanation": "A zero-day is an unknown vulnerability that attackers exploit before developers can create a patch."},
+        {"id": "q-008-04", "question": "Which encryption method uses a pair of public and private keys?", "options": ["AES", "Symmetric encryption", "Asymmetric encryption", "MD5 hashing"], "correctIndex": 2, "explanation": "Asymmetric encryption (e.g. RSA) uses a public key to encrypt and a private key to decrypt."},
+        {"id": "q-008-05", "question": "What is SQL injection?", "options": ["Optimizing SQL queries for speed", "Inserting malicious SQL code into an input field to manipulate a database", "Injecting test data into a SQL database", "Running SQL queries via a REST API"], "correctIndex": 1, "explanation": "SQL injection exploits unvalidated inputs to execute malicious database queries, leaking or destroying data."},
+        {"id": "q-008-06", "question": "Which protocol provides secure communication over HTTPS?", "options": ["SSH", "FTP", "TLS/SSL", "SMTP"], "correctIndex": 2, "explanation": "TLS (Transport Layer Security) encrypts HTTP traffic, forming HTTPS and protecting data in transit."},
+        {"id": "q-008-07", "question": "What is the purpose of multi-factor authentication (MFA)?", "options": ["Using multiple passwords", "Requiring multiple forms of identity verification to access an account", "Logging in from multiple devices simultaneously", "Having multiple admins approve access"], "correctIndex": 1, "explanation": "MFA combines something you know (password), have (phone), or are (biometric) to strengthen authentication."},
+        {"id": "q-008-08", "question": "What is a DDoS attack?", "options": ["Decrypting encrypted data at scale", "Flooding a server with traffic from many sources to make it unavailable", "Deleting distributed database records", "Downloading data covertly"], "correctIndex": 1, "explanation": "A Distributed Denial-of-Service (DDoS) attack overwhelms a target with traffic from many compromised machines."},
+        {"id": "q-008-09", "question": "What is the principle of least privilege?", "options": ["Giving all users admin rights", "Granting users only the minimum permissions needed for their role", "Restricting internet access for all employees", "Using the simplest encryption available"], "correctIndex": 1, "explanation": "Least privilege limits damage from breaches by ensuring users can only access what they absolutely need."},
+        {"id": "q-008-10", "question": "What does a firewall primarily do?", "options": ["Encrypts all outgoing data", "Monitors and controls incoming/outgoing network traffic based on rules", "Scans files for viruses", "Backs up server data automatically"], "correctIndex": 1, "explanation": "A firewall enforces network security rules, blocking unauthorized traffic while allowing legitimate connections."}
+      ]
+    },
+    {
+      "courseId": "course-009",
+      "title": "Advanced Python Programming Quiz",
+      "description": "Challenge yourself on Python internals, design patterns, async programming, and best practices.",
+      "totalQuestions": 10,
+      "timeLimit": 15,
+      "passingScore": 70,
+      "questions": [
+        {"id": "q-009-01", "question": "What is a Python decorator?", "options": ["A CSS-like styling tool for Python UIs", "A function that wraps another function to extend its behavior", "A special comment syntax for documentation", "A type annotation prefix"], "correctIndex": 1, "explanation": "Decorators use the @syntax to wrap functions/classes, adding behavior before or after the original code runs."},
+        {"id": "q-009-02", "question": "What does the `__init__` method do in a Python class?", "options": ["Deletes an object when it goes out of scope", "Initializes a new instance of the class", "Returns a string representation of the object", "Converts the object to a dictionary"], "correctIndex": 1, "explanation": "__init__ is the constructor called when a new instance is created, setting initial attribute values."},
+        {"id": "q-009-03", "question": "What is the output of `[x**2 for x in range(4)]`?", "options": ["[1, 4, 9, 16]", "[0, 1, 4, 9]", "[0, 2, 4, 6]", "[1, 2, 3, 4]"], "correctIndex": 1, "explanation": "range(4) gives 0,1,2,3. Squaring each: 0²=0, 1²=1, 2²=4, 3²=9 → [0, 1, 4, 9]."},
+        {"id": "q-009-04", "question": "What is the difference between `deepcopy` and `copy` in Python?", "options": ["No difference — they are aliases", "copy creates a new object but references the same nested objects; deepcopy recursively copies everything", "deepcopy is faster than copy", "copy works on lists only; deepcopy works on all types"], "correctIndex": 1, "explanation": "copy() is shallow (shared nested references); deepcopy() creates fully independent nested copies."},
+        {"id": "q-009-05", "question": "What keyword is used to define an asynchronous function in Python?", "options": ["async def", "await def", "def async", "coroutine def"], "correctIndex": 0, "explanation": "`async def` defines a coroutine function that can use `await` to pause execution non-blockingly."},
+        {"id": "q-009-06", "question": "What is a Python generator?", "options": ["A class that generates random numbers", "A function that yields values one at a time using the `yield` keyword", "A tool that generates boilerplate code", "A built-in factory function"], "correctIndex": 1, "explanation": "Generators produce values lazily using `yield`, conserving memory for large sequences."},
+        {"id": "q-009-07", "question": "What does the `*args` syntax allow in a Python function?", "options": ["Accepts keyword arguments only", "Passes a pointer to the function", "Accepts a variable number of positional arguments as a tuple", "Multiplies all arguments together"], "correctIndex": 2, "explanation": "`*args` collects any number of positional arguments into a tuple inside the function."},
+        {"id": "q-009-08", "question": "Which built-in Python function returns an iterator of (index, value) pairs?", "options": ["zip()", "map()", "enumerate()", "filter()"], "correctIndex": 2, "explanation": "enumerate() adds a counter to an iterable, returning (index, value) pairs — useful in for loops."},
+        {"id": "q-009-09", "question": "What is the GIL in Python?", "options": ["Global Index List", "A mutex that allows only one thread to execute Python bytecode at a time", "A garbage collection algorithm", "A global import library"], "correctIndex": 1, "explanation": "The GIL (Global Interpreter Lock) prevents true parallelism in CPython threads, limiting CPU-bound multithreading."},
+        {"id": "q-009-10", "question": "What is the purpose of `__str__` vs `__repr__` in Python?", "options": ["They are identical methods", "__str__ is for end-users (readable); __repr__ is for developers (unambiguous/debuggable)", "__repr__ is for end-users; __str__ is for developers", "__str__ works on strings; __repr__ works on all types"], "correctIndex": 1, "explanation": "__str__ returns a human-friendly string; __repr__ returns an unambiguous representation useful for debugging."}
+      ]
+    },
+    {
+      "courseId": "course-010",
+      "title": "UI/UX Design Principles Quiz",
+      "description": "Test your understanding of design thinking, user research, accessibility, and prototyping.",
+      "totalQuestions": 10,
+      "timeLimit": 15,
+      "passingScore": 70,
+      "questions": [
+        {"id": "q-010-01", "question": "What is the first stage of the Design Thinking process?", "options": ["Prototype", "Define", "Empathize", "Test"], "correctIndex": 2, "explanation": "Design Thinking begins with Empathize — deeply understanding user needs, pain points, and context."},
+        {"id": "q-010-02", "question": "What does WCAG stand for in accessibility?", "options": ["Web Content Accessibility Guidelines", "Wide Color and Graphics Standard", "Web Component Architecture Guide", "Worldwide Content Access Group"], "correctIndex": 0, "explanation": "WCAG (Web Content Accessibility Guidelines) defines standards for making web content accessible to all users."},
+        {"id": "q-010-03", "question": "What is the minimum color contrast ratio required for normal text per WCAG AA?", "options": ["2.5:1", "3:1", "4.5:1", "7:1"], "correctIndex": 2, "explanation": "WCAG AA requires at least 4.5:1 contrast ratio for normal text to ensure readability for low-vision users."},
+        {"id": "q-010-04", "question": "What is a wireframe in UX design?", "options": ["A high-fidelity prototype with animations", "A low-fidelity structural blueprint of a UI layout", "A final design delivered to developers", "A usability test script"], "correctIndex": 1, "explanation": "Wireframes are simple, low-fidelity sketches showing layout and structure without visual styling."},
+        {"id": "q-010-05", "question": "What does the Fitts's Law describe in UX?", "options": ["How users read content in an F-pattern", "The time required to move to and click a target relates to distance and target size", "How color affects user emotion", "The cognitive load of a user interface"], "correctIndex": 1, "explanation": "Fitts's Law: the time to hit a target is a function of target size and distance — bigger/closer = faster."},
+        {"id": "q-010-06", "question": "What is the purpose of a usability test?", "options": ["To test code performance under load", "To observe real users interacting with a product to identify usability issues", "To check if the design matches brand guidelines", "To measure server response times"], "correctIndex": 1, "explanation": "Usability testing reveals how real users interact with a product, uncovering friction points and confusion."},
+        {"id": "q-010-07", "question": "What is the difference between UX and UI design?", "options": ["They are the same discipline", "UX focuses on user experience and flow; UI focuses on visual design and components", "UI is for mobile; UX is for web", "UX is for developers; UI is for designers"], "correctIndex": 1, "explanation": "UX (User Experience) covers the overall journey and usability; UI (User Interface) covers visual design and interaction."},
+        {"id": "q-010-08", "question": "What is a design system?", "options": ["A project management tool for designers", "A collection of reusable components, guidelines, and patterns for consistent product design", "A file organization system for design assets", "An automated design generation tool"], "correctIndex": 1, "explanation": "Design systems (e.g. Material Design, Atlassian) provide shared components and guidelines ensuring UI consistency."},
+        {"id": "q-010-09", "question": "What is progressive disclosure in UX?", "options": ["Loading content progressively as the user scrolls", "Revealing features or information gradually to reduce cognitive overload", "Displaying design progress to stakeholders", "Progressively increasing UI complexity for advanced users"], "correctIndex": 1, "explanation": "Progressive disclosure shows only necessary information initially, revealing more as users need it — reducing overwhelm."},
+        {"id": "q-010-10", "question": "Which UX research method involves observing users in their natural environment?", "options": ["A/B Testing", "Contextual Inquiry", "Card Sorting", "Eye Tracking"], "correctIndex": 1, "explanation": "Contextual Inquiry is a field research method where designers observe and interview users in their real-world context."}
       ]
     }
   ],
