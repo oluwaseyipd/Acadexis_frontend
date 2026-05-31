@@ -145,13 +145,17 @@ export default function SetPasswordPage() {
 
     try {
       const payload = { password: data.password };
-      const response = await apiService.post("/auth/register", payload);
+      const response = await apiService.post("/auth/register/", payload);
       const { tokens } = response.data as {
         tokens: { accessToken: string; refreshToken: string };
       };
 
       tokenStorage.setToken(tokens.accessToken);
       tokenStorage.setRefreshToken(tokens.refreshToken);
+      if (typeof window !== "undefined") {
+        document.cookie = `access_token=${tokens.accessToken}; path=/; max-age=${60 * 60}; SameSite=Lax`;
+        document.cookie = `refresh_token=${tokens.refreshToken}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
+      }
       // Add navigation or success state here
     } catch (error: any) {
       const message =

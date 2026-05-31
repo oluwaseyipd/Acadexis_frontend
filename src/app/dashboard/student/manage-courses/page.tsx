@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { BookOpen, Users, FileText, Search, Plus } from "lucide-react";
 import Link from "next/link";
@@ -9,26 +9,28 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { api, type Course } from "@/services/api";
+import apiService from "@/services/apiService";
+import { useCourses } from "@/hooks/useCourses";
+import { type Course } from "@/types/course";
 import { toast } from "sonner";
 
 export default function ManageCourses() {
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [addedIds, setAddedIds] = useState<Set<string>>(new Set(["c1", "c3"]));
-
-  useEffect(() => {
-    api.getCourses().then((c) => { setCourses(c); setLoading(false); });
-  }, []);
-
+  const { courses, isLoading: loading, error, refetch } = useCourses({ mode: "mine", search });
   const filtered = courses.filter(
-    (c) => c.title.toLowerCase().includes(search.toLowerCase()) || c.code.toLowerCase().includes(search.toLowerCase())
+    (course) =>
+      course.title.toLowerCase().includes(search.toLowerCase()) ||
+      course.code.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleAdd = (id: string, title: string) => {
-    setAddedIds((prev) => new Set(prev).add(id));
-    toast.success(`Added "${title}" to your courses`);
+  const handleEnroll = async (courseId: string) => {
+    try {
+      await apiService.courses.enroll(courseId);
+      await refetch();
+      toast.success("Course enrollment updated.");
+    } catch {
+      toast.error("Unable to enroll in course. Please try again.");
+    }
   };
 
   return (
@@ -45,46 +47,53 @@ export default function ManageCourses() {
       </div>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {loading
-          ? Array.from({ length: 6 }).map((_, i) => <Card key={i}><CardContent className="p-5"><Skeleton className="h-32 w-full" /></CardContent></Card>)
-          : filtered.map((course, i) => {
-              const isAdded = addedIds.has(course.id);
-              return (
-                <motion.div key={course.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-                  <Card className="shadow-card hover:shadow-card-hover transition-shadow h-full flex flex-col">
-                    <CardHeader className="pb-2">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className="h-8 w-8 rounded-lg bg-accent flex items-center justify-center">
-                            <BookOpen className="h-4 w-4 text-accent-foreground" />
-                          </div>
-                          <span className="text-xs font-mono text-muted-foreground">{course.code}</span>
-                        </div>
-                        {isAdded && <Badge variant="secondary" className="text-xs">Added</Badge>}
+        {loading ? (
+          Array.from({ length: 6 }).map((_, i) => (
+            <Card key={i}><CardContent className="p-5"><Skeleton className="h-32 w-full" /></CardContent></Card>
+          ))
+        ) : error ? (
+          <div className="col-span-full flex justify-center items-center py-16 text-sm text-destructive">Unable to load courses. Please refresh to try again.</div>
+        ) : filtered.length === 0 ? (
+          <div className="col-span-full flex justify-center items-center py-16 text-sm text-muted-foreground">No courses available.</div>
+        ) : (
+          filtered.map((course, i) => (
+            <motion.div key={course.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
+              <Card className="shadow-card hover:shadow-card-hover transition-shadow h-full flex flex-col">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-8 rounded-lg bg-accent flex items-center justify-center">
+                        <BookOpen className="h-4 w-4 text-accent-foreground" />
                       </div>
-                      <Link href={`/dashboard/student/manage-courses/${course.id}`}>
-                        <CardTitle className="text-base mt-2 hover:text-primary transition-colors cursor-pointer">{course.title}</CardTitle>
-                      </Link>
-                    </CardHeader>
-                    <CardContent className="pt-0 flex-1 flex flex-col">
-                      <p className="text-sm text-muted-foreground line-clamp-2 flex-1">{course.description}</p>
-                      <div className="mt-4 flex items-center justify-between">
-                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                          <span>{course.lecturerName}</span>
-                          <span className="flex items-center gap-1"><Users className="h-3 w-3" />{course.studentsEnrolled}</span>
-                          <span className="flex items-center gap-1"><FileText className="h-3 w-3" />{course.materialsCount}</span>
-                        </div>
-                        {!isAdded && (
-                          <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => handleAdd(course.id, course.title)}>
-                            <Plus className="h-3 w-3 mr-1" /> Add
-                          </Button>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              );
-            })}
+                      <span className="text-xs font-mono text-muted-foreground">{course.code}</span>
+                    </div>
+                    {course.is_enrolled && <Badge variant="secondary" className="text-xs">Enrolled</Badge>}
+                  </div>
+                  <Link href={`/dashboard/student/manage-courses/${course.id}`}>
+                    <CardTitle className="text-base mt-2 hover:text-primary transition-colors cursor-pointer">{course.title}</CardTitle>
+                  </Link>
+                </CardHeader>
+                <CardContent className="pt-0 flex-1 flex flex-col">
+                  <p className="text-sm text-muted-foreground line-clamp-2 flex-1">{course.description}</p>
+                  <div className="mt-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                      <span>{course.lecturer_name}</span>
+                      <span className="flex items-center gap-1"><Users className="h-3 w-3" />{course.students_enrolled}</span>
+                      <span className="flex items-center gap-1"><FileText className="h-3 w-3" />{course.materials_count}</span>
+                    </div>
+                    {course.is_enrolled ? (
+                      <Badge className="text-xs">Enrolled</Badge>
+                    ) : (
+                      <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => handleEnroll(course.id)}>
+                        <Plus className="h-3 w-3 mr-1" /> Enroll
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))
+        )}
       </div>
     </div>
   );

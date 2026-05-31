@@ -7,7 +7,6 @@ export default function StudentDashboardLayout({ children }) {
       userSubtitle="Undergraduate Studies"
       userInitials="JD"
       avatarColor="bg-orange-400"
-      notificationCount={2}
     >
       {children}
     </DashboardLayout>

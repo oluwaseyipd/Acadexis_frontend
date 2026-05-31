@@ -1,58 +1,91 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { Upload, FileText, CheckCircle, Loader2, X, Cloud } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FileText, CheckCircle, Loader2, X, Cloud } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { api, type Course, type CourseMaterial } from "@/services/api";
+import apiService from "@/services/apiService";
+import { type Course } from "@/types/course";
 import { UI_TEXT } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+import { useMaterials } from "@/hooks/useMaterials";
+import { useFileUpload } from "@/hooks/useFileUpload";
+import { useNotificationStore } from "@/store/notificationStore";
 
 export default function KnowledgeHub() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [selectedCourse, setSelectedCourse] = useState("");
-  const [materials, setMaterials] = useState<CourseMaterial[]>([]);
   const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [dragOver, setDragOver] = useState(false);
+  const { materials, loading: materialsLoading, refresh, setMaterials } = useMaterials(selectedCourse || null);
+  const { uploading, uploadFile } = useFileUpload();
+  const notifications = useNotificationStore((state) => state.notifications);
+  const prevFirstNotificationId = useRef<string | null>(null);
 
   useEffect(() => {
-    api.getCourses().then((c) => {
-      setCourses(c);
-      if (c.length) setSelectedCourse(c[0].id);
-      setLoading(false);
-    });
+    const loadCourses = async () => {
+      setLoading(true);
+      try {
+        const response = await apiService.courses.getMyCourses();
+        setCourses(response.data);
+        if (response.data.length) setSelectedCourse(response.data[0].id);
+      } catch {
+        setCourses([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    void loadCourses();
   }, []);
 
   useEffect(() => {
-    if (!selectedCourse) return;
-    api.getCourseMaterials(selectedCourse).then(setMaterials);
-  }, [selectedCourse]);
+    const firstNotification = notifications[0];
+
+    if (
+      !firstNotification ||
+      firstNotification.id === prevFirstNotificationId.current ||
+      firstNotification.notification_type !== "material_ready"
+    ) {
+      return;
+    }
+
+    if (firstNotification.data?.course_id === selectedCourse) {
+      prevFirstNotificationId.current = firstNotification.id;
+      void refresh();
+    }
+  }, [notifications, refresh, selectedCourse]);
 
   const handleUpload = useCallback(async (files: FileList | null) => {
     if (!files || files.length === 0 || !selectedCourse) return;
-    setUploading(true);
     setUploadProgress(0);
     const interval = setInterval(() => setUploadProgress((p) => Math.min(p + 15, 90)), 300);
     try {
-      await api.uploadMaterial(selectedCourse, files[0]);
+      await uploadFile({ course: selectedCourse, file: files[0] });
       setUploadProgress(100);
-      setTimeout(() => {
-        api.getCourseMaterials(selectedCourse).then(setMaterials);
-        setUploading(false);
-        setUploadProgress(0);
-      }, 500);
+      await refresh();
     } catch {
-      setUploading(false);
       setUploadProgress(0);
     } finally {
+      setTimeout(() => {
+        setUploadProgress(0);
+      }, 500);
       clearInterval(interval);
     }
-  }, [selectedCourse]);
+  }, [selectedCourse, refresh, uploadFile]);
+
+  const handleDelete = async (materialId: string) => {
+    try {
+      await apiService.materials.deleteMaterial(materialId);
+      setMaterials((prev) => prev.filter((item) => item.id !== materialId));
+    } catch {
+      // ignore delete errors for now
+    }
+  };
 
   const statusIcon = (status: string) => {
     if (status === "ready") return <CheckCircle className="h-4 w-4 text-success" />;
@@ -117,32 +150,42 @@ export default function KnowledgeHub() {
       <div>
         <h2 className="text-lg font-semibold text-foreground mb-3">Uploaded Materials</h2>
         <div className="space-y-2">
-          {loading ? (
+          {materialsLoading ? (
             Array.from({ length: 3 }).map((_, i) => (
               <Card key={i} className="shadow-card"><CardContent className="p-4"><div className="h-12 bg-muted animate-pulse rounded" /></CardContent></Card>
             ))
-          ) : materials.map((mat, i) => (
-            <motion.div key={mat.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-              <Card className="shadow-card">
-                <CardContent className="p-4 flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-accent flex items-center justify-center shrink-0">
-                    <FileText className="h-5 w-5 text-accent-foreground" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{mat.fileName}</p>
-                    <p className="text-xs text-muted-foreground">{mat.pageCount} pages • {(mat.fileSize / 1024 / 1024).toFixed(1)} MB</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {statusIcon(mat.status)}
-                    <span className="text-xs text-muted-foreground capitalize">{mat.status}</span>
-                  </div>
-                  <Button variant="ghost" size="sm">
-                    {UI_TEXT.common.delete}
-                  </Button>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
+          ) : materials.length === 0 ? (
+            <Card className="shadow-card"><CardContent className="p-6 text-sm text-muted-foreground">No materials uploaded for this course yet.</CardContent></Card>
+          ) : (
+            materials.map((mat, i) => (
+              <motion.div key={mat.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
+                <Card className="shadow-card">
+                  <CardContent className="p-4 flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-lg bg-accent flex items-center justify-center shrink-0">
+                      <FileText className="h-5 w-5 text-accent-foreground" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{mat.file_name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {(mat.page_count ?? 0) > 0 ? `${mat.page_count} pages • ` : ""}
+                        {(mat.file_size / 1024 / 1024).toFixed(1)} MB
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {statusIcon(mat.status)}
+                      <span className="text-xs text-muted-foreground capitalize">{mat.status}</span>
+                    </div>
+                    <Button asChild variant="ghost" size="sm">
+                      <a href={mat.file} target="_blank" rel="noreferrer">Download</a>
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => void handleDelete(mat.id)}>
+                      {UI_TEXT.common.delete}
+                    </Button>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))
+          )}
         </div>
       </div>
     </div>

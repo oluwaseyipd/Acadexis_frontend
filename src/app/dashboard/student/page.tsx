@@ -6,28 +6,53 @@ import { BookOpen, Users, FileText, TrendingUp, Clock, MessageSquare } from "luc
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAppStore } from "@/store/useAppStore";
-import { api, type Course, type ChatMessage } from "@/services/api";
+import apiService from "@/services/apiService";
 import { UI_TEXT } from "@/lib/constants";
+import type { Course } from "@/types/course";
+import type { StudySession } from "@/types/studylab";
 
 
 
 export default function OverviewPage() {
     const user = useAppStore((s) => s.user);
   const [courses, setCourses] = useState<Course[]>([]);
-  const [recentQuestions, setRecentQuestions] = useState<ChatMessage[]>([]);
+  const [recentSessions, setRecentSessions] = useState<StudySession[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([api.getCourses(), api.getChatHistory("c1")]).then(([c, chat]) => {
-      setCourses(c);
-      setRecentQuestions(chat.filter((m) => m.role === "user").slice(0, 3));
-      setLoading(false);
-    });
+    let isMounted = true;
+
+    const loadData = async () => {
+      try {
+        const courseResponse = await apiService.courses.getMyCourses();
+        if (!isMounted) return;
+        setCourses(courseResponse.data);
+
+        const courseId = courseResponse.data[0]?.id ?? null;
+        if (courseId) {
+          const sessions = await apiService.studyLab.getSessionsForCourse(courseId);
+          if (!isMounted) return;
+          setRecentSessions(sessions.slice(0, 3));
+        }
+      } catch {
+        if (!isMounted) return;
+        setCourses([]);
+        setRecentSessions([]);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    void loadData();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const stats = [
     { label: "Enrolled Courses", value: courses.length.toString(), icon: BookOpen, color: "text-primary" },
-    { label: "Study Sessions", value: "24", icon: Clock, color: "text-info" },
+    { label: "Study Sessions", value: recentSessions.length.toString(), icon: Clock, color: "text-info" },
     { label: "Materials Read", value: "38", icon: FileText, color: "text-success" },
     { label: "AI Questions", value: "156", icon: TrendingUp, color: "text-warning" },
   ];
@@ -36,7 +61,7 @@ export default function OverviewPage() {
       {/* Heading */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">
-          {UI_TEXT.dashboard.welcomeBack}, {user?.firstName || "Student"} 
+          {UI_TEXT.dashboard.welcomeBack}, {user?.name || "Student"}
         </h1>
         <p className="text-muted-foreground mt-1">Here is what is happening with your courses.</p>
       </div>
@@ -105,16 +130,16 @@ export default function OverviewPage() {
           <h2 className="text-lg font-semibold text-foreground mb-3">Recent Study</h2>
           {loading ? (
             <Card className="shadow-card"><CardContent className="p-5"><Skeleton className="h-32 w-full" /></CardContent></Card>
-          ) : recentQuestions.length > 0 ? (
+          ) : recentSessions.length > 0 ? (
             <div className="space-y-3">
-              {recentQuestions.map((q, i) => (
-                <motion.div key={q.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
+              {recentSessions.map((session, i) => (
+                <motion.div key={session.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
                   <Card className="shadow-card">
                     <CardContent className="p-4 flex items-start gap-3">
                       <div className="text-primary mt-0.5"><MessageSquare className="h-4 w-4" /></div>
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-card-foreground line-clamp-2">{q.content}</p>
-                        <p className="text-xs text-muted-foreground mt-1">{new Date(q.timestamp).toLocaleDateString()}</p>
+                        <p className="text-sm font-medium text-card-foreground line-clamp-2">{session.title}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{new Date(session.created_at).toLocaleDateString()}</p>
                       </div>
                     </CardContent>
                   </Card>

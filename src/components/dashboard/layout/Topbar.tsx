@@ -3,13 +3,14 @@
 import { useState, useRef, useEffect } from "react";
 import { Search, Bell, HelpCircle, X, Menu } from "lucide-react";
 import Link from "next/link";
+import NotificationPanel from "./NotificationPanel";
+import { useNotificationStore } from "@/store/notificationStore";
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 interface TopBarProps {
   userName?: string;
   userInitials?: string;
   avatarColor?: string;
-  notificationCount?: number;
   onSearch?: (query: string) => void;
   onMenuClick?: () => void;
 }
@@ -18,10 +19,10 @@ export default function TopBar({
   userName = "Student",
   userInitials = "S",
   avatarColor = "bg-brand-primary",
-  notificationCount = 0,
   onSearch,
   onMenuClick,
 }: TopBarProps) {
+  const unreadCount = useNotificationStore((state) => state.unreadCount);
   const [query, setQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const [showNotifs, setShowNotifs] = useState(false);
@@ -108,29 +109,12 @@ export default function TopBar({
             aria-label="Notifications"
           >
             <Bell size={18} strokeWidth={1.8} />
-            {notificationCount > 0 && (
+            {unreadCount > 0 && (
               <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 ring-2 ring-white" />
             )}
           </button>
 
-          {/* Notification dropdown */}
-          {showNotifs && (
-            <div className="absolute right-0 top-full mt-2 w-70 bg-card rounded-xl shadow-[0_4px_24px_rgba(0,0,0,0.1)] border border-border py-2 z-50">
-              <p className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                Notifications
-              </p>
-              {notificationCount === 0 ? (
-                <p className="px-4 py-3 text-sm text-muted-foreground">
-                  No new notifications
-                </p>
-              ) : (
-                <div className="px-4 py-3 text-sm text-foreground border-t border-border">
-                  You have {notificationCount} new notification
-                  {notificationCount > 1 ? "s" : ""}
-                </div>
-              )}
-            </div>
-          )}
+          {showNotifs && <NotificationPanel onClose={() => setShowNotifs(false)} />}
         </div>
 
         {/* Help */}

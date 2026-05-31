@@ -4,8 +4,11 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useRouter } from "next/navigation";
 import { Eye, EyeOff, GraduationCap } from "lucide-react";
-import apiService from "@/services/apiService"; // adjust to your actual path
+import apiService from "@/services/apiService";
+import { tokenStorage } from "@/services/api-client";
+import { mapBackendUser, useAppStore } from "@/store/useAppStore";
 
 // ─── Validation Schema ────────────────────────────────────────────────────────
 const loginSchema = z.object({
@@ -35,6 +38,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  const router = useRouter();
 
   const {
     register,
@@ -51,15 +55,37 @@ export default function LoginPage() {
     setServerError(null);
 
     try {
-      const response = await apiService.post("/auth/login", {
+      const response = await apiService.auth.login({
         email: data.email,
         password: data.password,
         rememberMe: data.rememberMe,
       });
 
-      // Handle successful login — e.g. store token, redirect
-      // router.push("/dashboard");
-      console.log("Login successful", response.data);
+      const { access, refresh, user } = response.data;
+      tokenStorage.setToken(access);
+      tokenStorage.setRefreshToken(refresh);
+      if (typeof window !== "undefined") {
+        document.cookie = `access_token=${access}; path=/; max-age=${60 * 60}; SameSite=Lax`;
+        document.cookie = `refresh_token=${refresh}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
+      }
+
+      useAppStore.getState().setUser(
+        mapBackendUser({
+          ...user,
+          profile: {
+            first_name: user.profile.first_name,
+            last_name: user.profile.last_name,
+            identification_number: user.profile.identification_number,
+            level: user.profile.level,
+            department: user.profile.department,
+            avatar: user.profile.avatar,
+            avatar_url: user.profile.avatar,
+          },
+        })
+      );
+
+      const nextRoute = user.role === "lecturer" ? "/dashboard/lecturer" : "/dashboard/student";
+      router.push(nextRoute);
     } catch (error: any) {
       const message =
         error?.response?.data?.message ||
@@ -76,7 +102,7 @@ export default function LoginPage() {
     setServerError(null);
 
     try {
-      const response = await apiService.get("/auth/google/university");
+      const response = await apiService.auth.getGoogleAuthUrl();
       if (response.data?.url) {
         window.location.href = response.data.url;
       }

@@ -1,5 +1,17 @@
 import { AxiosRequestConfig, AxiosResponse } from "axios";
-import apiClient from "./api-client";
+import apiClient, { tokenStorage } from "./api-client";
+import { AuthUser, UserProfile } from "@/types/user";
+import { Course, CourseModule, PaginatedResponse } from "@/types/course";
+import { Notification } from "@/types/notification";
+import type { CourseMaterial } from "@/types/material";
+import { University, Faculty, Department } from "@/types/institution";
+import type {
+  StudySession,
+  ChatMessage,
+  AskResponse,
+  SessionFeedbackPayload,
+  Bookmark,
+} from "@/types/studylab";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -10,20 +22,6 @@ export interface ApiResponse<T = unknown> {
   status: number;
 }
 
-/** Shape returned by the login endpoint */
-export interface AuthTokens {
-  accessToken: string;
-  refreshToken: string;
-}
-
-/** Minimal user shape — extend to match your backend */
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  role: string;
-}
-
 export interface LoginPayload {
   email: string;
   password: string;
@@ -31,54 +29,9 @@ export interface LoginPayload {
 }
 
 export interface LoginResponse {
-  user: User;
-  tokens: AuthTokens;
-}
-
-// ─── Course Types ─────────────────────────────────────────────────────────────
-
-export interface CurriculumItem {
-  id: string;
-  title: string;
-  duration: string;
-  done: boolean;
-  active: boolean;
-  locked: boolean;
-}
-
-export interface Module {
-  id: string;
-  courseId: string;
-  icon?: string;
-  tag?: string;
-  title: string;
-  description: string;
-  duration?: string;
-  completed?: number;
-  total?: number;
-  studyGroup?: boolean;
-  memberCount?: number;
-}
-
-export interface Course {
-  id: string;
-  title: string;
-  description: string;
-  progress: number;
-  featuredModuleId: string;
-  curriculum: CurriculumItem[];
-}
-
-export interface Recommendation {
-  id: string;
-  courseId: string;
-  studentId: string;
-  body: string;
-  actions: Array<{
-    label: string;
-    primary?: boolean;
-    accent?: boolean;
-  }>;
+  access: string;
+  refresh: string;
+  user: AuthUser;
 }
 
 // ─── Service ──────────────────────────────────────────────────────────────────
@@ -129,27 +82,45 @@ const apiService = {
   auth: {
     /** Email + password login */
     login(payload: LoginPayload): Promise<AxiosResponse<LoginResponse>> {
-      return apiClient.post<LoginResponse>("/auth/login", payload);
+      return apiClient.post<LoginResponse>("/auth/login/", payload);
+    },
+
+    /** Register a new user */
+    register(payload: Record<string, unknown>): Promise<AxiosResponse<{ success: boolean; user: AuthUser }>> {
+      return apiClient.post<{ success: boolean; user: AuthUser }>("/auth/register/", payload);
     },
 
     /** Logout — invalidates refresh token on the server */
-    logout(): Promise<AxiosResponse<void>> {
-      return apiClient.post<void>("/auth/logout");
+    async logout(): Promise<void> {
+      const refreshToken = tokenStorage.getRefreshToken();
+
+      try {
+        if (refreshToken) {
+          await apiClient.post<void>("/auth/logout/", { refresh: refreshToken });
+        } else {
+          await apiClient.post<void>("/auth/logout/", {});
+        }
+      } catch {
+        // Ignore logout errors and proceed with client-side cleanup.
+      } finally {
+        tokenStorage.clearAll();
+        window.location.href = "/auth/login";
+      }
     },
 
     /** Get the Google OAuth redirect URL for university SSO */
     getGoogleAuthUrl(): Promise<AxiosResponse<{ url: string }>> {
-      return apiClient.get<{ url: string }>("/auth/google/university");
+      return apiClient.get<{ url: string }>("/auth/google/university/");
     },
 
     /** Exchange Google OAuth code for tokens (called on the callback page) */
     googleCallback(code: string): Promise<AxiosResponse<LoginResponse>> {
-      return apiClient.post<LoginResponse>("/auth/google/callback", { code });
+      return apiClient.post<LoginResponse>("/auth/google/callback/", { code });
     },
 
     /** Request a password-reset email */
     forgotPassword(email: string): Promise<AxiosResponse<{ message: string }>> {
-      return apiClient.post<{ message: string }>("/auth/forgot-password", { email });
+      return apiClient.post<{ message: string }>("/auth/forgot-password/", { email });
     },
 
     /** Complete password reset with the token from the email */
@@ -157,9 +128,9 @@ const apiService = {
       token: string,
       newPassword: string
     ): Promise<AxiosResponse<{ message: string }>> {
-      return apiClient.post<{ message: string }>("/auth/reset-password", {
+      return apiClient.post<{ message: string }>("/auth/reset-password/", {
         token,
-        newPassword,
+        new_password: newPassword,
       });
     },
   },
@@ -167,14 +138,42 @@ const apiService = {
   // ── User / Profile ──────────────────────────────────────────────────────────
 
   user: {
-    /** Get the currently authenticated user's profile */
-    me(): Promise<AxiosResponse<User>> {
-      return apiClient.get<User>("/users/me");
+    /** Get the full authenticated user object */
+    me(): Promise<AxiosResponse<AuthUser>> {
+      return apiClient.get<AuthUser>("/auth/me/");
     },
 
-    /** Update profile fields */
-    update(data: Partial<User>): Promise<AxiosResponse<User>> {
-      return apiClient.patch<User>("/users/me", data);
+    /** Update email only */
+    updateEmail(data: { email: string }): Promise<AxiosResponse<AuthUser>> {
+      return apiClient.patch<AuthUser>("/auth/me/", data);
+    },
+
+    profile: {
+      get(): Promise<AxiosResponse<UserProfile>> {
+        return apiClient.get<UserProfile>("/auth/profile/");
+      },
+
+      update(data: {
+        first_name?: string;
+        last_name?: string;
+        level?: string;
+        department?: string | null;
+        avatar?: File;
+      }): Promise<AxiosResponse<UserProfile>> {
+        if (data.avatar) {
+          const formData = new FormData();
+          if (data.first_name !== undefined) formData.append("first_name", data.first_name);
+          if (data.last_name !== undefined) formData.append("last_name", data.last_name);
+          if (data.level !== undefined) formData.append("level", data.level);
+          if (data.department !== undefined) formData.append("department", data.department);
+          formData.append("avatar", data.avatar);
+
+          return apiClient.patch<UserProfile>("/auth/profile/", formData);
+        }
+
+        const { avatar: _avatar, ...jsonData } = data;
+        return apiClient.patch<UserProfile>("/auth/profile/", jsonData);
+      },
     },
 
     /** Change password (requires current password) */
@@ -182,9 +181,9 @@ const apiService = {
       currentPassword: string,
       newPassword: string
     ): Promise<AxiosResponse<{ message: string }>> {
-      return apiClient.post<{ message: string }>("/users/me/change-password", {
-        currentPassword,
-        newPassword,
+      return apiClient.post<{ message: string }>("/auth/change-password/", {
+        current_password: currentPassword,
+        new_password: newPassword,
       });
     },
   },
@@ -192,29 +191,217 @@ const apiService = {
   // ── Courses ──────────────────────────────────────────────────────────────────
 
   courses: {
-    /** Get all courses */
-    getAll(): Promise<AxiosResponse<Course[]>> {
-      return apiClient.get<Course[]>("/courses");
+    /** Get paginated course list */
+    getAll(params?: {
+      page?: number;
+      department?: string;
+      lecturer?: string;
+      level?: string;
+      search?: string;
+      ordering?: string;
+    }): Promise<AxiosResponse<PaginatedResponse<Course>>> {
+      return apiClient.get<PaginatedResponse<Course>>("/courses/", { params });
+    },
+
+    /** Get the authenticated user's courses */
+    getMyCourses(): Promise<AxiosResponse<Course[]>> {
+      return apiClient.get<Course[]>("/courses/mine/");
     },
 
     /** Get a specific course by ID */
     getById(courseId: string): Promise<AxiosResponse<Course>> {
-      return apiClient.get<Course>(`/courses/${courseId}`);
+      return apiClient.get<Course>(`/courses/${courseId}/`);
     },
 
     /** Get modules for a course */
-    getModules(courseId: string): Promise<AxiosResponse<Module[]>> {
-      return apiClient.get<Module[]>(`/modules?courseId=${courseId}`);
+    getModules(courseId: string): Promise<AxiosResponse<CourseModule[]>> {
+      return apiClient.get<CourseModule[]>("/modules/", {
+        params: { course: courseId },
+      });
     },
 
     /** Get a specific module by ID */
-    getModuleById(moduleId: string): Promise<AxiosResponse<Module>> {
-      return apiClient.get<Module>(`/modules/${moduleId}`);
+    getModuleById(moduleId: string): Promise<AxiosResponse<CourseModule>> {
+      return apiClient.get<CourseModule>(`/modules/${moduleId}/`);
     },
 
     /** Get recommendations for a course */
-    getRecommendations(courseId: string): Promise<AxiosResponse<Recommendation[]>> {
-      return apiClient.get<Recommendation[]>(`/recommendations?courseId=${courseId}`);
+    getRecommendations(courseId: string): Promise<AxiosResponse<Course[]>> {
+      return apiClient.get<Course[]>("/recommendations/", {
+        params: { course: courseId },
+      });
+    },
+
+    /** Get materials for a specific course */
+    getMaterials(courseId: string): Promise<AxiosResponse<CourseMaterial[]>> {
+      return apiClient.get<CourseMaterial[]>("/materials/", {
+        params: { course: courseId },
+      });
+    },
+
+    /** Upload a new course material file */
+    uploadMaterial(courseId: string, file: File): Promise<AxiosResponse<CourseMaterial>> {
+      const body = new FormData();
+      body.append("course", courseId);
+      body.append("file", file);
+      return apiClient.post<CourseMaterial>("/materials/", body);
+    },
+  },
+
+  studyLab: {
+    async getSessionsForCourse(courseId: string): Promise<StudySession[]> {
+      const response = await apiClient.get<StudySession[]>("/sessions/", {
+        params: { course: courseId },
+      });
+      return response.data;
+    },
+
+    async getAllSessions(): Promise<StudySession[]> {
+      const response = await apiClient.get<StudySession[]>("/sessions/");
+      return response.data;
+    },
+
+    async getSessionById(sessionId: string): Promise<StudySession> {
+      const response = await apiClient.get<StudySession>(`/sessions/${sessionId}/`);
+      return response.data;
+    },
+
+    async createSession(data: {
+      course: string;
+      title?: string;
+      description?: string;
+    }): Promise<StudySession> {
+      const response = await apiClient.post<StudySession>("/sessions/", {
+        course: data.course,
+        title: data.title ?? "New Session",
+        description: data.description ?? "",
+      });
+      return response.data;
+    },
+
+    async updateSession(sessionId: string, data: { title?: string; description?: string }): Promise<StudySession> {
+      const response = await apiClient.patch<StudySession>(`/sessions/${sessionId}/`, data);
+      return response.data;
+    },
+
+    async deleteSession(sessionId: string): Promise<void> {
+      await apiClient.delete(`/sessions/${sessionId}/`);
+    },
+
+    async getSessionMessages(sessionId: string): Promise<ChatMessage[]> {
+      const response = await apiClient.get<ChatMessage[]>(`/sessions/${sessionId}/messages/`);
+      return response.data;
+    },
+
+    async askQuestion(sessionId: string, message: string): Promise<AskResponse> {
+      const response = await apiClient.post<AskResponse>(`/sessions/${sessionId}/ask/`, {
+        message,
+      });
+      return response.data;
+    },
+
+    async submitSessionFeedback(sessionId: string, payload: SessionFeedbackPayload): Promise<{ success: boolean }> {
+      const response = await apiClient.post<{ success: boolean }>(`/sessions/${sessionId}/feedback/`, {
+        rating: payload.rating,
+        note: payload.note ?? "",
+      });
+      return response.data;
+    },
+
+    async getBookmarks(): Promise<Bookmark[]> {
+      const response = await apiClient.get<Bookmark[]>("/bookmarks/");
+      return response.data;
+    },
+
+    async createBookmark(data: {
+      kind: "snippet" | "answer";
+      title: string;
+      content: string;
+      material?: string;
+      page?: number;
+      message?: string;
+    }): Promise<Bookmark> {
+      const response = await apiClient.post<Bookmark>("/bookmarks/", data);
+      return response.data;
+    },
+
+    async deleteBookmark(bookmarkId: string): Promise<void> {
+      await apiClient.delete(`/bookmarks/${bookmarkId}/`);
+    },
+  },
+
+  notifications: {
+    getNotifications(params?: { page?: number; read?: boolean }): Promise<AxiosResponse<PaginatedResponse<Notification>>> {
+      return apiClient.get<PaginatedResponse<Notification>>("/notifications/", { params });
+    },
+
+    getUnreadCount(): Promise<AxiosResponse<{ unread_count: number }>> {
+      return apiClient.get<{ unread_count: number }>("/notifications/unread-count/");
+    },
+
+    markNotificationRead(notificationId: string): Promise<AxiosResponse<Notification>> {
+      return apiClient.post<Notification>(`/notifications/${notificationId}/mark-as-read/`);
+    },
+
+    markAllNotificationsRead(): Promise<AxiosResponse<{ marked: number }>> {
+      return apiClient.post<{ marked: number }>("/notifications/mark-all-read/");
+    },
+  },
+
+  materials: {
+    getCourseMaterials(courseId: string): Promise<AxiosResponse<PaginatedResponse<CourseMaterial>>> {
+      return apiClient.get<PaginatedResponse<CourseMaterial>>("/materials/", {
+        params: { course: courseId },
+      });
+    },
+
+    getMaterialById(materialId: string): Promise<CourseMaterial> {
+      return apiClient.get<CourseMaterial>(`/materials/${materialId}/`).then((response) => response.data);
+    },
+
+    uploadCourseMaterial(formData: FormData): Promise<AxiosResponse<CourseMaterial>> {
+      return apiClient.post<CourseMaterial>("/materials/", formData);
+    },
+
+    renameMaterial(materialId: string, data: { file_name: string }): Promise<AxiosResponse<CourseMaterial>> {
+      return apiClient.patch<CourseMaterial>(`/materials/${materialId}/`, data);
+    },
+
+    deleteMaterial(materialId: string): Promise<AxiosResponse<void>> {
+      return apiClient.delete<void>(`/materials/${materialId}/`);
+    },
+  },
+
+  institutions: {
+    getUniversities(params?: { page?: number; search?: string }): Promise<AxiosResponse<PaginatedResponse<University>>> {
+      return apiClient.get<PaginatedResponse<University>>("/universities/", { params });
+    },
+
+    getUniversityById(id: string): Promise<AxiosResponse<University>> {
+      return apiClient.get<University>(`/universities/${id}/`);
+    },
+
+    getFaculties(universityId: string): Promise<AxiosResponse<Faculty[]>> {
+      return apiClient.get<Faculty[]>("/faculties/", {
+        params: { university: universityId },
+      });
+    },
+
+    getDepartments(params: { faculty?: string; university?: string }): Promise<AxiosResponse<Department[]>> {
+      return apiClient.get<Department[]>("/departments/", { params });
+    },
+  },
+
+  analytics: {
+    getHeatmap(params?: {
+      course?: string;
+      ordering?: string;
+      search?: string;
+      page?: number;
+    }): Promise<AxiosResponse<PaginatedResponse<TopicStruggle>>> {
+      return apiClient.get<PaginatedResponse<TopicStruggle>>("/heatmap/", {
+        params,
+      });
     },
   },
 };

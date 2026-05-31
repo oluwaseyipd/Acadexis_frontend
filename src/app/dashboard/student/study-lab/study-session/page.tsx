@@ -15,10 +15,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
-import { api, type ChatMessage, type Course, type CourseMaterial } from "@/services/api";
+import { api, type ChatMessage } from "@/services/api";
+import apiService from "@/services/apiService";
 import { UI_TEXT } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { useParams, useRouter, usePathname } from "next/navigation";
+import type { Course } from "@/types/course";
+import type { CourseMaterial } from "@/types/material";
+import { useMaterials } from "@/hooks/useMaterials";
 
 /* ── Question Block type ─────────────────────────────────────────── */
 interface QuestionBlock {
@@ -42,7 +46,7 @@ export default function StudySession() {
 
   const [courses, setCourses] = useState<Course[]>([]);
   const [selectedCourse, setSelectedCourse] = useState("");
-  const [materials, setMaterials] = useState<CourseMaterial[]>([]);
+  const { materials, loading: materialsLoading, refresh: refreshMaterials } = useMaterials(selectedCourse || null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [questionBlocks, setQuestionBlocks] = useState<QuestionBlock[]>([]);
   const [input, setInput] = useState("");
@@ -65,31 +69,44 @@ export default function StudySession() {
 
   /* ── Data loading ────────────────────────────────────────────── */
   useEffect(() => {
-    api.getCourses().then((c) => {
-      setCourses(c);
-      if (c.length > 0) setSelectedCourse(c[0].id);
-      setLoading(false);
-    });
+    const loadCourses = async () => {
+      try {
+        const response = await apiService.courses.getMyCourses();
+        setCourses(response.data);
+        if (response.data.length) setSelectedCourse(response.data[0].id);
+      } catch {
+        setCourses([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    void loadCourses();
   }, []);
 
   useEffect(() => {
     if (!selectedCourse) return;
     setLoading(true);
     Promise.all([
-      api.getCourseMaterials(selectedCourse),
+      refreshMaterials(),
       isNew ? Promise.resolve([]) : api.getChatHistory(selectedCourse),
-    ]).then(([m, h]) => {
-      setMaterials(m);
-      setMessages(h);
-      // Rebuild question blocks from history
-      const blocks: QuestionBlock[] = h
-        .filter((msg) => msg.role === "user")
-        .map((msg) => ({ id: `qb-${msg.id}`, title: refineTitle(msg.content), messageId: msg.id }));
-      setQuestionBlocks(blocks);
-      userQuestionCount.current = blocks.length;
-      setLoading(false);
-    });
-  }, [selectedCourse, isNew]);
+    ])
+      .then(([_, h]) => {
+        setMessages(h);
+        const blocks: QuestionBlock[] = h
+          .filter((msg) => msg.role === "user")
+          .map((msg) => ({ id: `qb-${msg.id}`, title: refineTitle(msg.content), messageId: msg.id }));
+        setQuestionBlocks(blocks);
+        userQuestionCount.current = blocks.length;
+      })
+      .catch(() => {
+        setMessages([]);
+        setQuestionBlocks([]);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [selectedCourse, isNew, refreshMaterials]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -106,7 +123,6 @@ export default function StudySession() {
     };
     setMessages((prev) => [...prev, userMsg]);
 
-    // Add question block
     const newBlock: QuestionBlock = {
       id: `qb-${userMsg.id}`,
       title: refineTitle(input),
@@ -121,11 +137,14 @@ export default function StudySession() {
     try {
       const reply = await api.sendMessage(selectedCourse, input);
       setMessages((prev) => [...prev, reply]);
+    } catch {
+      setMessages((prev) => prev.filter((msg) => msg.id !== userMsg.id));
+      setQuestionBlocks((prev) => prev.filter((block) => block.id !== newBlock.id));
+      userQuestionCount.current -= 1;
     } finally {
       setSending(false);
     }
 
-    // Trigger feedback after 3rd question
     if (userQuestionCount.current === 3 && !feedbackGiven) {
       setTimeout(() => setShowFeedback(true), 1200);
     }
@@ -139,7 +158,7 @@ export default function StudySession() {
 
   /* ── Open PDF viewer ─────────────────────────────────────────── */
   const openPdf = (materialName: string) => {
-    const mat = materials.find((m) => m.fileName === materialName);
+    const mat = materials.find((m) => m.file_name === materialName);
     if (mat) {
       setActivePdf(mat);
       setPdfOpen(true);
@@ -344,7 +363,7 @@ const basePath = pathname.includes("/lecturer/")
               </span>
             </div>
             <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
-              {loading ? (
+              {loading || materialsLoading ? (
                 Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)
               ) : materials.length === 0 ? (
                 <p className="text-xs text-muted-foreground text-center mt-8">No materials available</p>
@@ -360,9 +379,9 @@ const basePath = pathname.includes("/lecturer/")
                   >
                     <FileText className="h-4 w-4 text-primary/60 shrink-0" />
                     <div className="min-w-0">
-                      <p className="text-xs font-medium text-foreground truncate">{mat.fileName}</p>
+                      <p className="text-xs font-medium text-foreground truncate">{mat.file_name}</p>
                       <p className="text-[10px] text-muted-foreground">
-                        {mat.pageCount} pages
+                        {mat.page_count ?? 0} pages
                       </p>
                     </div>
                   </button>
@@ -387,7 +406,7 @@ const basePath = pathname.includes("/lecturer/")
                   <div className="flex items-center gap-2 min-w-0">
                     <FileText className="h-4 w-4 text-primary shrink-0" />
                     <span className="text-xs font-medium text-foreground truncate">
-                      {activePdf.fileName}
+                      {activePdf.file_name}
                     </span>
                   </div>
                   <Button
@@ -408,9 +427,9 @@ const basePath = pathname.includes("/lecturer/")
                       <FileText className="h-8 w-8 text-muted-foreground/50" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-foreground">{activePdf.fileName}</p>
+                      <p className="text-sm font-medium text-foreground">{activePdf.file_name}</p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        {activePdf.pageCount} pages • {(activePdf.fileSize / 1024 / 1024).toFixed(1)} MB
+                        {activePdf.page_count ?? 0} pages • {(activePdf.file_size / 1024 / 1024).toFixed(1)} MB
                       </p>
                     </div>
                     <p className="text-xs text-muted-foreground">

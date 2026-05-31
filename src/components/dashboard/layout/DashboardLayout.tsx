@@ -4,6 +4,7 @@ import { useState } from "react";
 import Sidebar from "./Sidebar";
 import TopBar from "./Topbar";
 import Askai from "./Askai";
+import { useNotifications } from "@/hooks/useNotifications";
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 interface DashboardLayoutProps {
@@ -14,8 +15,6 @@ interface DashboardLayoutProps {
   userSubtitle?: string;
   userInitials?: string;
   avatarColor?: string;
-  notificationCount?: number;
-
   /** Passed down to AskAI to set context-aware placeholder & welcome message */
   courseContext?: string;
 }
@@ -26,9 +25,9 @@ export default function DashboardLayout({
   userSubtitle = "Undergraduate Studies",
   userInitials = "S",
   avatarColor = "bg-orange-400",
-  notificationCount = 0,
   courseContext,
 }: DashboardLayoutProps) {
+  useNotifications();
   const [aiOpen, setAiOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -39,7 +38,6 @@ export default function DashboardLayout({
           userName={userName}
           userInitials={userInitials}
           avatarColor={avatarColor}
-          notificationCount={notificationCount}
           onMenuClick={() => setSidebarOpen(true)}
         />
 

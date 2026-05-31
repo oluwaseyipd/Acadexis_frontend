@@ -50,7 +50,7 @@ export default function QuizResultPage() {
         <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
           <p className="text-gray-500">No result found. Please take the quiz first.</p>
           <button
-            onClick={() => router.push(`/dashboard/student/courses/${courseId}/quiz`)}
+            onClick={() => router.push(`/dashboard/student/manage-courses/${courseId}/quiz`)}
             className="text-sm font-semibold text-green-600 hover:underline"
           >
             Go to quiz →
@@ -89,7 +89,7 @@ export default function QuizResultPage() {
         {/* ── Header ─────────────────────────────────────────────────────── */}
         <div className="flex items-center gap-2">
           <button
-            onClick={() => router.push(`/dashboard/student/courses/${courseId}`)}
+            onClick={() => router.push(`/dashboard/student/manage-courses/${courseId}`)}
             className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 transition-colors"
           >
             <ArrowLeft size={14} strokeWidth={2} />
@@ -322,14 +322,14 @@ export default function QuizResultPage() {
         {/* ── Actions ─────────────────────────────────────────────────────── */}
         <div className="flex flex-col sm:flex-row gap-3 pb-8">
           <button
-            onClick={() => router.push(`/dashboard/student/courses/${courseId}/quiz`)}
+            onClick={() => router.push(`/dashboard/student/manage-courses/${courseId}/quiz`)}
             className="flex-1 flex items-center justify-center gap-2 bg-[#0f173e] hover:bg-[#1a2456] text-white font-semibold rounded-xl py-3.5 text-sm transition-all duration-200"
           >
             <RefreshCw size={16} strokeWidth={2} />
             Retake Quiz
           </button>
           <button
-            onClick={() => router.push(`/dashboard/student/courses/${courseId}`)}
+            onClick={() => router.push(`/dashboard/student/manage-courses/${courseId}`)}
             className="flex-1 flex items-center justify-center gap-2 border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium rounded-xl py-3.5 text-sm transition-all duration-200"
           >
             <ArrowLeft size={16} strokeWidth={2} />

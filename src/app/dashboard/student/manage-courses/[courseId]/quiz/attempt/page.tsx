@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { quizData } from "@/util/quizzes";
+import { api, type Quiz } from "@/services/api";
 import { QuizAnswer } from "@/util/types";
 import {
   Clock,
@@ -13,29 +13,61 @@ import {
 } from "lucide-react";
 
 export default function QuizAttemptPage() {
-  const { courseId } = useParams<{ courseId: string }>();
+  const params = useParams();
+  const courseId = params.courseId as string;
   const router = useRouter();
-  const quiz = quizData[courseId];
-
-  const TOTAL_SECONDS = (quiz?.timeLimit ?? 15) * 60;
-
-  // ── State ───────────────────────────────────────────────────────────────────
+  const [quiz, setQuiz] = useState<Quiz | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [answers, setAnswers] = useState<(number | null)[]>(
-    Array(quiz?.totalQuestions ?? 10).fill(null),
-  );
-  const [timeLeft, setTimeLeft] = useState(TOTAL_SECONDS);
+  const [answers, setAnswers] = useState<(number | null)[]>([]);
+  const [timeLeft, setTimeLeft] = useState(0);
   const [showConfirm, setShowConfirm] = useState(false);
   const startedAt = useRef(new Date().toISOString());
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // ── Timer ───────────────────────────────────────────────────────────────────
+  const totalSeconds = quiz?.timeLimit ? quiz.timeLimit * 60 : 15 * 60;
+
+  useEffect(() => {
+    if (!courseId) return;
+
+    let mounted = true;
+
+    api
+      .getQuizByCourseId(courseId)
+      .then((data) => {
+        if (!mounted) return;
+        setError(null);
+
+        if (!data) {
+          setError("Quiz not found.");
+          return;
+        }
+
+        setQuiz(data);
+        setAnswers(Array(data.totalQuestions).fill(null));
+        setTimeLeft(data.timeLimit * 60);
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setError("Unable to load quiz. Please try again.");
+      })
+      .finally(() => {
+        if (!mounted) return;
+        setLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [courseId]);
+
   const submitQuiz = useCallback(
     (remainingSeconds: number) => {
       if (!quiz) return;
       if (timerRef.current) clearInterval(timerRef.current);
 
-      const timeUsed = TOTAL_SECONDS - remainingSeconds;
+      const timeUsed = totalSeconds - remainingSeconds;
       const quizAnswers: QuizAnswer[] = quiz.questions.map((q, i) => ({
         questionId: q.id,
         selectedIndex: answers[i],
@@ -57,12 +89,16 @@ export default function QuizAttemptPage() {
       };
 
       sessionStorage.setItem(`quiz-result-${courseId}`, JSON.stringify(result));
-      router.push(`/dashboard/student/courses/${courseId}/quiz/result`);
+      router.push(`/dashboard/student/manage-courses/${courseId}/quiz/result`);
     },
-    [answers, courseId, quiz, TOTAL_SECONDS, router],
+    [answers, courseId, quiz, router, totalSeconds],
   );
 
   useEffect(() => {
+    if (!quiz) return;
+    if (timerRef.current) clearInterval(timerRef.current);
+    startedAt.current = new Date().toISOString();
+
     timerRef.current = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
@@ -72,10 +108,27 @@ export default function QuizAttemptPage() {
         return prev - 1;
       });
     }, 1000);
+
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [submitQuiz]);
+  }, [quiz, submitQuiz]);
+
+  if (loading) {
+    return (
+      <div className="max-w-[1500px] mx-auto px-6 py-8 text-center text-gray-600">
+        Loading quiz...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-[1500px] mx-auto px-6 py-8 text-center text-red-600">
+        {error}
+      </div>
+    );
+  }
 
   if (!quiz) return null;
 

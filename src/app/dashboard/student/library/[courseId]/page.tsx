@@ -327,7 +327,7 @@ export default function CourseDetailPage() {
                   </button>
 
                   <button 
-                    onClick={() => router.push(`/dashboard/student/courses/${courseId}/quiz`)}
+                    onClick={() => router.push(`/dashboard/student/manage-courses/${courseId}/quiz`)}
                     className="flex items-center gap-2 cursor-pointer bg-white text-[#0f173e] font-semibold text-sm px-5 py-2.5 rounded-xl hover:bg-green-50 active:scale-[0.97] transition-all duration-150">
                     <BookCheck size={14} strokeWidth={1.8} fill="currentColor" />
                     Take Quiz

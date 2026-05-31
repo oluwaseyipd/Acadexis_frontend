@@ -17,7 +17,8 @@ import {
   Loader2,
   BookCheck,
 } from "lucide-react";
-import { api, type Course } from "@/services/api";
+import apiService from "@/services/apiService";
+import { type Course } from "@/types/course";
 
 // Mock module and recommendation data
 interface Module {
@@ -73,8 +74,8 @@ export default function CourseDetailPage() {
         setLoading(true);
         setError(null);
 
-        // Fetch course data from mock API
-        const fetchedCourse = await api.getCourse(courseId);
+        const response = await apiService.courses.getById(courseId);
+        const fetchedCourse = response.data;
         if (!fetchedCourse) {
           setError("Course not found");
           setLoading(false);

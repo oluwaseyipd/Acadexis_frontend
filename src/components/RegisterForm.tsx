@@ -1,33 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Eye, EyeOff } from "lucide-react";
 import apiService from "@/services/apiService";
-import { tokenStorage } from "@/services/api-client";
 import { useRouter } from "next/navigation";
+import { type Department, type Faculty, type University } from "@/types/institution";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 export type UserRole = "lecturer" | "student";
-
-// ─── Departments (lecturer only) ──────────────────────────────────────────────
-const DEPARTMENTS = [
-  "Computer Science",
-  "Mathematics",
-  "Physics",
-  "Chemistry",
-  "Biology",
-  "Engineering",
-  "Medicine",
-  "Law",
-  "Economics",
-  "Arts & Humanities",
-  "Social Sciences",
-  "Education",
-  "Other",
-] as const;
 
 // ─── Validation Schema ────────────────────────────────────────────────────────
 const registerSchema = z
@@ -50,7 +33,9 @@ const registerSchema = z
         { message: "Please use your university email address" }
       ),
 
-    department: z.string().optional(),
+    university: z.string().min(1, "University is required"),
+    faculty: z.string().min(1, "Faculty is required"),
+    department: z.string().min(1, "Department is required"),
 
     password: z
       .string()
@@ -81,6 +66,9 @@ export default function RegisterForm({ role }: RegisterFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  const [universities, setUniversities] = useState<University[]>([]);
+  const [faculties, setFaculties] = useState<Faculty[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
 
   const isLecturer = role === "lecturer";
 
@@ -88,10 +76,56 @@ export default function RegisterForm({ role }: RegisterFormProps) {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
   });
+
+  const selectedUniversity = watch("university");
+  const selectedFaculty = watch("faculty");
+
+  useEffect(() => {
+    const loadUniversities = async () => {
+      const response = await apiService.institutions.getUniversities();
+      setUniversities(response.data.results);
+    };
+
+    void loadUniversities();
+  }, []);
+
+  useEffect(() => {
+    if (!selectedUniversity) {
+      setFaculties([]);
+      setDepartments([]);
+      return;
+    }
+
+    const loadFaculties = async () => {
+      const response = await apiService.institutions.getFaculties(selectedUniversity);
+      setFaculties(response.data);
+      setDepartments([]);
+      setValue("faculty", "");
+      setValue("department", "");
+    };
+
+    void loadFaculties();
+  }, [selectedUniversity, setValue]);
+
+  useEffect(() => {
+    if (!selectedFaculty) {
+      setDepartments([]);
+      return;
+    }
+
+    const loadDepartments = async () => {
+      const response = await apiService.institutions.getDepartments({ faculty: selectedFaculty });
+      setDepartments(response.data);
+      setValue("department", "");
+    };
+
+    void loadDepartments();
+  }, [selectedFaculty, setValue]);
 
   // Password strength indicator
   const passwordValue = watch("password", "");
@@ -104,20 +138,17 @@ export default function RegisterForm({ role }: RegisterFormProps) {
 
     try {
       const payload = {
-        fullName: data.fullName,
+        full_name: data.fullName,
         email: data.email,
         password: data.password,
         role,
-        ...(isLecturer && data.department ? { department: data.department } : {}),
+        university: data.university,
+        faculty: data.faculty,
+        department: data.department,
       };
 
-      const response = await apiService.post("/auth/register", payload);
-      const { tokens } = response.data as { tokens: { accessToken: string; refreshToken: string } };
-
-      tokenStorage.setToken(tokens.accessToken);
-      tokenStorage.setRefreshToken(tokens.refreshToken);
-
-      router.push(isLecturer ? "/dashboard/lecturer" : "/dashboard/student");
+      await apiService.auth.register(payload);
+      router.push("/auth/login");
     } catch (error: any) {
       const message =
         error?.response?.data?.message ?? "Registration failed. Please try again.";
@@ -214,28 +245,61 @@ export default function RegisterForm({ role }: RegisterFormProps) {
                   />
                 </Field>
 
-                {/* Department — lecturer only */}
-                {isLecturer && (
-                  <Field
-                    label="ACADEMIC DEPARTMENT"
-                    error={errors.department?.message}
+                {/* University */}
+                <Field label="UNIVERSITY" error={errors.university?.message}>
+                  <select
+                    className={`${inputCn(!!errors.university)} text-gray-700 bg-white cursor-pointer`}
+                    defaultValue=""
+                    {...register("university")}
                   >
-                    <select
-                      className={`${inputCn(!!errors.department)} text-gray-700 bg-white cursor-pointer`}
-                      defaultValue=""
-                      {...register("department")}
-                    >
-                      <option value="" disabled>
-                        Select department
+                    <option value="" disabled>
+                      Select your university
+                    </option>
+                    {universities.map((university) => (
+                      <option key={university.id} value={university.id}>
+                        {university.name}
                       </option>
-                      {DEPARTMENTS.map((d) => (
-                        <option key={d} value={d}>
-                          {d}
-                        </option>
-                      ))}
-                    </select>
-                  </Field>
-                )}
+                    ))}
+                  </select>
+                </Field>
+
+                {/* Faculty */}
+                <Field label="FACULTY" error={errors.faculty?.message}>
+                  <select
+                    className={`${inputCn(!!errors.faculty)} text-gray-700 bg-white cursor-pointer`}
+                    defaultValue=""
+                    disabled={!selectedUniversity}
+                    {...register("faculty")}
+                  >
+                    <option value="" disabled>
+                      Select your faculty
+                    </option>
+                    {faculties.map((faculty) => (
+                      <option key={faculty.id} value={faculty.id}>
+                        {faculty.name}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+
+                {/* Department */}
+                <Field label="DEPARTMENT" error={errors.department?.message}>
+                  <select
+                    className={`${inputCn(!!errors.department)} text-gray-700 bg-white cursor-pointer`}
+                    defaultValue=""
+                    disabled={!selectedFaculty}
+                    {...register("department")}
+                  >
+                    <option value="" disabled>
+                      Select your department
+                    </option>
+                    {departments.map((department) => (
+                      <option key={department.id} value={department.id}>
+                        {department.name}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
 
                 {/* Password */}
                 <Field label="PASSWORD" error={errors.password?.message}>

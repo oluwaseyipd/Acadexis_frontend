@@ -145,10 +145,13 @@ export default function Sidebar({
       <div className="mt-4 py-1 border-t border-border flex flex-col gap-0.5">
         <button
           onClick={() => {
-            // Clear tokens and redirect
-            localStorage.removeItem("access_token");
-            localStorage.removeItem("refresh_token");
-            window.location.href = "/auth/login";
+            if (typeof window !== "undefined") {
+              localStorage.removeItem("access_token");
+              localStorage.removeItem("refresh_token");
+              document.cookie = "access_token=; path=/; max-age=0; SameSite=Lax";
+              document.cookie = "refresh_token=; path=/; max-age=0; SameSite=Lax";
+              window.location.href = "/auth/login";
+            }
           }}
           className="flex items-center gap-2.5 px-3 py-4 text-xs text-muted-foreground hover:text-destructive cursor-pointer rounded-lg hover:bg-destructive/10 transition-colors w-full text-left"
         >

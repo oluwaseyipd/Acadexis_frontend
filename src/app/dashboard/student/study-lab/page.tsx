@@ -2,98 +2,68 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Plus, BookOpen, FileText, Calendar, TrendingUp } from "lucide-react";
+import { Plus, BookOpen, Calendar, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import apiService from "@/services/apiService";
 import { UI_TEXT } from "@/lib/constants";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-
-export interface StudySession {
-  id: string;
-  title: string;
-  description: string;
-  courseTitle: string;
-  courseCode: string;
-  referencedDocs: string[];
-  date: string;
-  confidenceLevel: number;
-  questionCount: number;
-}
-
-const mockStudySessions: StudySession[] = [
-  {
-    id: "ss1",
-    title: "Understanding Backpropagation",
-    description: "Explored the fundamentals of backpropagation in neural networks, including gradient computation and the chain rule.",
-    courseTitle: "Introduction to Machine Learning",
-    courseCode: "CSC3022F",
-    referencedDocs: ["Lecture 8 - Neural Networks.pdf", "Tutorial 4 - Gradient Descent.pdf", "Lab Manual - Week 9.pdf"],
-    date: "2026-03-11T10:00:00Z",
-    confidenceLevel: 72,
-    questionCount: 5,
-  },
-  {
-    id: "ss2",
-    title: "Eigenvalues & Diagonalization",
-    description: "Deep dive into eigenvalue decomposition, characteristic polynomials, and matrix diagonalization techniques.",
-    courseTitle: "Linear Algebra",
-    courseCode: "MAM1020F",
-    referencedDocs: ["Chapter 5 - Eigenvalues.pdf", "Practice Set 3.pdf", "Supplementary Notes.pdf"],
-    date: "2026-03-10T14:30:00Z",
-    confidenceLevel: 58,
-    questionCount: 8,
-  },
-  {
-    id: "ss3",
-    title: "Binary Search Trees & AVL Trees",
-    description: "Studied self-balancing BSTs, rotations, and time complexity analysis for insertion and deletion.",
-    courseTitle: "Data Structures & Algorithms",
-    courseCode: "CSC2001F",
-    referencedDocs: ["Lecture 6 - Trees.pdf", "Tutorial 5 - BST.pdf"],
-    date: "2026-03-09T09:15:00Z",
-    confidenceLevel: 85,
-    questionCount: 3,
-  },
-  {
-    id: "ss4",
-    title: "Wave-Particle Duality",
-    description: "Explored the double-slit experiment, de Broglie wavelength, and photoelectric effect interpretations.",
-    courseTitle: "Quantum Mechanics I",
-    courseCode: "PHY2014F",
-    referencedDocs: ["Chapter 1 - Foundations.pdf", "Feynman Lectures Extract.pdf", "Problem Set 2.pdf"],
-    date: "2026-03-08T16:00:00Z",
-    confidenceLevel: 45,
-    questionCount: 12,
-  },
-];
-
-function getConfidenceColor(level: number) {
-  if (level >= 75) return "text-green-500";
-  if (level >= 50) return "text-yellow-500";
-  return "text-red-500";
-}
-
-function getConfidenceBg(level: number) {
-  if (level >= 75) return "bg-green-500/10";
-  if (level >= 50) return "bg-yellow-500/10";
-  return "bg-red-500/10";
-}
+import type { Course } from "@/types/course";
+import type { StudySession } from "@/types/studylab";
 
 export default function StudyLab() {
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [selectedCourse, setSelectedCourse] = useState("");
   const [sessions, setSessions] = useState<StudySession[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingSessions, setLoadingSessions] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setSessions(mockStudySessions);
-      setLoading(false);
-    }, 600);
-    return () => clearTimeout(timer);
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        const response = await apiService.courses.getMyCourses();
+        setCourses(response.data);
+        if (response.data.length > 0) {
+          setSelectedCourse(response.data[0].id);
+        }
+      } catch {
+        setCourses([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    void loadData();
   }, []);
+
+  useEffect(() => {
+    if (!selectedCourse) {
+      setSessions([]);
+      return;
+    }
+
+    const loadSessions = async () => {
+      setLoadingSessions(true);
+      try {
+        const data = await apiService.studyLab.getSessionsForCourse(selectedCourse);
+        setSessions(data);
+      } catch {
+        setSessions([]);
+      } finally {
+        setLoadingSessions(false);
+      }
+    };
+
+    void loadSessions();
+  }, [selectedCourse]);
+
+  const course = courses.find((courseItem) => courseItem.id === selectedCourse);
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -107,26 +77,70 @@ export default function StudyLab() {
     return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   };
 
+  const getConfidenceColor = (score: number) => {
+    if (score >= 0.75) return "text-green-500";
+    if (score >= 0.5) return "text-yellow-500";
+    return "text-red-500";
+  };
+
+  const getConfidenceBg = (score: number) => {
+    if (score >= 0.75) return "bg-green-500/10";
+    if (score >= 0.5) return "bg-yellow-500/10";
+    return "bg-red-500/10";
+  };
+
   return (
     <div className="max-w-[1500px] mx-auto px-8 py-8 flex flex-col gap-8 font-sans">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">{UI_TEXT.studyLab.title}</h1>
           <p className="text-sm text-muted-foreground">{UI_TEXT.studyLab.subtitle}</p>
         </div>
-        <Button variant="hero" onClick={() => router.push("/dashboard/student/study-lab/study-session/new")} className="gap-2">
-          <Plus className="h-4 w-4" /> New Study
-        </Button>
+        <div className="flex items-center gap-3">
+          {courses.length > 1 && (
+            <Select value={selectedCourse} onValueChange={setSelectedCourse}>
+              <SelectTrigger className="w-56">
+                <SelectValue placeholder="Select a course" />
+              </SelectTrigger>
+              <SelectContent>
+                {courses.map((courseItem) => (
+                  <SelectItem key={courseItem.id} value={courseItem.id}>
+                    {courseItem.code} - {courseItem.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+          <Button
+            variant="hero"
+            disabled={!selectedCourse}
+            onClick={() => router.push(`/dashboard/student/study-lab/study-session/new?courseId=${selectedCourse}`)}
+            className="gap-2"
+          >
+            <Plus className="h-4 w-4" /> New Study
+          </Button>
+        </div>
       </div>
 
-      {/* Session Cards Grid */}
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {loading
-          ? Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-64 w-full rounded-xl" />
-            ))
-          : sessions.map((session, idx) => (
+        {loading || loadingSessions ? (
+          Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-64 w-full rounded-xl" />
+          ))
+) : sessions.length === 0 ? (
+  <div className="col-span-full flex justify-center items-center py-16">
+    <div className="p-8 text-center text-sm text-muted-foreground max-w-sm w-full">
+      {selectedCourse
+        ? "No study sessions exist for this course yet. Start a new one above."
+        : "You are not enrolled in any courses yet."}
+    </div>
+  </div>
+) : (
+          sessions.map((session, idx) => {
+            const courseItem = courses.find((item) => item.id === session.course);
+            const confidencePercent = Math.round(session.confidence_score * 100);
+
+            return (
               <motion.div
                 key={session.id}
                 initial={{ opacity: 0, y: 16 }}
@@ -135,56 +149,49 @@ export default function StudyLab() {
               >
                 <Card
                   className="group cursor-pointer overflow-hidden border border-border hover:border-primary/40 hover:shadow-lg transition-all duration-300"
-                  onClick={() => router.push(`/dashboard/student/study-lab/study-session/${session.id}`)}
+                  onClick={() => router.push(`/dashboard/student/study-lab/study-session/${session.id}?courseId=${selectedCourse}`)}
                 >
                   <div className="p-5 space-y-4">
-                    {/* Title & Description */}
                     <div>
                       <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-1">
                         {session.title}
                       </h3>
                       <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                        {session.description}
+                        {session.description || "No description available."}
                       </p>
                     </div>
 
-                    {/* Course badge */}
                     <Badge variant="secondary" className="text-xs">
-                      <BookOpen className="h-3 w-3 mr-1" /> {session.courseCode} - {session.courseTitle}
+                      <BookOpen className="h-3 w-3 mr-1" /> {courseItem ? `${courseItem.code} - ${courseItem.title}` : session.course}
                     </Badge>
 
-                    {/* Referenced Docs */}
                     <div className="space-y-1.5">
-                      <span className="text-xs font-medium text-muted-foreground">Referenced Materials</span>
-                      <div className="space-y-1">
-                        {session.referencedDocs.slice(0, 3).map((doc, i) => (
-                          <div key={i} className="flex items-center gap-2 text-xs text-foreground/80">
-                            <FileText className="h-3 w-3 text-primary/60 shrink-0" />
-                            <span className="truncate">{doc}</span>
-                          </div>
-                        ))}
-                      </div>
+                      <span className="text-xs font-medium text-muted-foreground">Session summary</span>
+                      <p className="text-sm text-foreground/80 line-clamp-3">
+                        {session.description || "No summary available."}
+                      </p>
                     </div>
 
-                    {/* Footer: Date & Confidence */}
                     <div className="flex items-center justify-between pt-2 border-t border-border">
                       <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                        <Calendar className="h-3 w-3" /> {formatDate(session.date)}
+                        <Calendar className="h-3 w-3" /> {formatDate(session.created_at)}
                       </div>
                       <div
                         className={cn(
                           "flex items-center gap-1.5 text-xs font-semibold px-2 py-1 rounded-full",
-                          getConfidenceBg(session.confidenceLevel),
-                          getConfidenceColor(session.confidenceLevel)
+                          getConfidenceBg(confidencePercent / 100),
+                          getConfidenceColor(confidencePercent / 100)
                         )}
                       >
-                        <TrendingUp className="h-3 w-3" /> {session.confidenceLevel}%
+                        <TrendingUp className="h-3 w-3" /> {confidencePercent}%
                       </div>
                     </div>
                   </div>
                 </Card>
               </motion.div>
-            ))}
+            );
+          })
+        )}
       </div>
     </div>
   );

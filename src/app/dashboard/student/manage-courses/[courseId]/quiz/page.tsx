@@ -1,7 +1,8 @@
 "use client";
  
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { quizData } from "@/util/quizzes";
+import { api, type Quiz } from "@/services/api";
 import {
   Clock,
   BookOpenCheck,
@@ -12,59 +13,114 @@ import {
   CheckCircle2,
 } from "lucide-react";
  
-
 export default function QuizPage() {
-  const { courseId } = useParams<{ courseId: string }>();
+  const params = useParams();
+  const courseId = params.courseId as string;
   const router = useRouter();
- 
-  const quiz = quizData[courseId];
+  const [quiz, setQuiz] = useState<Quiz | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-    const INFO_CARDS = [
-    {
-      icon: BookOpenCheck,
-      label: "Questions",
-      value: `${quiz.totalQuestions} Questions`,
-      sub: "Multiple choice",
-      color: "text-blue-500",
-      bg: "bg-blue-50",
-    },
-    {
-      icon: Clock,
-      label: "Time Limit",
-      value: `${quiz.timeLimit} Minutes`,
-      sub: "Overall timer",
-      color: "text-orange-500",
-      bg: "bg-orange-50",
-    },
-    {
-      icon: Target,
-      label: "Pass Score",
-      value: `${quiz.passingScore}%`,
-      sub: "Minimum to pass",
-      color: "text-green-600",
-      bg: "bg-green-50",
-    },
-    {
-      icon: RefreshCw,
-      label: "Attempts",
-      value: "Unlimited",
-      sub: "Retake anytime",
-      color: "text-purple-500",
-      bg: "bg-purple-50",
-    },
-  ];
- 
-  // if (!quiz) {
-  //   return (
-  //       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-  //         <AlertCircle size={40} className="text-red-400" strokeWidth={1.5} />
-  //         <p className="text-lg font-semibold text-gray-600">Quiz not found for this course.</p>
-  //       </div>
-  //   );
-  // }
+  useEffect(() => {
+    if (!courseId) return;
+
+    let mounted = true;
+
+    async function loadQuiz() {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const data = await api.getQuizByCourseId(courseId);
+        if (!mounted) return;
+
+        if (!data) {
+          setError("Quiz not found for this course.");
+          return;
+        }
+
+        setQuiz(data);
+      } catch {
+        if (!mounted) return;
+        setError("Unable to load quiz. Please try again.");
+      } finally {
+        if (!mounted) return;
+        setLoading(false);
+      }
+    }
+
+    loadQuiz();
+
+    return () => {
+      mounted = false;
+    };
+  }, [courseId]);
+
+  const INFO_CARDS = quiz
+    ? [
+        {
+          icon: BookOpenCheck,
+          label: "Questions",
+          value: `${quiz.totalQuestions} Questions`,
+          sub: "Multiple choice",
+          color: "text-blue-500",
+          bg: "bg-blue-50",
+        },
+        {
+          icon: Clock,
+          label: "Time Limit",
+          value: `${quiz.timeLimit} Minutes`,
+          sub: "Overall timer",
+          color: "text-orange-500",
+          bg: "bg-orange-50",
+        },
+        {
+          icon: Target,
+          label: "Pass Score",
+          value: `${quiz.passingScore}%`,
+          sub: "Minimum to pass",
+          color: "text-green-600",
+          bg: "bg-green-50",
+        },
+        {
+          icon: RefreshCw,
+          label: "Attempts",
+          value: "Unlimited",
+          sub: "Retake anytime",
+          color: "text-purple-500",
+          bg: "bg-purple-50",
+        },
+      ]
+    : [];
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center px-6 py-8 text-gray-600">
+        Loading quiz...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 px-6 py-8 text-center text-gray-700">
+        <AlertCircle size={40} className="text-red-400" strokeWidth={1.5} />
+        <p className="text-lg font-semibold text-gray-600">{error}</p>
+      </div>
+    );
+  }
+
+  if (!quiz) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 px-6 py-8 text-center text-gray-700">
+        <AlertCircle size={40} className="text-red-400" strokeWidth={1.5} />
+        <p className="text-lg font-semibold text-gray-600">Quiz not found for this course.</p>
+      </div>
+    );
+  }
  
   const handleStart = () => {
-    router.push(`/dashboard/student/courses/${courseId}/quiz/attempt`);
+    router.push(`/dashboard/student/manage-courses/${courseId}/quiz/attempt`);
   };
  
 
@@ -79,7 +135,7 @@ export default function QuizPage() {
               Quizzes
             </h1>
             <p className="text-sm text-gray-500 leading-relaxed max-w-120">
-                Test your knowledge and reinforce your learning with AI-generated quizzes from the course content. 
+              Test your knowledge and reinforce your learning with AI-generated quizzes from the course content.
             </p>
           </div>
         </div>
@@ -95,7 +151,7 @@ export default function QuizPage() {
           </button>
           <ChevronRight size={13} strokeWidth={2.5} />
           <button
-            onClick={() => router.push(`/dashboard/student/courses/${courseId}`)}
+            onClick={() => router.push(`/dashboard/student/manage-courses/${courseId}`)}
             className="hover:text-green-600 transition-colors capitalize"
           >
             {quiz.title.replace(" Quiz", "")}

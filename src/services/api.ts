@@ -30,6 +30,23 @@ export interface Course {
   thumbnail?: string;
 }
 
+
+export interface Quiz {
+  courseId: string;
+  title: string;
+  description: string;
+  totalQuestions: number;
+  timeLimit: number; // in minutes
+  passingScore: number; // percentage
+  questions: {
+    id: string;
+    question: string;
+    options: string[];
+    correctIndex: number;
+    explanation: string;
+  }[];
+}
+
 export interface CourseMaterial {
   id: string;
   courseId: string;
@@ -52,17 +69,23 @@ export interface ChatMessage {
 export interface Notification {
   id: string;
   title: string;
+  body: string;
   message: string;
-  type: "info" | "success" | "warning" | "course";
+  notification_type: "material_ready" | "new_enrollment" | "course_announcement" | "admin_request_approved" | "info" | "success" | "warning" | "course";
+  type: "material_ready" | "new_enrollment" | "course_announcement" | "admin_request_approved" | "info" | "success" | "warning" | "course";
   read: boolean;
-  createdAt: string;
+  data: Record<string, string>;
+  created_at: string;
 }
 
 export interface HeatmapData {
   topic: string;
-  questionsAsked: number;
-  avgConfidence: number;
-  strugglingStudents: number;
+  questions_asked: number;
+  avg_confidence: number;
+  struggling_students: number;
+  questionsAsked?: number;
+  avgConfidence?: number;
+  strugglingStudents?: number;
 }
 
 // ---- Mock Data ----
@@ -122,22 +145,211 @@ const courses: Course[] = [
   },
 ];
 
+const quizzes: Quiz[] = [
+   {
+      courseId: "c1",
+      title: "Introduction to Machine Learning Quiz",
+      description: "Test your knowledge of abstract data types, algorithms, and complexity analysis.",
+      totalQuestions: 10,
+      timeLimit: 15,
+      passingScore: 70,
+      questions: [
+        {id: "q-001-01", question: "What is the time complexity of accessing an element in an array by index?", options: ["O(n)", "O(log n)", "O(1)", "O(n²)"], correctIndex: 2, explanation: "Array index access is O(1) — constant time — because elements are stored contiguously in memory."},
+        {id: "q-001-02", question: "Which data structure operates on a Last-In-First-Out (LIFO) principle?", options: ["Queue", "Stack", "Linked List", "Heap"], correctIndex: 1, explanation: "A Stack follows LIFO: the last element pushed is the first one popped."},
+        {id: "q-001-03", question: "What is the worst-case time complexity of QuickSort?", options: ["O(n log n)", "O(n)", "O(n²)", "O(log n)"], correctIndex: 2, explanation: "QuickSort degrades to O(n²) when the pivot is consistently the smallest or largest element."},
+        {id: "q-001-04", question: "In Big O notation, which describes the fastest growth rate?", options: ["O(n log n)", "O(2ⁿ)", "O(n³)", "O(n!)"], correctIndex: 3, explanation: "O(n!) — factorial time — grows faster than exponential O(2ⁿ) and polynomial complexities."},
+        {id: "q-001-05", question: "Which traversal visits the root node first in a binary tree?", options: ["Inorder", "Postorder", "Preorder", "Level-order"], correctIndex: 2, explanation: "Preorder traversal visits: Root → Left → Right."},
+        {id: "q-001-06", question: "What is the average-case lookup time for a Hash Table?", options: ["O(n)", "O(log n)", "O(n log n)", "O(1)"], correctIndex: 3, explanation: "Hash tables provide O(1) average lookup using a hash function to directly address memory."},
+        {id: "q-001-07", question: "A linked list node contains which of the following?", options: ["Only data", "Data and a pointer to the next node", "Only a pointer", "Index and data"], correctIndex: 1, explanation: "Each linked list node stores data and a reference (pointer) to the next node in the chain."},
+        {id: "q-001-08", question: "Which data structure is best suited for implementing a breadth-first search?", options: ["Stack", "Heap", "Queue", "Array"], correctIndex: 2, explanation: "BFS uses a Queue to process nodes level by level, ensuring FIFO ordering."},
+        {id: "q-001-09", question: "What property must a Max-Heap satisfy?", options: ["Parent is always smaller than its children", "Parent is always greater than or equal to its children", "Left child is always greater than right child", "All leaves must be at the same level"], correctIndex: 1, explanation: "In a Max-Heap, every parent node is ≥ its children, ensuring the maximum is always at the root."},
+        {id: "q-001-10", question: "What is the space complexity of Merge Sort?", options: ["O(1)", "O(log n)", "O(n)", "O(n²)"], "correctIndex": 2, explanation: "Merge Sort requires O(n) auxiliary space to hold the temporary arrays during merging."}
+      ]
+    },
+     {
+      courseId: "c2",
+      title: "Data Structures & Algorithms Quiz",
+      description: "Assess your grasp of HTML, CSS, JavaScript, and modern web development practices.",
+      totalQuestions: 10,
+      timeLimit: 15,
+      passingScore: 70,
+      questions: [
+        {id: "q-002-01", question: "Which HTML element is used to define the main content of a document?", options: ["<section>", "<article>", "<main>", "<body>"], correctIndex: 2, explanation: "<main> represents the dominant content of the <body>, unique to the document."},
+        {id: "q-002-02", question: "In CSS Flexbox, which property aligns items along the cross axis?", options: ["justify-content", "align-items", "flex-direction", "flex-wrap"], correctIndex: 1, explanation: "align-items controls alignment perpendicular to the main axis (the cross axis)."},
+        {id: "q-002-03", question: "What does the JavaScript `typeof null` return?", options: ["'null'", "'undefined'", "'object'", "'boolean'"], correctIndex: 2, explanation: "This is a known JavaScript bug — typeof null returns 'object' due to legacy implementation."},
+        {id: "q-002-04", question: "Which method is used to add an event listener to a DOM element?", options: ["element.on()", "element.addEvent()", "element.addEventListener()", "element.listen()"], correctIndex: 2, explanation: "addEventListener() is the standard method for attaching event handlers to DOM elements."},
+        {id: "q-002-05", question: "What is the output of `Promise.resolve(1).then(x => x + 1).then(x => x * 2)`?", options: ["2", "3", "4", "6"], correctIndex: 2, explanation: "1 + 1 = 2, then 2 * 2 = 4. Each .then() chains the resolved value forward."},
+        {id: "q-002-06", question: "Which CSS property controls the stacking order of elements?", options: ["order", "z-index", "position", "layer"], correctIndex: 1, explanation: "z-index determines which elements appear on top when they overlap, on positioned elements."},
+        {id: "q-002-07", question: "In React, what hook would you use to run a side effect after render?", options: ["useState", "useContext", "useEffect", "useRef"], correctIndex: 2, explanation: "useEffect runs after every render by default, ideal for API calls, subscriptions, and DOM mutations."},
+        {id: "q-002-08", question: "What HTTP status code indicates a resource was successfully created?", options: ["200", "204", "301", "201"], correctIndex: 3, explanation: "201 Created is returned when a POST request successfully creates a new resource."},
+        {id: "q-002-09", question: "Which of the following is NOT a valid way to declare a variable in modern JavaScript?", options: ["let x = 1", "const x = 1", "var x = 1", "def x = 1"], correctIndex: 3, explanation: "`def` is not a JavaScript keyword — it's used in Python. JS uses var, let, and const."},
+        {id: "q-002-10", question: "What does CSS `box-sizing: border-box` do?", options: ["Adds a visible border to all elements", "Includes padding and border in the element's total width/height", "Removes default margins from elements", "Sets the box shadow on all sides"], correctIndex: 1, explanation: "border-box makes width/height include padding and border, preventing layout overflow surprises."}
+      ]
+    },
+    {
+      courseId: "c3",
+      title: "Linear Algebra Quiz",
+      description: "Challenge your knowledge of relational databases, SQL queries, and optimization strategies.",
+      totalQuestions: 10,
+      timeLimit: 15,
+      passingScore: 70,
+      questions: [
+        {id: "q-003-01", question: "Which SQL clause is used to filter grouped results?", options: ["WHERE", "HAVING", "FILTER", "GROUP BY"], correctIndex: 1, explanation: "HAVING filters groups after GROUP BY; WHERE filters rows before grouping."},
+        {id: "q-003-02", question: "What is a PRIMARY KEY in a relational database?", options: ["A key that can contain NULL values", "A foreign reference to another table", "A unique, non-null identifier for each row", "An index on multiple columns"], correctIndex: 2, explanation: "A PRIMARY KEY uniquely identifies each record and cannot be NULL."},
+        {id: "q-003-03", question: "Which JOIN returns all rows from both tables, with NULLs where there is no match?", options: ["INNER JOIN", "LEFT JOIN", "RIGHT JOIN", "FULL OUTER JOIN"], correctIndex: 3, explanation: "FULL OUTER JOIN returns all rows from both tables, filling NULLs where matches don't exist."},
+        {id: "q-003-04", question: "What is database normalization primarily designed to reduce?", options: ["Query speed", "Data redundancy", "Table count", "Index size"], correctIndex: 1, explanation: "Normalization organizes data to minimize redundancy and dependency anomalies."},
+        {id: "q-003-05", question: "Which SQL command removes all rows from a table without logging individual row deletions?", options: ["DELETE", "DROP", "TRUNCATE", "REMOVE"], correctIndex: 2, explanation: "TRUNCATE is faster than DELETE as it deallocates data pages without logging each row removal."},
+        {id: "q-003-06", question: "What does an index in a database primarily improve?", options: ["Write performance", "Storage efficiency", "Read/query performance", "Data integrity"], correctIndex: 2, explanation: "Indexes speed up SELECT queries by allowing the database to find rows without a full table scan."},
+        {id: "q-003-07", question: "Which normal form eliminates transitive dependencies?", options: ["1NF", "2NF", "3NF", "BCNF"], correctIndex: 2, explanation: "3NF eliminates transitive dependencies — non-key columns depending on other non-key columns."},
+        {id: "q-003-08", question: "What does ACID stand for in database transactions?", options: ["Atomic, Consistent, Isolated, Durable", "Accurate, Complete, Indexed, Defined", "Async, Cached, Integrated, Distributed", "Automated, Committed, Isolated, Dynamic"], correctIndex: 0, explanation: "ACID ensures reliable transactions: Atomicity, Consistency, Isolation, Durability."},
+        {id: "q-003-09", question: "Which SQL function returns the number of rows in a result set?", options: ["SUM()", "TOTAL()", "COUNT()", "LENGTH()"], correctIndex: 2, explanation: "COUNT() returns the number of rows matching the query criteria."},
+        {id: "q-003-10", question: "What is a composite index?", options: ["An index on a JSON column", "An index created on multiple columns", "A clustered index on the primary key", "An index that covers all columns"], correctIndex: 1, explanation: "A composite index spans multiple columns and is most effective when queries filter by those columns in order."}
+      ]
+    },
+    {
+      courseId: "c4",
+      title: "Quantum Mechanics I Quiz",
+      description: "Test your understanding of ML algorithms, model evaluation, and practical applications.",
+      totalQuestions: 10,
+      timeLimit: 15,
+      passingScore: 70,
+      questions: [
+        {id: "q-004-01", question: "What is overfitting in machine learning?", options: ["Model performs well on training and test data", "Model performs poorly on all data", "Model performs well on training data but poorly on unseen data", "Model trains too slowly"], correctIndex: 2, explanation: "Overfitting occurs when a model memorizes training data and fails to generalize to new examples."},
+        {id: "q-004-02", question: "Which metric is most appropriate for evaluating a classification model with imbalanced classes?", options: ["Accuracy", "F1 Score", "Mean Squared Error", "R² Score"], correctIndex: 1, explanation: "F1 Score balances precision and recall, making it ideal when class distribution is uneven."},
+        {id: "q-004-03", question: "What does a gradient descent algorithm minimize?", options: ["Training data size", "Number of features", "Loss function", "Learning rate"], correctIndex: 2, explanation: "Gradient descent iteratively adjusts parameters to minimize the model's loss (error) function."},
+        {id: "q-004-04", question: "Which technique is used to prevent overfitting by penalizing large weights?", options: ["Normalization", "Regularization", "Activation", "Batching"], correctIndex: 1, explanation: "Regularization (L1/L2) adds a penalty term to the loss function to discourage overly complex models."},
+        {id: "q-004-05", question: "In supervised learning, what is the training data composed of?", options: ["Unlabeled examples", "Input features only", "Input-output pairs (features and labels)", "Output labels only"], correctIndex: 2, explanation: "Supervised learning requires labeled examples — pairs of input features and their correct output labels."},
+        {id: "q-004-06", question: "What is the purpose of a validation set in model training?", options: ["To train the final model", "To tune hyperparameters and detect overfitting during training", "To replace the test set", "To augment training data"], correctIndex: 1, explanation: "The validation set helps tune hyperparameters and monitor for overfitting without touching the test set."},
+        {id: "q-004-07", question: "Which algorithm builds a model by combining multiple weak learners?", options: ["Linear Regression", "K-Nearest Neighbors", "Random Forest", "PCA"], correctIndex: 2, explanation: "Random Forest is an ensemble method that combines many decision trees to produce better predictions."},
+        {id: "q-004-08", question: "What does PCA (Principal Component Analysis) primarily do?", options: ["Classifies data into categories", "Reduces dimensionality while preserving variance", "Imputes missing values", "Normalizes feature scales"], correctIndex: 1, explanation: "PCA transforms data into fewer dimensions (principal components) capturing the most variance."},
+        {id: "q-004-09", question: "Which activation function is most commonly used in hidden layers of deep neural networks?", options: ["Sigmoid", "Softmax", "ReLU", "Tanh"], correctIndex: 2, explanation: "ReLU (Rectified Linear Unit) is preferred for hidden layers as it mitigates the vanishing gradient problem."},
+        {id: "q-004-10", question: "What is cross-validation used for?", options: ["Augmenting training data", "Estimating how well a model generalizes to independent data", "Cleaning noisy datasets", "Selecting the right activation function"], correctIndex: 1, explanation: "Cross-validation (e.g. k-fold) estimates generalization performance by testing on different data splits."}
+      ]
+    }
+]
+
+
+
 const notifications: Notification[] = [
-  { id: "n1", title: "New Material Uploaded", message: "Prof. Chen uploaded 'Lecture 8 - Neural Networks.pdf' to CSC3022F.", type: "course", read: false, createdAt: "2026-03-11T10:30:00Z" },
-  { id: "n2", title: "Study Streak!", message: "You've studied 5 days in a row. Keep it up!", type: "success", read: false, createdAt: "2026-03-10T18:00:00Z" },
-  { id: "n3", title: "Heatmap Alert", message: "Students in CSC3022F are struggling with 'Backpropagation'. Consider adding resources.", type: "warning", read: true, createdAt: "2026-03-09T14:00:00Z" },
-  { id: "n4", title: "System Update", message: "Acadexis will undergo maintenance on March 15th from 2-4 AM.", type: "info", read: true, createdAt: "2026-03-08T09:00:00Z" },
+  {
+    id: "n1",
+    title: "New Material Uploaded",
+    body: "Prof. Chen uploaded 'Lecture 8 - Neural Networks.pdf' to CSC3022F.",
+    message: "Prof. Chen uploaded 'Lecture 8 - Neural Networks.pdf' to CSC3022F.",
+    notification_type: "course",
+    type: "course",
+    read: false,
+    data: { course_id: "c1" },
+    created_at: "2026-03-11T10:30:00Z",
+  },
+  {
+    id: "n2",
+    title: "Study Streak!",
+    body: "You've studied 5 days in a row. Keep it up!",
+    message: "You've studied 5 days in a row. Keep it up!",
+    notification_type: "success",
+    type: "success",
+    read: false,
+    data: {},
+    created_at: "2026-03-10T18:00:00Z",
+  },
+  {
+    id: "n3",
+    title: "Heatmap Alert",
+    body: "Students in CSC3022F are struggling with 'Backpropagation'. Consider adding resources.",
+    message: "Students in CSC3022F are struggling with 'Backpropagation'. Consider adding resources.",
+    notification_type: "warning",
+    type: "warning",
+    read: true,
+    data: {},
+    created_at: "2026-03-09T14:00:00Z",
+  },
+  {
+    id: "n4",
+    title: "System Update",
+    body: "Acadexis will undergo maintenance on March 15th from 2-4 AM.",
+    message: "Acadexis will undergo maintenance on March 15th from 2-4 AM.",
+    notification_type: "info",
+    type: "info",
+    read: true,
+    data: {},
+    created_at: "2026-03-08T09:00:00Z",
+  },
 ];
 
 const heatmapData: HeatmapData[] = [
-  { topic: "Backpropagation", questionsAsked: 89, avgConfidence: 0.32, strugglingStudents: 67 },
-  { topic: "Gradient Descent", questionsAsked: 72, avgConfidence: 0.45, strugglingStudents: 51 },
-  { topic: "Overfitting & Regularization", questionsAsked: 65, avgConfidence: 0.41, strugglingStudents: 48 },
-  { topic: "Decision Trees", questionsAsked: 34, avgConfidence: 0.72, strugglingStudents: 18 },
-  { topic: "K-Means Clustering", questionsAsked: 28, avgConfidence: 0.68, strugglingStudents: 15 },
-  { topic: "Neural Network Architecture", questionsAsked: 56, avgConfidence: 0.38, strugglingStudents: 42 },
-  { topic: "Loss Functions", questionsAsked: 45, avgConfidence: 0.52, strugglingStudents: 30 },
-  { topic: "Feature Engineering", questionsAsked: 21, avgConfidence: 0.78, strugglingStudents: 10 },
+  {
+    topic: "Backpropagation",
+    questions_asked: 89,
+    avg_confidence: 0.32,
+    struggling_students: 67,
+    questionsAsked: 89,
+    avgConfidence: 0.32,
+    strugglingStudents: 67,
+  },
+  {
+    topic: "Gradient Descent",
+    questions_asked: 72,
+    avg_confidence: 0.45,
+    struggling_students: 51,
+    questionsAsked: 72,
+    avgConfidence: 0.45,
+    strugglingStudents: 51,
+  },
+  {
+    topic: "Overfitting & Regularization",
+    questions_asked: 65,
+    avg_confidence: 0.41,
+    struggling_students: 48,
+    questionsAsked: 65,
+    avgConfidence: 0.41,
+    strugglingStudents: 48,
+  },
+  {
+    topic: "Decision Trees",
+    questions_asked: 34,
+    avg_confidence: 0.72,
+    struggling_students: 18,
+    questionsAsked: 34,
+    avgConfidence: 0.72,
+    strugglingStudents: 18,
+  },
+  {
+    topic: "K-Means Clustering",
+    questions_asked: 28,
+    avg_confidence: 0.68,
+    struggling_students: 15,
+    questionsAsked: 28,
+    avgConfidence: 0.68,
+    strugglingStudents: 15,
+  },
+  {
+    topic: "Neural Network Architecture",
+    questions_asked: 56,
+    avg_confidence: 0.38,
+    struggling_students: 42,
+    questionsAsked: 56,
+    avgConfidence: 0.38,
+    strugglingStudents: 42,
+  },
+  {
+    topic: "Loss Functions",
+    questions_asked: 45,
+    avg_confidence: 0.52,
+    struggling_students: 30,
+    questionsAsked: 45,
+    avgConfidence: 0.52,
+    strugglingStudents: 30,
+  },
+  {
+    topic: "Feature Engineering",
+    questions_asked: 21,
+    avg_confidence: 0.78,
+    struggling_students: 10,
+    questionsAsked: 21,
+    avgConfidence: 0.78,
+    strugglingStudents: 10,
+  },
 ];
 
 const mockChatHistory: ChatMessage[] = [
@@ -210,6 +422,11 @@ export const api = {
   async getCourse(id: string): Promise<Course | undefined> {
     await delay(300);
     return courses.find((c) => c.id === id);
+  },
+
+  async getQuizByCourseId(courseId: string): Promise<Quiz | undefined> {
+    await delay(400);
+    return quizzes.find((quiz) => quiz.courseId === courseId);
   },
 
   // Materials

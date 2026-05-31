@@ -2,31 +2,86 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosR
 
 // ─── Base Config ──────────────────────────────────────────────────────────────
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-const TIMEOUT = 15_000; // 15 seconds
+const TIMEOUT = 30_000;
+const IS_BROWSER = typeof window !== "undefined";
+
+const camelizeString = (value: string): string =>
+  value.replace(/([-_][a-z])/gi, (match) => match.toUpperCase().replace(/[-_]/g, ""));
+
+const decamelizeString = (value: string): string =>
+  value.replace(/([a-z0-9])([A-Z])/g, "$1_$2").toLowerCase();
+
+const deepTransformKeys = (value: any, transform: (key: string) => string): any => {
+  if (Array.isArray(value)) {
+    return value.map((item) => deepTransformKeys(item, transform));
+  }
+
+  if (value !== null && typeof value === "object") {
+    return Object.entries(value).reduce<Record<string, unknown>>((acc, [key, item]) => {
+      acc[transform(key)] = deepTransformKeys(item, transform);
+      return acc;
+    }, {});
+  }
+
+  return value;
+};
 
 // ─── Token Helpers ────────────────────────────────────────────────────────────
 const TOKEN_KEY = "access_token";
 const REFRESH_TOKEN_KEY = "refresh_token";
 
-export const tokenStorage = {
-  getToken: (): string | null => localStorage.getItem(TOKEN_KEY),
-  setToken: (token: string): void => localStorage.setItem(TOKEN_KEY, token),
-  removeToken: (): void => localStorage.removeItem(TOKEN_KEY),
+const safeLocalStorage = {
+  getItem: (key: string): string | null => {
+    return IS_BROWSER ? window.localStorage.getItem(key) : null;
+  },
+  setItem: (key: string, value: string): void => {
+    if (IS_BROWSER) {
+      window.localStorage.setItem(key, value);
+    }
+  },
+  removeItem: (key: string): void => {
+    if (IS_BROWSER) {
+      window.localStorage.removeItem(key);
+    }
+  },
+};
 
-  getRefreshToken: (): string | null => localStorage.getItem(REFRESH_TOKEN_KEY),
-  setRefreshToken: (token: string): void => localStorage.setItem(REFRESH_TOKEN_KEY, token),
-  removeRefreshToken: (): void => localStorage.removeItem(REFRESH_TOKEN_KEY),
+export const tokenStorage = {
+  getToken: (): string | null => safeLocalStorage.getItem(TOKEN_KEY),
+  setToken: (token: string): void => safeLocalStorage.setItem(TOKEN_KEY, token),
+  removeToken: (): void => safeLocalStorage.removeItem(TOKEN_KEY),
+
+  getRefreshToken: (): string | null => safeLocalStorage.getItem(REFRESH_TOKEN_KEY),
+  setRefreshToken: (token: string): void => safeLocalStorage.setItem(REFRESH_TOKEN_KEY, token),
+  removeRefreshToken: (): void => safeLocalStorage.removeItem(REFRESH_TOKEN_KEY),
 
   clearAll: (): void => {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(REFRESH_TOKEN_KEY);
+    safeLocalStorage.removeItem(TOKEN_KEY);
+    safeLocalStorage.removeItem(REFRESH_TOKEN_KEY);
   },
 };
 
 // ─── Create Instance ──────────────────────────────────────────────────────────
+const setAuthCookies = (accessToken: string | null, refreshToken: string | null) => {
+  if (!IS_BROWSER) return;
+
+  if (accessToken) {
+    document.cookie = `access_token=${accessToken}; path=/; max-age=${60 * 60}; SameSite=Lax`;
+  } else {
+    document.cookie = "access_token=; path=/; max-age=0; SameSite=Lax";
+  }
+
+  if (refreshToken) {
+    document.cookie = `refresh_token=${refreshToken}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
+  } else {
+    document.cookie = "refresh_token=; path=/; max-age=0; SameSite=Lax";
+  }
+};
+
 const apiClient: AxiosInstance = axios.create({
-  baseURL: BASE_URL,
+  baseURL: `${BASE_URL}/api`,
   timeout: TIMEOUT,
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
@@ -37,10 +92,21 @@ const apiClient: AxiosInstance = axios.create({
 // Attaches the Bearer token to every outgoing request automatically
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
-    const token = tokenStorage.getToken();
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
+    if (IS_BROWSER) {
+      const token = tokenStorage.getToken();
+      if (token && config.headers) {
+        (config.headers as Record<string, string>).Authorization = `Bearer ${token}`;
+      }
     }
+
+    if (config.data && !(config.data instanceof FormData)) {
+      config.data = deepTransformKeys(config.data, decamelizeString);
+    }
+
+    if (config.params) {
+      config.params = deepTransformKeys(config.params, decamelizeString);
+    }
+
     return config;
   },
   (error) => Promise.reject(error)
@@ -63,57 +129,78 @@ const processQueue = (error: unknown, token: string | null = null) => {
 };
 
 apiClient.interceptors.response.use(
-  (response: AxiosResponse) => response,
+  (response: AxiosResponse) => {
+    if (response.data && typeof response.data === "object") {
+      response.data = deepTransformKeys(response.data, camelizeString);
+    }
+    return response;
+  },
 
   async (error) => {
     const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
 
-    // Only attempt refresh on 401, and only once per request
     if (error.response?.status === 401 && !originalRequest._retry) {
       const refreshToken = tokenStorage.getRefreshToken();
 
-      // No refresh token — clear session and redirect to login
       if (!refreshToken) {
         tokenStorage.clearAll();
-        window.location.href = "/login";
+        setAuthCookies(null, null);
+        if (IS_BROWSER) window.location.href = "/auth/login";
         return Promise.reject(error);
       }
 
       if (isRefreshing) {
-        // Queue subsequent 401s until the refresh resolves
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
-        }).then((token) => {
-          if (originalRequest.headers) {
-            (originalRequest.headers as Record<string, string>).Authorization = `Bearer ${token}`;
-          }
-          return apiClient(originalRequest);
-        });
+        })
+          .then((token) => {
+            if (originalRequest.headers) {
+              (originalRequest.headers as Record<string, string>).Authorization = `Bearer ${token}`;
+            }
+            return apiClient(originalRequest);
+          })
+          .catch((refreshError) => Promise.reject(refreshError));
       }
 
       originalRequest._retry = true;
       isRefreshing = true;
 
       try {
-        const { data } = await axios.post(`${BASE_URL}/auth/refresh`, {
-          refreshToken,
-        });
+        const { data } = await axios.post(
+          `${BASE_URL}/api/auth/token/refresh/`,
+          { refresh: refreshToken },
+          { headers: { "Content-Type": "application/json" }, withCredentials: true }
+        );
 
-        const newToken: string = data.accessToken;
-        tokenStorage.setToken(newToken);
-        processQueue(null, newToken);
+        tokenStorage.setToken(data.access);
+        tokenStorage.setRefreshToken(data.refresh);
+        setAuthCookies(data.access, data.refresh);
+        apiClient.defaults.headers.common.Authorization = `Bearer ${data.access}`;
+        processQueue(null, data.access);
 
         if (originalRequest.headers) {
-          (originalRequest.headers as Record<string, string>).Authorization = `Bearer ${newToken}`;
+          (originalRequest.headers as Record<string, string>).Authorization = `Bearer ${data.access}`;
         }
         return apiClient(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
         tokenStorage.clearAll();
-        window.location.href = "/login";
+        setAuthCookies(null, null);
+        if (IS_BROWSER) window.location.href = "/auth/login";
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
+      }
+    }
+
+    if (error.response?.status === 429) {
+      const resetHeader = error.response.headers["x-ratelimit-reset"];
+      if (resetHeader) {
+        const waitMs = parseInt(resetHeader, 10) * 1000 - Date.now() + 1000;
+        if (waitMs > 0 && waitMs < 60_000) {
+          await new Promise((resolve) => setTimeout(resolve, waitMs));
+          return apiClient(originalRequest);
+        }
       }
     }
 
