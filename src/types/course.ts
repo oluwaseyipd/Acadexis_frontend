@@ -40,17 +40,6 @@ export interface CourseModule {
   created_at: string;
 }
 
-export interface CourseMaterial {
-  id: string;
-  course: string;
-  file_name: string;
-  file_type: string;
-  file_size: number;
-  uploaded_at: string;
-  status: "processing" | "ready" | "failed";
-  page_count?: number;
-}
-
 export interface HeatmapData {
   topic: string;
   questions_asked: number;

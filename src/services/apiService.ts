@@ -12,6 +12,7 @@ import type {
   SessionFeedbackPayload,
   Bookmark,
 } from "@/types/studylab";
+import { TopicStruggle } from "@/types/analytics";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -165,7 +166,7 @@ const apiService = {
           if (data.first_name !== undefined) formData.append("first_name", data.first_name);
           if (data.last_name !== undefined) formData.append("last_name", data.last_name);
           if (data.level !== undefined) formData.append("level", data.level);
-          if (data.department !== undefined) formData.append("department", data.department);
+          if (data.department !== undefined && data.department !== null) formData.append("department", data.department);
           formData.append("avatar", data.avatar);
 
           return apiClient.patch<UserProfile>("/auth/profile/", formData);
@@ -211,6 +212,16 @@ const apiService = {
     /** Get a specific course by ID */
     getById(courseId: string): Promise<AxiosResponse<Course>> {
       return apiClient.get<Course>(`/courses/${courseId}/`);
+    },
+
+    /** Enroll in a course */
+    enroll(courseId: string): Promise<AxiosResponse<{ success: boolean; message: string }>> {
+      return apiClient.post<{ success: boolean; message: string }>(`/courses/${courseId}/enroll/`);
+    },
+
+    /** Unenroll from a course */
+    unenroll(courseId: string): Promise<AxiosResponse<{ success: boolean; message: string }>> {
+      return apiClient.post<{ success: boolean; message: string }>(`/courses/${courseId}/unenroll/`);
     },
 
     /** Get modules for a course */

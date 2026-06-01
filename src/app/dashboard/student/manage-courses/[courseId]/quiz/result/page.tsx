@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { quizData } from "@/util/quizzes";
-import { QuizAttempt } from "@/util/data/quiz/types";
+import { QuizAttempt } from "@/util/types";
 import {
   Trophy,
   XCircle,

@@ -21,7 +21,7 @@ export function useMaterials(courseId: string | null) {
     setError(null);
     try {
       const response = await apiService.materials.getCourseMaterials(courseId);
-      setMaterials(response.results);
+      setMaterials(response.data.results);
     } catch (err) {
       setError("Unable to load course materials.");
     } finally {

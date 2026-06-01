@@ -1,6 +1,6 @@
 import DashboardLayout from "@/components/dashboard/layout/DashboardLayout";
 
-export default function StudentDashboardLayout({ children }) {
+export default function LecturerDashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <DashboardLayout
       userName="Athenaeum Portal"

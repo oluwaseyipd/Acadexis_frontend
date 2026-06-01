@@ -1,9 +1,8 @@
 /**
- * Quiz utilities — centralized quiz data retrieval from data.json
+ * Quiz utilities — centralized quiz data retrieval
  * This layer abstracts the data loading so components stay clean
  */
 
-import data from "./data.json";
 import type { QuizData } from "./types";
 
 // Type helper for data.json structure
@@ -14,7 +13,15 @@ interface DataStore {
   recommendations: any[];
 }
 
-const typedData = data as DataStore;
+// Empty data store as fallback since data.json is not available
+const emptyData: DataStore = {
+  quizzes: [],
+  courses: [],
+  modules: [],
+  recommendations: [],
+};
+
+const typedData = emptyData;
 
 /**
  * Get all quizzes from the data store
