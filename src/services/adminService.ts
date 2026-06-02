@@ -87,6 +87,7 @@ const adminService = {
   /**
    * Admin login - goes directly to /admin/login (not /api/auth/login)
    * This endpoint accepts any valid email (no university email required)
+   * Body: { "email": string, "password": string } (rememberMe is not sent)
    */
   async login(payload: { email: string; password: string; rememberMe?: boolean }): Promise<{
     access: string;
@@ -97,7 +98,10 @@ const adminService = {
       access: string;
       refresh: string;
       user: any;
-    }>("/admin/login/", payload);
+    }>("/admin/login/", {
+      email: payload.email,
+      password: payload.password,
+    });
     return response.data;
   },
 
