@@ -6,9 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Shield } from "lucide-react";
-import apiService from "@/services/apiService";
+import adminService from "@/services/adminService";
 import { tokenStorage } from "@/services/api-client";
-import { mapBackendUser, useAppStore } from "@/store/useAppStore";
 
 // ─── Validation Schema ────────────────────────────────────────────────────────
 // Admin login does NOT require university email - just a valid email
@@ -48,13 +47,12 @@ export default function AdminLoginPage() {
     setServerError(null);
 
     try {
-      const response = await apiService.auth.login({
+      // Use adminService.login() which goes directly to /auth/login (NOT /api/auth/login)
+      const { access, refresh, user } = await adminService.login({
         email: data.email,
         password: data.password,
         rememberMe: data.rememberMe,
       });
-
-      const { access, refresh, user } = response.data;
 
       // Verify user is an admin
       if (user.role !== "admin") {
@@ -69,21 +67,6 @@ export default function AdminLoginPage() {
         document.cookie = `access_token=${access}; path=/; max-age=${60 * 60}; SameSite=Lax`;
         document.cookie = `refresh_token=${refresh}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
       }
-
-      useAppStore.getState().setUser(
-        mapBackendUser({
-          ...user,
-          profile: {
-            first_name: user.profile.first_name,
-            last_name: user.profile.last_name,
-            identification_number: user.profile.identification_number,
-            level: user.profile.level,
-            department: user.profile.department,
-            avatar: user.profile.avatar,
-            avatar_url: user.profile.avatar,
-          },
-        })
-      );
 
       router.push("/dashboard/admin");
     } catch (error: any) {
