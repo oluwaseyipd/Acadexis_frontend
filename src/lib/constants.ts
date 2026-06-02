@@ -91,6 +91,11 @@ export const UI_TEXT = {
     adminRequest: "Request Admin",
     search: "Search courses, materials...",
     logout: "Sign Out",
+    // Admin specific
+    adminDashboard: "Admin Dashboard",
+    adminUsers: "User Management",
+    adminCourses: "Course Management",
+    adminSupport: "Support Queue",
   },
   studyLab: {
     title: "The Study Lab",

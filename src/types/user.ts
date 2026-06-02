@@ -8,10 +8,12 @@ export interface UserProfile {
   avatar_url: string | null;
 }
 
+export type UserRole = "student" | "lecturer" | "admin";
+
 export interface AuthUser {
   id: string;
   email: string;
-  role: "student" | "lecturer" | "admin";
+  role: UserRole;
   university: string;
   name: string;
   profile: UserProfile;

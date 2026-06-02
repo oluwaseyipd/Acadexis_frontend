@@ -1,7 +1,5 @@
 import { create } from "zustand";
-import { AuthUser, AuthUserMapped } from "@/types/user";
-
-export type UserRole = "student" | "lecturer" | "admin";
+import { AuthUser, AuthUserMapped, UserRole } from "@/types/user";
 
 export const mapBackendUser = (raw: AuthUser): AuthUserMapped => ({
   ...raw,
