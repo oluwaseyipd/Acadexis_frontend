@@ -19,6 +19,14 @@ import type {
 // Use a separate axios instance that points directly to /admin (NOT /api/admin)
 const ADMIN_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://acadexis-backend.onrender.com";
 
+// ─── CSRF Token Helper ───────────────────────────────────────────────────────
+// Extract CSRF token from cookies
+const getCsrfToken = (): string | null => {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(/csrftoken=([^;]+)/);
+  return match ? match[1] : null;
+};
+
 // Separate client just for admin authentication (no /api prefix)
 const adminAuthClient = axios.create({
   baseURL: `${ADMIN_BASE_URL}`,
@@ -85,23 +93,49 @@ const adminService = {
   // ── Authentication ──────────────────────────────────────────────────────────
 
   /**
+   * Fetch CSRF token - must be called before login to set the CSRF cookie
+   * GET /admin/login/ (or /admin/csrf/ depending on backend)
+   */
+  async fetchCsrfToken(): Promise<void> {
+    // Make a GET request to fetch the CSRF cookie
+    await adminAuthClient.get("/admin/login/");
+  },
+
+  /**
    * Admin login - goes directly to /admin/login (not /api/auth/login)
    * This endpoint accepts any valid email (no university email required)
    * Body: { "email": string, "password": string } (rememberMe is not sent)
+   *
+   * Proper CSRF Flow:
+   * 1. First make a GET request to /admin/login/ to receive the CSRF cookie
+   * 2. Then make the POST login request with the CSRF token in the header
    */
   async login(payload: { email: string; password: string; rememberMe?: boolean }): Promise<{
     access: string;
     refresh: string;
     user: { id: string; email: string; role: string; name: string; profile: any };
   }> {
+    // Step 1: Fetch CSRF token first (this sets the csrftoken cookie)
+    await this.fetchCsrfToken();
+
+    // Step 2: Get the CSRF token from cookies
+    const csrfToken = getCsrfToken();
+
+    // Step 3: Make the POST login request with CSRF token in header
     const response = await adminAuthClient.post<{
       access: string;
       refresh: string;
       user: any;
-    }>("/admin/login/", {
-      email: payload.email,
-      password: payload.password,
-    });
+    }>(
+      "/admin/login/",
+      {
+        email: payload.email,
+        password: payload.password,
+      },
+      {
+        headers: csrfToken ? { "X-CSRFToken": csrfToken } : {},
+      }
+    );
     return response.data;
   },
 
