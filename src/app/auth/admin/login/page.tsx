@@ -12,10 +12,7 @@ import { tokenStorage } from "@/services/api-client";
 // ─── Validation Schema ────────────────────────────────────────────────────────
 // Admin login does NOT require university email - just a valid email
 const adminLoginSchema = z.object({
-  email: z
-    .string()
-    .min(1, "Email is required")
-    .email("Please enter a valid email address"),
+  username: z.string().min(1, "Username is required"),
   password: z
     .string()
     .min(1, "Password is required")
@@ -48,9 +45,9 @@ export default function AdminLoginPage() {
 
     try {
       // Use adminService.login() which goes directly to /auth/login (NOT /api/auth/login)
-      // Django admin expects username (email is used as username)
+      // Django admin expects username here
       const { access, refresh, user } = await adminService.login({
-        username: data.email, // Use email as username for Django admin
+        username: data.username,
         password: data.password,
       });
 
@@ -124,24 +121,24 @@ export default function AdminLoginPage() {
             noValidate
             className="flex flex-col gap-7"
           >
-            {/* Email */}
+            {/* Username */}
             <div className="flex flex-col gap-3">
-              <label htmlFor="email" className="text-sm font-medium text-gray-900">
-                Email Address
+              <label htmlFor="username" className="text-sm font-medium text-gray-900">
+                Username
               </label>
               <input
-                id="email"
-                type="email"
-                autoComplete="email"
-                placeholder="admin@example.com"
+                id="username"
+                type="text"
+                autoComplete="username"
+                placeholder="admin_username"
                 className={`w-full bg-transparent border-0 border-b pb-1.5 text-[0.9375rem] text-gray-900 placeholder-gray-400 outline-none transition-colors focus:border-b-[#0f173e] ${
-                  errors.email ? "border-b-red-500" : "border-b-gray-300"
+                  errors.username ? "border-b-red-500" : "border-b-gray-300"
                 }`}
-                {...register("email")}
+                {...register("username")}
               />
-              {errors.email && (
+              {errors.username && (
                 <p className="text-xs text-red-500 mt-0.5" role="alert">
-                  {errors.email.message}
+                  {errors.username.message}
                 </p>
               )}
             </div>
