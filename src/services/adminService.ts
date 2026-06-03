@@ -27,6 +27,12 @@ const getCsrfToken = (): string | null => {
   return match ? match[1] : null;
 };
 
+// Helper to get all cookies as a string (for debugging)
+const getAllCookies = (): string => {
+  if (typeof document === "undefined") return "";
+  return document.cookie;
+};
+
 // Separate client just for admin authentication (no /api prefix)
 const adminAuthClient = axios.create({
   baseURL: `${ADMIN_BASE_URL}`,
@@ -94,11 +100,28 @@ const adminService = {
 
   /**
    * Fetch CSRF token - must be called before login to set the CSRF cookie
-   * GET /admin/login/ (or /admin/csrf/ depending on backend)
+   *
+   * Uses the dedicated /api/auth/csrf/ endpoint which uses @ensure_csrf_cookie
+   * to force the CSRF cookie to be set. This is more reliable than using
+   * /admin/login/ for cross-origin requests.
+   *
+   * For cross-origin requests with SameSite=None, the browser won't send
+   * cookies automatically, so we need to fetch the CSRF cookie explicitly.
    */
   async fetchCsrfToken(): Promise<void> {
-    // Make a GET request to fetch the CSRF cookie
-    await adminAuthClient.get("/admin/login/");
+    try {
+      // Use the dedicated CSRF endpoint
+      await adminAuthClient.get("/api/auth/csrf/");
+    } catch (error) {
+      // Fallback: try the admin login page
+      console.warn("CSRF endpoint failed, trying admin login:", error);
+      try {
+        await adminAuthClient.get("/admin/login/");
+      } catch (altError) {
+        console.error("Failed to fetch CSRF token:", altError);
+        // Don't throw - we'll check if cookie was set anyway
+      }
+    }
   },
 
   /**
@@ -108,6 +131,11 @@ const adminService = {
    * Proper CSRF Flow:
    * 1. First make a GET request to /admin/login/ to receive the CSRF cookie
    * 2. Then make the POST login request with the CSRF token in the header
+   *
+   * Note: For cross-origin requests with SameSite=None cookies:
+   * - The browser requires Secure=True (HTTPS)
+   * - Credentials (cookies) must be included explicitly
+   * - The frontend must extract the CSRF token from cookies and send as header
    */
   async login(payload: { username: string; password: string }): Promise<{
     access: string;
@@ -118,7 +146,19 @@ const adminService = {
     await this.fetchCsrfToken();
 
     // Step 2: Get the CSRF token from cookies
-    const csrfToken = getCsrfToken();
+    let csrfToken = getCsrfToken();
+
+    // If still no CSRF token, try one more time with a fresh request
+    if (!csrfToken) {
+      console.warn("CSRF token not found in cookies after initial fetch, retrying...");
+      await this.fetchCsrfToken();
+      csrfToken = getCsrfToken();
+    }
+
+    // Debug: log all cookies for troubleshooting
+    if (typeof window !== "undefined") {
+      console.debug("Current cookies:", getAllCookies());
+    }
 
     // Step 3: Make the POST login request with CSRF token in header
     // Django admin expects form-encoded data with username (not email)
@@ -138,6 +178,8 @@ const adminService = {
           "Content-Type": "application/x-www-form-urlencoded",
           ...(csrfToken ? { "X-CSRFToken": csrfToken } : {}),
         },
+        // Explicitly include credentials for cross-origin requests
+        withCredentials: true,
       }
     );
     return response.data;
