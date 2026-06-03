@@ -103,14 +103,13 @@ const adminService = {
 
   /**
    * Admin login - goes directly to /admin/login (not /api/auth/login)
-   * This endpoint accepts any valid email (no university email required)
-   * Body: { "email": string, "password": string } (rememberMe is not sent)
+   * Django admin expects form-encoded data with username (not email)
    *
    * Proper CSRF Flow:
    * 1. First make a GET request to /admin/login/ to receive the CSRF cookie
    * 2. Then make the POST login request with the CSRF token in the header
    */
-  async login(payload: { email: string; password: string; rememberMe?: boolean }): Promise<{
+  async login(payload: { username: string; password: string }): Promise<{
     access: string;
     refresh: string;
     user: { id: string; email: string; role: string; name: string; profile: any };
@@ -122,18 +121,23 @@ const adminService = {
     const csrfToken = getCsrfToken();
 
     // Step 3: Make the POST login request with CSRF token in header
+    // Django admin expects form-encoded data with username (not email)
+    const formData = new URLSearchParams();
+    formData.append("username", payload.username);
+    formData.append("password", payload.password);
+
     const response = await adminAuthClient.post<{
       access: string;
       refresh: string;
       user: any;
     }>(
       "/admin/login/",
+      formData.toString(),
       {
-        email: payload.email,
-        password: payload.password,
-      },
-      {
-        headers: csrfToken ? { "X-CSRFToken": csrfToken } : {},
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          ...(csrfToken ? { "X-CSRFToken": csrfToken } : {}),
+        },
       }
     );
     return response.data;
