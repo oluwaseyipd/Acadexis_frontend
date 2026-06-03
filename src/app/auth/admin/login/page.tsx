@@ -48,10 +48,10 @@ export default function AdminLoginPage() {
 
     try {
       // Use adminService.login() which goes directly to /auth/login (NOT /api/auth/login)
+      // Django admin expects username (email is used as username)
       const { access, refresh, user } = await adminService.login({
-        email: data.email,
+        username: data.email, // Use email as username for Django admin
         password: data.password,
-        rememberMe: data.rememberMe,
       });
 
       // Verify user is an admin
