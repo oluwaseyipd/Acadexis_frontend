@@ -295,7 +295,7 @@ const adminService = {
    * Get course details
    * GET /admin/courses/<id>/
    */
-  async getCourseById(courseId: string): Promise<AdminCourse> {
+  async getCourseDetails(courseId: string): Promise<AdminCourse> {
     const response = await adminApiClient.get<AdminCourse>(`/courses/${courseId}/`);
     return response.data;
   },
@@ -684,19 +684,19 @@ const adminService = {
   },
 
   /**
-   * Get course by ID
+   * Get course by ID (Django admin)
    * GET /admin/courses/course/<id>/change/
    */
-  async getCourseById(courseId: string): Promise<any> {
+  async getAdminCourseById(courseId: string): Promise<any> {
     const response = await adminApiClient.get<any>(`/courses/course/${courseId}/change/`);
     return response.data;
   },
 
   /**
-   * Update course
+   * Update course (Django admin)
    * POST /admin/courses/course/<id>/change/
    */
-  async updateCourse(courseId: string, data: {
+  async updateAdminCourse(courseId: string, data: {
     title?: string;
     code?: string;
     description?: string;
@@ -723,10 +723,10 @@ const adminService = {
   },
 
   /**
-   * Delete course
+   * Delete course (Django admin)
    * POST /admin/courses/course/<id>/delete/
    */
-  async deleteCourse(courseId: string): Promise<{ success: boolean }> {
+  async deleteAdminCourse(courseId: string): Promise<{ success: boolean }> {
     const formData = new URLSearchParams();
     formData.append("post", "yes");
     const response = await adminApiClient.post<any>(
