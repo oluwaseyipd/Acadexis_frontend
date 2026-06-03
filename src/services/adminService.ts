@@ -19,31 +19,6 @@ import type {
 // Use a separate axios instance that points directly to /admin (NOT /api/admin)
 const ADMIN_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://acadexis-backend.onrender.com";
 
-// Institutions API client (uses /api prefix)
-const institutionsApiClient = axios.create({
-  baseURL: `${ADMIN_BASE_URL}/api/institutions`,
-  timeout: 30_000,
-  withCredentials: true,
-  headers: {
-    "Content-Type": "application/json",
-    Accept: "application/json",
-  },
-});
-
-// Add auth interceptor for institutions requests
-institutionsApiClient.interceptors.request.use(
-  (config) => {
-    if (typeof window !== "undefined") {
-      const token = tokenStorage.getToken();
-      if (token && config.headers) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
 // ─── CSRF Token Helper ───────────────────────────────────────────────────────
 // Extract CSRF token from cookies
 const getCsrfToken = (): string | null => {
@@ -79,13 +54,19 @@ const adminApiClient = axios.create({
   },
 });
 
-// Add auth interceptor for admin requests
+// Add auth and CSRF interceptor for admin requests
 adminApiClient.interceptors.request.use(
   (config) => {
     if (typeof window !== "undefined") {
+      // Add Bearer token if available
       const token = tokenStorage.getToken();
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
+      }
+      // Add CSRF token for POST/PUT/DELETE requests
+      const csrfToken = getCsrfToken();
+      if (csrfToken && config.headers && ["POST", "PUT", "PATCH", "DELETE"].includes(config.method?.toUpperCase() || "")) {
+        config.headers["X-CSRFToken"] = csrfToken;
       }
     }
     return config;
@@ -456,140 +437,304 @@ const adminService = {
   },
 
   // ── Institutions (Universities, Faculties, Departments) ────────────────────────
+  // Using Django Admin endpoints (/admin/institutions/*)
 
   /**
    * List all universities
-   * GET /api/universities/
+   * GET /admin/institutions/university/
    */
   async getUniversities(params?: { search?: string }): Promise<any[]> {
-    const response = await institutionsApiClient.get<any[]>("/universities/", { params });
-    return response.data;
+    const response = await adminApiClient.get<any>("/institutions/university/", { params });
+    return response.data || [];
   },
 
   /**
    * Create a university
-   * POST /api/universities/
+   * POST /admin/institutions/university/add/
    */
   async createUniversity(data: { name: string; description?: string; code?: string }): Promise<any> {
-    const response = await institutionsApiClient.post<any>("/universities/", data);
+    const formData = new URLSearchParams();
+    formData.append("name", data.name);
+    if (data.description) formData.append("description", data.description);
+    if (data.code) formData.append("code", data.code);
+
+    const response = await adminApiClient.post<any>(
+      "/institutions/university/add/",
+      formData.toString(),
+      { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+    );
     return response.data;
   },
 
   /**
    * Get university by ID
-   * GET /api/universities/<id>/
+   * GET /admin/institutions/university/<id>/change/
    */
   async getUniversityById(universityId: string): Promise<any> {
-    const response = await institutionsApiClient.get<any>(`/universities/${universityId}/`);
+    const response = await adminApiClient.get<any>(`/institutions/university/${universityId}/change/`);
     return response.data;
   },
 
   /**
    * Update university
-   * PUT /api/universities/<id>/
+   * POST /admin/institutions/university/<id>/change/
    */
   async updateUniversity(universityId: string, data: { name?: string; description?: string; code?: string }): Promise<any> {
-    const response = await institutionsApiClient.put<any>(`/universities/${universityId}/`, data);
+    const formData = new URLSearchParams();
+    if (data.name) formData.append("name", data.name);
+    if (data.description !== undefined) formData.append("description", data.description);
+    if (data.code !== undefined) formData.append("code", data.code);
+
+    const response = await adminApiClient.post<any>(
+      `/institutions/university/${universityId}/change/`,
+      formData.toString(),
+      { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+    );
     return response.data;
   },
 
   /**
    * Delete university
-   * DELETE /api/universities/<id>/
+   * POST /admin/institutions/university/<id>/delete/
    */
   async deleteUniversity(universityId: string): Promise<{ success: boolean }> {
-    const response = await institutionsApiClient.delete<void>(`/universities/${universityId}/`);
-    return { success: response.status === 204 };
+    const formData = new URLSearchParams();
+    formData.append("post", "yes");
+    const response = await adminApiClient.post<any>(
+      `/institutions/university/${universityId}/delete/`,
+      formData.toString(),
+      { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+    );
+    return { success: response.status === 200 || response.status === 302 };
   },
 
   /**
    * List all faculties
-   * GET /api/faculties/
+   * GET /admin/institutions/faculty/
    */
   async getFaculties(params?: { university?: string }): Promise<any[]> {
-    const response = await institutionsApiClient.get<any[]>("/faculties/", { params });
-    return response.data;
+    const response = await adminApiClient.get<any>("/institutions/faculty/", { params });
+    return response.data || [];
   },
 
   /**
    * Create a faculty
-   * POST /api/faculties/
+   * POST /admin/institutions/faculty/add/
    */
   async createFaculty(data: { name: string; university: string }): Promise<any> {
-    const response = await institutionsApiClient.post<any>("/faculties/", data);
+    const formData = new URLSearchParams();
+    formData.append("name", data.name);
+    formData.append("university", data.university);
+
+    const response = await adminApiClient.post<any>(
+      "/institutions/faculty/add/",
+      formData.toString(),
+      { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+    );
     return response.data;
   },
 
   /**
    * Get faculty by ID
-   * GET /api/faculties/<id>/
+   * GET /admin/institutions/faculty/<id>/change/
    */
   async getFacultyById(facultyId: string): Promise<any> {
-    const response = await institutionsApiClient.get<any>(`/faculties/${facultyId}/`);
+    const response = await adminApiClient.get<any>(`/institutions/faculty/${facultyId}/change/`);
     return response.data;
   },
 
   /**
    * Update faculty
-   * PUT /api/faculties/<id>/
+   * POST /admin/institutions/faculty/<id>/change/
    */
   async updateFaculty(facultyId: string, data: { name?: string; university?: string }): Promise<any> {
-    const response = await institutionsApiClient.put<any>(`/faculties/${facultyId}/`, data);
+    const formData = new URLSearchParams();
+    if (data.name) formData.append("name", data.name);
+    if (data.university) formData.append("university", data.university);
+
+    const response = await adminApiClient.post<any>(
+      `/institutions/faculty/${facultyId}/change/`,
+      formData.toString(),
+      { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+    );
     return response.data;
   },
 
   /**
    * Delete faculty
-   * DELETE /api/faculties/<id>/
+   * POST /admin/institutions/faculty/<id>/delete/
    */
   async deleteFaculty(facultyId: string): Promise<{ success: boolean }> {
-    const response = await institutionsApiClient.delete<void>(`/faculties/${facultyId}/`);
-    return { success: response.status === 204 };
+    const formData = new URLSearchParams();
+    formData.append("post", "yes");
+    const response = await adminApiClient.post<any>(
+      `/institutions/faculty/${facultyId}/delete/`,
+      formData.toString(),
+      { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+    );
+    return { success: response.status === 200 || response.status === 302 };
   },
 
   /**
    * List all departments
-   * GET /api/departments/
+   * GET /admin/institutions/department/
    */
   async getDepartments(params?: { university?: string; faculty?: string }): Promise<any[]> {
-    const response = await institutionsApiClient.get<any[]>("/departments/", { params });
-    return response.data;
+    const response = await adminApiClient.get<any>("/institutions/department/", { params });
+    return response.data || [];
   },
 
   /**
    * Create a department
-   * POST /api/departments/
+   * POST /admin/institutions/department/add/
    */
   async createDepartment(data: { name: string; code?: string; faculty: string }): Promise<any> {
-    const response = await institutionsApiClient.post<any>("/departments/", data);
+    const formData = new URLSearchParams();
+    formData.append("name", data.name);
+    if (data.code) formData.append("code", data.code);
+    formData.append("faculty", data.faculty);
+
+    const response = await adminApiClient.post<any>(
+      "/institutions/department/add/",
+      formData.toString(),
+      { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+    );
     return response.data;
   },
 
   /**
    * Get department by ID
-   * GET /api/departments/<id>/
+   * GET /admin/institutions/department/<id>/change/
    */
   async getDepartmentById(departmentId: string): Promise<any> {
-    const response = await institutionsApiClient.get<any>(`/departments/${departmentId}/`);
+    const response = await adminApiClient.get<any>(`/institutions/department/${departmentId}/change/`);
     return response.data;
   },
 
   /**
    * Update department
-   * PUT /api/departments/<id>/
+   * POST /admin/institutions/department/<id>/change/
    */
   async updateDepartment(departmentId: string, data: { name?: string; code?: string; faculty?: string }): Promise<any> {
-    const response = await institutionsApiClient.put<any>(`/departments/${departmentId}/`, data);
+    const formData = new URLSearchParams();
+    if (data.name) formData.append("name", data.name);
+    if (data.code !== undefined) formData.append("code", data.code);
+    if (data.faculty) formData.append("faculty", data.faculty);
+
+    const response = await adminApiClient.post<any>(
+      `/institutions/department/${departmentId}/change/`,
+      formData.toString(),
+      { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+    );
     return response.data;
   },
 
   /**
    * Delete department
-   * DELETE /api/departments/<id>/
+   * POST /admin/institutions/department/<id>/delete/
    */
   async deleteDepartment(departmentId: string): Promise<{ success: boolean }> {
-    const response = await institutionsApiClient.delete<void>(`/departments/${departmentId}/`);
-    return { success: response.status === 204 };
+    const formData = new URLSearchParams();
+    formData.append("post", "yes");
+    const response = await adminApiClient.post<any>(
+      `/institutions/department/${departmentId}/delete/`,
+      formData.toString(),
+      { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+    );
+    return { success: response.status === 200 || response.status === 302 };
+  },
+
+  // ── Courses (using Django Admin endpoints) ─────────────────────────────────────
+
+  /**
+   * List all courses
+   * GET /admin/courses/course/
+   */
+  async getAllCourses(params?: { search?: string }): Promise<any[]> {
+    const response = await adminApiClient.get<any>("/courses/course/", { params });
+    return response.data || [];
+  },
+
+  /**
+   * Create a course
+   * POST /admin/courses/course/add/
+   */
+  async createCourse(data: {
+    title: string;
+    code: string;
+    description?: string;
+    department?: string;
+    lecturer?: string;
+    level?: string;
+  }): Promise<any> {
+    const formData = new URLSearchParams();
+    formData.append("title", data.title);
+    formData.append("code", data.code);
+    if (data.description) formData.append("description", data.description);
+    if (data.department) formData.append("department", data.department);
+    if (data.lecturer) formData.append("lecturer", data.lecturer);
+    if (data.level) formData.append("level", data.level);
+
+    const response = await adminApiClient.post<any>(
+      "/courses/course/add/",
+      formData.toString(),
+      { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+    );
+    return response.data;
+  },
+
+  /**
+   * Get course by ID
+   * GET /admin/courses/course/<id>/change/
+   */
+  async getCourseById(courseId: string): Promise<any> {
+    const response = await adminApiClient.get<any>(`/courses/course/${courseId}/change/`);
+    return response.data;
+  },
+
+  /**
+   * Update course
+   * POST /admin/courses/course/<id>/change/
+   */
+  async updateCourse(courseId: string, data: {
+    title?: string;
+    code?: string;
+    description?: string;
+    department?: string;
+    lecturer?: string;
+    level?: string;
+    lecturer_remark?: string;
+  }): Promise<any> {
+    const formData = new URLSearchParams();
+    if (data.title) formData.append("title", data.title);
+    if (data.code) formData.append("code", data.code);
+    if (data.description !== undefined) formData.append("description", data.description);
+    if (data.department) formData.append("department", data.department);
+    if (data.lecturer !== undefined) formData.append("lecturer", data.lecturer);
+    if (data.level !== undefined) formData.append("level", data.level);
+    if (data.lecturer_remark !== undefined) formData.append("lecturer_remark", data.lecturer_remark);
+
+    const response = await adminApiClient.post<any>(
+      `/courses/course/${courseId}/change/`,
+      formData.toString(),
+      { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+    );
+    return response.data;
+  },
+
+  /**
+   * Delete course
+   * POST /admin/courses/course/<id>/delete/
+   */
+  async deleteCourse(courseId: string): Promise<{ success: boolean }> {
+    const formData = new URLSearchParams();
+    formData.append("post", "yes");
+    const response = await adminApiClient.post<any>(
+      `/courses/course/${courseId}/delete/`,
+      formData.toString(),
+      { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+    );
+    return { success: response.status === 200 || response.status === 302 };
   },
 };
 
