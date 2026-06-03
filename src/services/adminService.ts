@@ -125,60 +125,47 @@ const adminService = {
   },
 
   /**
-   * Admin login - goes directly to /admin/login (not /api/auth/login)
-   * Django admin expects form-encoded data with username (not email)
+   * Admin login - uses custom DRF admin login endpoint instead of Django admin
    *
-   * Proper CSRF Flow:
-   * 1. First make a GET request to /admin/login/ to receive the CSRF cookie
-   * 2. Then make the POST login request with the CSRF token in the header
+   * This endpoint (/api/auth/admin-login/) is built with DRF and handles
+   * CSRF properly for cross-origin requests.
    *
-   * Note: For cross-origin requests with SameSite=None cookies:
-   * - The browser requires Secure=True (HTTPS)
-   * - Credentials (cookies) must be included explicitly
-   * - The frontend must extract the CSRF token from cookies and send as header
+   * Flow:
+   * 1. Fetch CSRF token to set the cookie
+   * 2. POST to /api/auth/admin-login/ with credentials
    */
   async login(payload: { username: string; password: string }): Promise<{
     access: string;
     refresh: string;
     user: { id: string; email: string; role: string; name: string; profile: any };
   }> {
-    // Step 1: Fetch CSRF token first (this sets the csrftoken cookie)
+    // Fetch CSRF token first (sets the csrftoken cookie)
     await this.fetchCsrfToken();
 
-    // Step 2: Get the CSRF token from cookies
-    let csrfToken = getCsrfToken();
-
-    // If still no CSRF token, try one more time with a fresh request
-    if (!csrfToken) {
-      console.warn("CSRF token not found in cookies after initial fetch, retrying...");
-      await this.fetchCsrfToken();
-      csrfToken = getCsrfToken();
-    }
+    // Get the CSRF token from cookies
+    const csrfToken = getCsrfToken();
 
     // Debug: log all cookies for troubleshooting
     if (typeof window !== "undefined") {
       console.debug("Current cookies:", getAllCookies());
     }
 
-    // Step 3: Make the POST login request with CSRF token in header
-    // Django admin expects form-encoded data with username (not email)
-    const formData = new URLSearchParams();
-    formData.append("username", payload.username);
-    formData.append("password", payload.password);
-
+    // Use the custom DRF admin login endpoint
     const response = await adminAuthClient.post<{
       access: string;
       refresh: string;
       user: any;
     }>(
-      "/admin/login/",
-      formData.toString(),
+      "/api/auth/admin-login/",
+      {
+        username: payload.username,
+        password: payload.password,
+      },
       {
         headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
+          "Content-Type": "application/json",
           ...(csrfToken ? { "X-CSRFToken": csrfToken } : {}),
         },
-        // Explicitly include credentials for cross-origin requests
         withCredentials: true,
       }
     );
