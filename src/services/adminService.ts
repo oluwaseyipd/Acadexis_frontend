@@ -19,6 +19,31 @@ import type {
 // Use a separate axios instance that points directly to /admin (NOT /api/admin)
 const ADMIN_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "https://acadexis-backend.onrender.com";
 
+// Institutions API client (uses /api prefix)
+const institutionsApiClient = axios.create({
+  baseURL: `${ADMIN_BASE_URL}/api/institutions`,
+  timeout: 30_000,
+  withCredentials: true,
+  headers: {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  },
+});
+
+// Add auth interceptor for institutions requests
+institutionsApiClient.interceptors.request.use(
+  (config) => {
+    if (typeof window !== "undefined") {
+      const token = tokenStorage.getToken();
+      if (token && config.headers) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 // ─── CSRF Token Helper ───────────────────────────────────────────────────────
 // Extract CSRF token from cookies
 const getCsrfToken = (): string | null => {
@@ -428,6 +453,143 @@ const adminService = {
       `/support/admin-requests/${requestId}/reject/`
     );
     return response.data;
+  },
+
+  // ── Institutions (Universities, Faculties, Departments) ────────────────────────
+
+  /**
+   * List all universities
+   * GET /api/universities/
+   */
+  async getUniversities(params?: { search?: string }): Promise<any[]> {
+    const response = await institutionsApiClient.get<any[]>("/universities/", { params });
+    return response.data;
+  },
+
+  /**
+   * Create a university
+   * POST /api/universities/
+   */
+  async createUniversity(data: { name: string; description?: string; code?: string }): Promise<any> {
+    const response = await institutionsApiClient.post<any>("/universities/", data);
+    return response.data;
+  },
+
+  /**
+   * Get university by ID
+   * GET /api/universities/<id>/
+   */
+  async getUniversityById(universityId: string): Promise<any> {
+    const response = await institutionsApiClient.get<any>(`/universities/${universityId}/`);
+    return response.data;
+  },
+
+  /**
+   * Update university
+   * PUT /api/universities/<id>/
+   */
+  async updateUniversity(universityId: string, data: { name?: string; description?: string; code?: string }): Promise<any> {
+    const response = await institutionsApiClient.put<any>(`/universities/${universityId}/`, data);
+    return response.data;
+  },
+
+  /**
+   * Delete university
+   * DELETE /api/universities/<id>/
+   */
+  async deleteUniversity(universityId: string): Promise<{ success: boolean }> {
+    const response = await institutionsApiClient.delete<void>(`/universities/${universityId}/`);
+    return { success: response.status === 204 };
+  },
+
+  /**
+   * List all faculties
+   * GET /api/faculties/
+   */
+  async getFaculties(params?: { university?: string }): Promise<any[]> {
+    const response = await institutionsApiClient.get<any[]>("/faculties/", { params });
+    return response.data;
+  },
+
+  /**
+   * Create a faculty
+   * POST /api/faculties/
+   */
+  async createFaculty(data: { name: string; university: string }): Promise<any> {
+    const response = await institutionsApiClient.post<any>("/faculties/", data);
+    return response.data;
+  },
+
+  /**
+   * Get faculty by ID
+   * GET /api/faculties/<id>/
+   */
+  async getFacultyById(facultyId: string): Promise<any> {
+    const response = await institutionsApiClient.get<any>(`/faculties/${facultyId}/`);
+    return response.data;
+  },
+
+  /**
+   * Update faculty
+   * PUT /api/faculties/<id>/
+   */
+  async updateFaculty(facultyId: string, data: { name?: string; university?: string }): Promise<any> {
+    const response = await institutionsApiClient.put<any>(`/faculties/${facultyId}/`, data);
+    return response.data;
+  },
+
+  /**
+   * Delete faculty
+   * DELETE /api/faculties/<id>/
+   */
+  async deleteFaculty(facultyId: string): Promise<{ success: boolean }> {
+    const response = await institutionsApiClient.delete<void>(`/faculties/${facultyId}/`);
+    return { success: response.status === 204 };
+  },
+
+  /**
+   * List all departments
+   * GET /api/departments/
+   */
+  async getDepartments(params?: { university?: string; faculty?: string }): Promise<any[]> {
+    const response = await institutionsApiClient.get<any[]>("/departments/", { params });
+    return response.data;
+  },
+
+  /**
+   * Create a department
+   * POST /api/departments/
+   */
+  async createDepartment(data: { name: string; code?: string; faculty: string }): Promise<any> {
+    const response = await institutionsApiClient.post<any>("/departments/", data);
+    return response.data;
+  },
+
+  /**
+   * Get department by ID
+   * GET /api/departments/<id>/
+   */
+  async getDepartmentById(departmentId: string): Promise<any> {
+    const response = await institutionsApiClient.get<any>(`/departments/${departmentId}/`);
+    return response.data;
+  },
+
+  /**
+   * Update department
+   * PUT /api/departments/<id>/
+   */
+  async updateDepartment(departmentId: string, data: { name?: string; code?: string; faculty?: string }): Promise<any> {
+    const response = await institutionsApiClient.put<any>(`/departments/${departmentId}/`, data);
+    return response.data;
+  },
+
+  /**
+   * Delete department
+   * DELETE /api/departments/<id>/
+   */
+  async deleteDepartment(departmentId: string): Promise<{ success: boolean }> {
+    const response = await institutionsApiClient.delete<void>(`/departments/${departmentId}/`);
+    return { success: response.status === 204 };
   },
 };
 

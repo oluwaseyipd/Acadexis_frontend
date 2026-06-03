@@ -15,6 +15,9 @@ import {
   Settings,
   GraduationCap,
   Mail,
+  Building2,
+  Building,
+  School,
 } from "lucide-react";
 
 // ─── Admin Navigation Items ─────────────────────────────────────────────────
@@ -23,6 +26,12 @@ const ADMIN_NAV_ITEMS = [
   { label: "Users", href: "/dashboard/admin/users", icon: Users },
   { label: "Courses", href: "/dashboard/admin/courses", icon: BookOpen },
   { label: "Analytics", href: "/dashboard/admin/analytics", icon: BarChart3 },
+] as const;
+
+const INSTITUTIONS_NAV_ITEMS = [
+  { label: "Universities", href: "/dashboard/admin/universities", icon: Building2 },
+  { label: "Faculties", href: "/dashboard/admin/faculties", icon: Building },
+  { label: "Departments", href: "/dashboard/admin/departments", icon: School },
 ] as const;
 
 const SUPPORT_NAV_ITEMS = [
@@ -102,6 +111,40 @@ export default function AdminSidebar({
           </span>
         </div>
         {ADMIN_NAV_ITEMS.map(({ label, href, icon: Icon }) => (
+          <Link
+            key={href}
+            href={href}
+            className={`relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-[15px] font-medium transition-all duration-150 group ${
+              isActive(href)
+                ? "text-brand-primary bg-brand-primary/10"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted"
+            }`}
+          >
+            <Icon
+              size={18}
+              strokeWidth={1.8}
+              className={
+                isActive(href)
+                  ? "text-brand-primary font-bold"
+                  : "text-muted-foreground group-hover:text-foreground"
+              }
+            />
+            {label}
+            <span
+              className={`absolute right-0 w-1.5 h-full rounded-r-lg bg-brand-primary transition-opacity duration-150 ${
+                isActive(href) ? "opacity-100" : "opacity-0"
+              }`}
+              aria-hidden="true"
+            />
+          </Link>
+        ))}
+
+        <div className="px-3 mt-6 mb-2">
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            Institutions
+          </span>
+        </div>
+        {INSTITUTIONS_NAV_ITEMS.map(({ label, href, icon: Icon }) => (
           <Link
             key={href}
             href={href}
