@@ -221,7 +221,7 @@ const adminService = {
    * GET /admin/users/
    */
   async getUsers(params?: UserFilters): Promise<PaginatedAdminUsers> {
-    const response = await adminApiClient.get<PaginatedAdminUsers>("/users/", { params });
+    const response = await adminApiClient.get<PaginatedAdminUsers>("/accounts/user/", { params });
     return response.data;
   },
 
@@ -230,7 +230,7 @@ const adminService = {
    * GET /admin/users/<id>/
    */
   async getUserById(userId: string): Promise<AdminUser> {
-    const response = await adminApiClient.get<AdminUser>(`/users/${userId}/`);
+    const response = await adminApiClient.get<AdminUser>(`/accounts/user/${userId}/`);
     return response.data;
   },
 
@@ -246,7 +246,7 @@ const adminService = {
       is_active?: boolean;
     }
   ): Promise<AdminUser> {
-    const response = await adminApiClient.put<AdminUser>(`/users/${userId}/`, data);
+    const response = await adminApiClient.put<AdminUser>(`/accounts/user/${userId}/`, data);
     return response.data;
   },
 
@@ -258,7 +258,7 @@ const adminService = {
     userId: string,
     role: "student" | "lecturer" | "admin"
   ): Promise<AdminUser> {
-    const response = await adminApiClient.put<AdminUser>(`/users/${userId}/role/`, { role });
+    const response = await adminApiClient.put<AdminUser>(`/accounts/user/${userId}/role/`, { role });
     return response.data;
   },
 
@@ -267,7 +267,7 @@ const adminService = {
    * POST /admin/users/<id>/activate/
    */
   async activateUser(userId: string): Promise<{ success: boolean }> {
-    const response = await adminApiClient.post<{ success: boolean }>(`/users/${userId}/activate/`);
+    const response = await adminApiClient.post<{ success: boolean }>(`/accounts/user/${userId}/activate/`);
     return response.data;
   },
 
@@ -276,7 +276,7 @@ const adminService = {
    * POST /admin/users/<id>/deactivate/
    */
   async deactivateUser(userId: string): Promise<{ success: boolean }> {
-    const response = await adminApiClient.post<{ success: boolean }>(`/users/${userId}/deactivate/`);
+    const response = await adminApiClient.post<{ success: boolean }>(`/accounts/user/${userId}/deactivate/`);
     return response.data;
   },
 
