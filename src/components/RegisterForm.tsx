@@ -85,10 +85,19 @@ export default function RegisterForm({ role }: RegisterFormProps) {
   const selectedUniversity = watch("university");
   const selectedFaculty = watch("faculty");
 
+  const normalizeArrayResponse = <T,>(payload: unknown): T[] => {
+    if (Array.isArray(payload)) return payload;
+    if (payload && typeof payload === "object" && "results" in payload) {
+      const results = (payload as { results?: unknown }).results;
+      if (Array.isArray(results)) return results;
+    }
+    return [];
+  };
+
   useEffect(() => {
     const loadUniversities = async () => {
       const response = await apiService.institutions.getUniversities();
-      setUniversities(response.data.results);
+      setUniversities(normalizeArrayResponse<University>(response.data));
     };
 
     void loadUniversities();
@@ -103,7 +112,7 @@ export default function RegisterForm({ role }: RegisterFormProps) {
 
     const loadFaculties = async () => {
       const response = await apiService.institutions.getFaculties(selectedUniversity);
-      setFaculties(response.data);
+      setFaculties(normalizeArrayResponse<Faculty>(response.data));
       setDepartments([]);
       setValue("faculty", "");
       setValue("department", "");
@@ -120,7 +129,7 @@ export default function RegisterForm({ role }: RegisterFormProps) {
 
     const loadDepartments = async () => {
       const response = await apiService.institutions.getDepartments({ faculty: selectedFaculty });
-      setDepartments(response.data);
+      setDepartments(normalizeArrayResponse<Department>(response.data));
       setValue("department", "");
     };
 
