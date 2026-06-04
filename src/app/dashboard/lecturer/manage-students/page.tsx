@@ -1,3 +1,10 @@
+/**
+ * TODO: Students endpoint needed in backend API
+ * Need endpoint to fetch students enrolled in lecturer's courses
+ * Once implemented, replace mockStudents with API call like:
+ * GET /lecturers/{lecturerId}/students/ or GET /courses/{courseId}/students/
+ */
+
 import { Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";

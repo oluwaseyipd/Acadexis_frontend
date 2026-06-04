@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * TODO: Quiz endpoints need to be implemented in the backend API
+ * Once implemented, replace mock quiz data with real API calls
+ * Current implementation uses mock data from src/util/quizzes.ts
+ */
+
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { quizData } from "@/util/quizzes";

@@ -17,7 +17,8 @@ import {
   Loader2,
   BookCheck,
 } from "lucide-react";
-import { api, type Course } from "@/services/api";
+import apiService from "@/services/apiService";
+import type { Course } from "@/types/course";
 
 interface Module {
   id: string;
@@ -76,56 +77,61 @@ export default function CourseDetailPage() {
         setLoading(true);
         setError(null);
 
-        const fetchedCourse = await api.getCourse(courseId);
+        // Fetch course info
+        const courseResponse = await apiService.courses.getById(courseId);
+        const fetchedCourse = courseResponse.data;
+        
         if (!fetchedCourse) {
           setError("Course not found");
-          setLoading(false);
           return;
         }
 
+        // Fetch modules for the course
+        const modulesResponse = await apiService.courses.getModules(courseId);
+        const fetchedModules = modulesResponse.data || [];
+        
+        // Convert modules to Module interface for display
+        const displayModules: Module[] = fetchedModules.map((m, idx) => ({
+          id: m.id,
+          title: m.title,
+          description: m.description || "",
+          duration: "1h",
+          tag: idx === 0 ? "Featured" : undefined,
+          completed: 0,
+          total: 0,
+        }));
+        
+        setModules(displayModules);
+
+        // Fetch recommendations
+        const recommendationsResponse = await apiService.courses.getRecommendations(courseId);
+        const recommendations = recommendationsResponse.data || [];
+        
+        // Build curriculum from modules
+        const curriculum: CurriculumItem[] = fetchedModules.map((m, idx) => ({
+          id: m.id,
+          title: m.title,
+          done: idx === 0,
+          locked: idx > 2,
+          active: idx === 1,
+          duration: "1h",
+        }));
+
         const enrichedCourse = {
           ...fetchedCourse,
-          progress: Math.floor(Math.random() * 100),
-          featuredModuleId: "m1",
-          curriculum: mockCurriculum,
+          progress: 45, // This could come from a user progress API if available
+          featuredModuleId: displayModules[0]?.id || "",
+          curriculum,
         };
         setCourse(enrichedCourse);
 
-        const mockModules: Module[] = [
-          {
-            id: "m1",
-            title: "Fundamentals of Neural Networks",
-            description: "Learn the basic concepts and architecture of neural networks, including perceptrons and activation functions.",
-            duration: "2h 30m",
-            tag: "Featured",
-            completed: 3,
-            total: 8,
-          },
-          {
-            id: "m2",
-            title: "Backpropagation Deep Dive",
-            description: "Master the backpropagation algorithm with step-by-step implementations and visual explanations.",
-            duration: "1h 45m",
-            completed: 2,
-            total: 5,
-            studyGroup: true,
-            memberCount: 12,
-          },
-          {
-            id: "m3",
-            title: "Optimization Techniques",
-            description: "Explore gradient descent variants, momentum, and adaptive learning rates.",
-            duration: "1h 20m",
-            completed: 0,
-            total: 4,
-            studyGroup: true,
-            memberCount: 8,
-          },
-        ];
-        setModules(mockModules);
+        // Generate recommendation text
+        const recommendationText = recommendations.length > 0
+          ? `We recommend enrolling in "${recommendations[0].title}" next. It builds on the concepts covered in this course.`
+          : `Based on your course enrollment, continue exploring related courses to deepen your understanding.`;
 
         setRecommendation({
-          body: "Based on your learning patterns, we recommend diving deeper into backpropagation concepts. You've been spending significant time on optimization questions, and a solid understanding of how gradients flow through networks will help you master advanced topics.",
+          body: recommendationText,
           actions: [
             { label: "Start Study Session", primary: true },
             { label: "View Resources", accent: true },

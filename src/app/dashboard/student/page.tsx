@@ -61,7 +61,7 @@ export default function OverviewPage() {
       {/* Heading */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">
-          {UI_TEXT.dashboard.welcomeBack}, {user?.name || "Student"}
+          {UI_TEXT.dashboard.welcomeBack}, {user?.profile?.first_name || "User"}
         </h1>
         <p className="text-muted-foreground mt-1">Here is what is happening with your courses.</p>
       </div>

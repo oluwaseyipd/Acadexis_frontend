@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * TODO: Quiz endpoints need to be implemented in the backend API
+ * Once implemented, replace mock `api.getQuizByCourseId()` with `apiService.quizzes.getByCourseId()`
+ * Current implementation uses mock data from src/services/api.ts
+ */
+
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { api, type Quiz } from "@/services/api";

@@ -1,33 +1,46 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { BookOpen, Users, FileText, Trash2 } from "lucide-react";
+import { BookOpen, Users, FileText, Trash2, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAppStore } from "@/store/useAppStore";
-
-// Mock "my courses" — subset the user has added
-const myCoursesMock = [
-  {
-    id: "c1", title: "Introduction to Machine Learning", code: "CSC3022F",
-    description: "Fundamentals of supervised and unsupervised learning, neural networks, and practical applications.",
-    lecturerName: "Prof. Sarah Chen", materialsCount: 12, studentsEnrolled: 145,
-  },
-  {
-    id: "c3", title: "Linear Algebra", code: "MAM1020F",
-    description: "Vector spaces, matrices, eigenvalues, and applications in data science.",
-    lecturerName: "Dr. James Moyo", materialsCount: 15, studentsEnrolled: 320,
-  },
-];
+import apiService from "@/services/apiService";
 
 export default function CoursesPage() {
-  const [courses, setCourses] = useState(myCoursesMock);
+  const [courses, setCourses] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { user } = useAppStore();
 
-  const removeCourse = (id: string) => {
-    setCourses((prev) => prev.filter((c) => c.id !== id));
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await apiService.courses.getMyCourses();
+        setCourses(response.data || []);
+      } catch (err) {
+        console.error("Failed to fetch courses:", err);
+        setError("Failed to load your courses. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCourses();
+  }, []);
+
+  const removeCourse = async (id: string) => {
+    try {
+      await apiService.courses.unenroll(id);
+      setCourses((prev) => prev.filter((c) => c.id !== id));
+    } catch (err) {
+      console.error("Failed to unenroll from course:", err);
+      setError("Failed to unenroll from course. Please try again.");
+    }
   };
 
   return (
@@ -38,7 +51,20 @@ export default function CoursesPage() {
         <p className="text-muted-foreground">Courses you have added to your study plan</p>
       </div>
 
-      {courses.length === 0 ? (
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      ) : error ? (
+        <Card className="shadow-card border-destructive">
+          <CardContent className="p-12 text-center">
+            <p className="text-lg font-medium text-destructive mb-1">{error}</p>
+            <Button onClick={() => window.location.reload()} variant="outline" className="mt-4">
+              Try Again
+            </Button>
+          </CardContent>
+        </Card>
+      ) : courses.length === 0 ? (
         <Card className="shadow-card">
           <CardContent className="p-12 text-center">
             <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />

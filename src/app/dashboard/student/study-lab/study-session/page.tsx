@@ -15,8 +15,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
-import { api, type ChatMessage } from "@/services/api";
 import apiService from "@/services/apiService";
+import type { ChatMessage } from "@/types/studylab";
 import { UI_TEXT } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { useParams, useRouter, usePathname } from "next/navigation";
@@ -87,26 +87,34 @@ export default function StudySession() {
   useEffect(() => {
     if (!selectedCourse) return;
     setLoading(true);
-    Promise.all([
-      refreshMaterials(),
-      isNew ? Promise.resolve([]) : api.getChatHistory(selectedCourse),
-    ])
-      .then(([_, h]) => {
-        setMessages(h);
-        const blocks: QuestionBlock[] = h
-          .filter((msg) => msg.role === "user")
-          .map((msg) => ({ id: `qb-${msg.id}`, title: refineTitle(msg.content), messageId: msg.id }));
-        setQuestionBlocks(blocks);
-        userQuestionCount.current = blocks.length;
-      })
-      .catch(() => {
+    
+    const loadSessionData = async () => {
+      try {
+        await refreshMaterials();
+        
+        // Only load messages if we have an existing session
+        if (!isNew) {
+          const messages = await apiService.studyLab.getSessionMessages(sessionId);
+          setMessages(messages);
+          const blocks: QuestionBlock[] = messages
+            .filter((msg) => msg.role === "user")
+            .map((msg) => ({ id: `qb-${msg.id}`, title: refineTitle(msg.content), messageId: msg.id }));
+          setQuestionBlocks(blocks);
+          userQuestionCount.current = blocks.length;
+        } else {
+          setMessages([]);
+          setQuestionBlocks([]);
+        }
+      } catch {
         setMessages([]);
         setQuestionBlocks([]);
-      })
-      .finally(() => {
+      } finally {
         setLoading(false);
-      });
-  }, [selectedCourse, isNew, refreshMaterials]);
+      }
+    };
+
+    void loadSessionData();
+  }, [selectedCourse, isNew, refreshMaterials, sessionId]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -115,32 +123,30 @@ export default function StudySession() {
   /* ── Send message ────────────────────────────────────────────── */
   const handleSend = async () => {
     if (!input.trim() || sending) return;
-    const userMsg: ChatMessage = {
-      id: `u-${Date.now()}`,
-      role: "user",
-      content: input,
-      timestamp: new Date().toISOString(),
-    };
-    setMessages((prev) => [...prev, userMsg]);
-
-    const newBlock: QuestionBlock = {
-      id: `qb-${userMsg.id}`,
-      title: refineTitle(input),
-      messageId: userMsg.id,
-    };
-    setQuestionBlocks((prev) => [...prev, newBlock]);
-    userQuestionCount.current += 1;
-
-    setInput("");
+    
     setSending(true);
+    const userMessage = input;
 
     try {
-      const reply = await api.sendMessage(selectedCourse, input);
-      setMessages((prev) => [...prev, reply]);
-    } catch {
-      setMessages((prev) => prev.filter((msg) => msg.id !== userMsg.id));
-      setQuestionBlocks((prev) => prev.filter((block) => block.id !== newBlock.id));
-      userQuestionCount.current -= 1;
+      // Ask question and get response from real API
+      const response = await apiService.studyLab.askQuestion(sessionId, userMessage);
+      
+      // Add both user and assistant messages to the UI
+      setMessages((prev) => [...prev, response.user, response.assistant]);
+
+      // Add user question to question blocks
+      const newBlock: QuestionBlock = {
+        id: `qb-${response.user.id}`,
+        title: refineTitle(userMessage),
+        messageId: response.user.id,
+      };
+      setQuestionBlocks((prev) => [...prev, newBlock]);
+      userQuestionCount.current += 1;
+
+      setInput("");
+    } catch (error) {
+      console.error("Failed to send message:", error);
+      // Optionally show error toast to user
     } finally {
       setSending(false);
     }
@@ -166,10 +172,18 @@ export default function StudySession() {
   };
 
   /* ── Submit feedback ─────────────────────────────────────────── */
-  const submitFeedback = () => {
-    setFeedbackGiven(true);
-    setShowFeedback(false);
-    // In production, would call api.submitFeedback(...)
+  const handleFeedbackSubmit = async () => {
+    try {
+      await apiService.studyLab.submitSessionFeedback(sessionId, {
+        rating: feedbackRating,
+        note: feedbackNote,
+      });
+      setFeedbackGiven(true);
+      setShowFeedback(false);
+    } catch (error) {
+      console.error("Failed to submit feedback:", error);
+      // Show error to user if needed
+    }
   };
 
 const pathname = usePathname();
@@ -287,29 +301,34 @@ const basePath = pathname.includes("/lecturer/")
                       {/* Source citations */}
                       {msg.sources && msg.sources.length > 0 && (
                         <div className="mt-3 space-y-1.5 border-t border-border/30 pt-2">
-                          {msg.sources.map((src, i) => (
-                            <button
-                              key={i}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openPdf(src.materialName);
-                              }}
-                              className="w-full flex items-start gap-2 text-xs bg-background/50 rounded-md p-2 cursor-pointer hover:bg-background/80 transition-colors text-left"
-                            >
-                              <ExternalLink className="h-3 w-3 mt-0.5 shrink-0 text-primary" />
-                              <div>
-                                <span className="font-medium">
-                                  {UI_TEXT.studyLab.sourceTag}: {src.materialName}
-                                </span>
-                                <span className="ml-2 text-muted-foreground">
-                                  ({UI_TEXT.studyLab.pageRef} {src.page})
-                                </span>
-                                <p className="text-muted-foreground mt-0.5 italic">
-                                  "{src.snippet}"
-                                </p>
-                              </div>
-                            </button>
-                          ))}
+                          {msg.sources.map((src, i) => {
+                            const materialName = src.material?.file_name ?? "Document";
+                            return (
+                              <button
+                                key={i}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (src.material?.file_name) {
+                                    openPdf(src.material.file_name);
+                                  }
+                                }}
+                                className="w-full flex items-start gap-2 text-xs bg-background/50 rounded-md p-2 cursor-pointer hover:bg-background/80 transition-colors text-left"
+                              >
+                                <ExternalLink className="h-3 w-3 mt-0.5 shrink-0 text-primary" />
+                                <div>
+                                  <span className="font-medium">
+                                    {UI_TEXT.studyLab.sourceTag}: {materialName}
+                                  </span>
+                                  <span className="ml-2 text-muted-foreground">
+                                    ({UI_TEXT.studyLab.pageRef} {src.page})
+                                  </span>
+                                  <p className="text-muted-foreground mt-0.5 italic">
+                                    "{src.snippet}"
+                                  </p>
+                                </div>
+                              </button>
+                            );
+                          })}
                         </div>
                       )}
                     </div>
@@ -484,7 +503,7 @@ const basePath = pathname.includes("/lecturer/")
             <Button variant="ghost" onClick={() => setShowFeedback(false)}>
               Skip
             </Button>
-            <Button variant="hero" onClick={submitFeedback} disabled={feedbackRating === 0}>
+            <Button variant="hero" onClick={handleFeedbackSubmit} disabled={feedbackRating === 0}>
               Submit Feedback
             </Button>
           </DialogFooter>

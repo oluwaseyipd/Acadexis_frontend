@@ -302,17 +302,6 @@ export default function LoginPage() {
           </a>
         </p>
 
-        {/* Admin link */}
-        <p className="text-sm text-gray-400">
-          Are you an administrator?{" "}
-          <a
-            href="/auth/admin/login"
-            className="font-medium text-[#0f173e] hover:underline transition-colors"
-          >
-            Admin login
-          </a>
-        </p>
-
         {/* Legal footer */}
         <footer className="flex flex-col items-center gap-1.5 mt-6">
           <div className="flex items-center gap-5 flex-wrap justify-center">
