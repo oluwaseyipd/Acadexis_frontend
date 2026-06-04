@@ -280,6 +280,16 @@ export default function ProfileForm() {
           </div>
 
           <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium text-gray-700">Faculty</label>
+            <input
+              type="text"
+              value={user?.faculty ?? ""}
+              disabled={true}
+              className="border border-gray-300 rounded-md py-2 px-4 bg-gray-100 cursor-not-allowed focus:outline-none"
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
             <label className="text-sm font-medium text-gray-700">University</label>
             <input
               type="text"

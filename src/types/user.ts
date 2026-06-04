@@ -24,8 +24,9 @@ export interface AuthUserMapped extends AuthUser {
     firstName: string;
     lastName: string;
     identificationNumber: string;
-    departmentId: string | null;
-    universityId: string;
+    department: string | null;
+    faculty: string | null;
+    university: string;
     avatarUrl: string | null;
   };
 }

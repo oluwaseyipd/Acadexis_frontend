@@ -13,6 +13,7 @@ import type {
   Bookmark,
 } from "@/types/studylab";
 import { TopicStruggle } from "@/types/analytics";
+import { ContactMessage, IssueReport, AdminRequest } from "@/types/admin";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -117,6 +118,11 @@ const apiService = {
     /** Exchange Google OAuth code for tokens (called on the callback page) */
     googleCallback(code: string): Promise<AxiosResponse<LoginResponse>> {
       return apiClient.post<LoginResponse>("/auth/google/callback/", { code });
+    },
+
+    /** Refresh the access token using the stored refresh token */
+    refreshToken(refresh: string): Promise<AxiosResponse<{ access: string; refresh: string }>> {
+      return apiClient.post<{ access: string; refresh: string }>("/auth/token/refresh/", { refresh });
     },
 
     /** Request a password-reset email */
@@ -224,6 +230,14 @@ const apiService = {
     /** Unenroll from a course */
     unenroll(courseId: string): Promise<AxiosResponse<{ success: boolean; message: string }>> {
       return apiClient.post<{ success: boolean; message: string }>(`/courses/${courseId}/unenroll/`);
+    },
+
+    /** Rate a course */
+    rateCourse(courseId: string, score: number, reaction: "up" | "down"): Promise<AxiosResponse<{ success: boolean; message: string }>> {
+      return apiClient.post<{ success: boolean; message: string }>(`/courses/${courseId}/rate/`, {
+        score,
+        reaction,
+      });
     },
 
     /** Get modules for a course */
@@ -415,6 +429,25 @@ const apiService = {
       return apiClient.get<PaginatedResponse<TopicStruggle>>("/heatmap/", {
         params,
       });
+    },
+  },
+
+  support: {
+    contact(data: { subject: string; body: string; email: string }): Promise<AxiosResponse<ContactMessage>> {
+      return apiClient.post<ContactMessage>("/support/contact/", data);
+    },
+
+    report(data: { title: string; description: string; severity: "low" | "medium" | "high" | "critical" }): Promise<AxiosResponse<IssueReport>> {
+      return apiClient.post<IssueReport>("/support/report/", data);
+    },
+
+    createAdminRequest(data: { reason: string; documentProof?: File }): Promise<AxiosResponse<AdminRequest>> {
+      const formData = new FormData();
+      formData.append("reason", data.reason);
+      if (data.documentProof) {
+        formData.append("document_proof", data.documentProof);
+      }
+      return apiClient.post<AdminRequest>("/support/admin-request/", formData);
     },
   },
 };
