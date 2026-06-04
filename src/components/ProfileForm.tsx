@@ -204,7 +204,7 @@ export default function ProfileForm() {
               type="text"
               value={formState.first_name}
               disabled={!editing || userLoading}
-              onChange={(event) => setFormState((prev) => ({ ...prev, firstName: event.target.value }))}
+              onChange={(event) => setFormState((prev) => ({ ...prev, first_name: event.target.value }))}
               className={`border border-gray-300 rounded-md py-2 px-4 focus:outline-none ${
                 editing ? "focus:ring-2 focus:ring-green-500 bg-white" : "bg-gray-100 cursor-not-allowed"
               }`}
@@ -217,7 +217,7 @@ export default function ProfileForm() {
               type="text"
               value={formState.last_name}
               disabled={!editing || userLoading}
-              onChange={(event) => setFormState((prev) => ({ ...prev, lastName: event.target.value }))}
+              onChange={(event) => setFormState((prev) => ({ ...prev, last_name: event.target.value }))}
               className={`border border-gray-300 rounded-md py-2 px-4 focus:outline-none ${
                 editing ? "focus:ring-2 focus:ring-green-500 bg-white" : "bg-gray-100 cursor-not-allowed"
               }`}
@@ -238,12 +238,12 @@ export default function ProfileForm() {
           </div>
 
             <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-700">Student ID</label>
+            <label className="text-sm font-medium text-gray-700">Matric Number</label>
             <input
               type="text"
               value={formState.identification_number}
               disabled={!editing || userLoading}
-              onChange={(event) => setFormState((prev) => ({ ...prev, identificationNumber: event.target.value }))}
+              onChange={(event) => setFormState((prev) => ({ ...prev, identification_number: event.target.value }))}
               className={`border border-gray-300 rounded-md py-2 px-4 focus:outline-none ${
                 editing ? "focus:ring-2 focus:ring-green-500 bg-white" : "bg-gray-100 cursor-not-allowed"
               }`}
