@@ -96,8 +96,16 @@ export default function RegisterForm({ role }: RegisterFormProps) {
 
   useEffect(() => {
     const loadUniversities = async () => {
-      const response = await apiService.institutions.getUniversities();
-      setUniversities(normalizeArrayResponse<University>(response.data));
+      try {
+        const response = await apiService.institutions.getUniversities();
+        setUniversities(normalizeArrayResponse<University>(response.data));
+      } catch (error) {
+        console.error("Failed to load universities:", error);
+        setServerError(
+          "Unable to load universities right now. Please refresh the page or try again later."
+        );
+        setUniversities([]);
+      }
     };
 
     void loadUniversities();
@@ -111,11 +119,20 @@ export default function RegisterForm({ role }: RegisterFormProps) {
     }
 
     const loadFaculties = async () => {
-      const response = await apiService.institutions.getFaculties(selectedUniversity);
-      setFaculties(normalizeArrayResponse<Faculty>(response.data));
-      setDepartments([]);
-      setValue("faculty", "");
-      setValue("department", "");
+      try {
+        const response = await apiService.institutions.getFaculties(selectedUniversity);
+        setFaculties(normalizeArrayResponse<Faculty>(response.data));
+        setDepartments([]);
+        setValue("faculty", "");
+        setValue("department", "");
+      } catch (error) {
+        console.error("Failed to load faculties:", error);
+        setServerError(
+          "Unable to load faculties right now. Please refresh the page or try again later."
+        );
+        setFaculties([]);
+        setDepartments([]);
+      }
     };
 
     void loadFaculties();
@@ -128,9 +145,17 @@ export default function RegisterForm({ role }: RegisterFormProps) {
     }
 
     const loadDepartments = async () => {
-      const response = await apiService.institutions.getDepartments({ faculty: selectedFaculty });
-      setDepartments(normalizeArrayResponse<Department>(response.data));
-      setValue("department", "");
+      try {
+        const response = await apiService.institutions.getDepartments({ faculty: selectedFaculty });
+        setDepartments(normalizeArrayResponse<Department>(response.data));
+        setValue("department", "");
+      } catch (error) {
+        console.error("Failed to load departments:", error);
+        setServerError(
+          "Unable to load departments right now. Please refresh the page or try again later."
+        );
+        setDepartments([]);
+      }
     };
 
     void loadDepartments();

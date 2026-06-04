@@ -1,5 +1,5 @@
 import { AxiosRequestConfig, AxiosResponse } from "axios";
-import apiClient, { tokenStorage } from "./api-client";
+import apiClient, { publicApiClient, tokenStorage } from "./api-client";
 import { AuthUser, UserProfile } from "@/types/user";
 import { Course, CourseModule, PaginatedResponse } from "@/types/course";
 import { Notification } from "@/types/notification";
@@ -385,21 +385,21 @@ const apiService = {
 
   institutions: {
     getUniversities(params?: { page?: number; search?: string }): Promise<AxiosResponse<PaginatedResponse<University>>> {
-      return apiClient.get<PaginatedResponse<University>>("/universities/", { params });
+      return publicApiClient.get<PaginatedResponse<University>>("/universities/", { params });
     },
 
     getUniversityById(id: string): Promise<AxiosResponse<University>> {
-      return apiClient.get<University>(`/universities/${id}/`);
+      return publicApiClient.get<University>(`/universities/${id}/`);
     },
 
     getFaculties(universityId: string): Promise<AxiosResponse<Faculty[]>> {
-      return apiClient.get<Faculty[]>("/faculties/", {
+      return publicApiClient.get<Faculty[]>("/faculties/", {
         params: { university: universityId },
       });
     },
 
     getDepartments(params: { faculty?: string; university?: string }): Promise<AxiosResponse<Department[]>> {
-      return apiClient.get<Department[]>("/departments/", { params });
+      return publicApiClient.get<Department[]>("/departments/", { params });
     },
   },
 

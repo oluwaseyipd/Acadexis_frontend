@@ -78,6 +78,41 @@ const setAuthCookies = (accessToken: string | null, refreshToken: string | null)
   }
 };
 
+const publicApiClient: AxiosInstance = axios.create({
+  baseURL: `${BASE_URL}/api`,
+  timeout: TIMEOUT,
+  withCredentials: false,
+  headers: {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  },
+});
+
+publicApiClient.interceptors.request.use(
+  (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
+    if (config.data && !(config.data instanceof FormData)) {
+      config.data = deepTransformKeys(config.data, decamelizeString);
+    }
+
+    if (config.params) {
+      config.params = deepTransformKeys(config.params, decamelizeString);
+    }
+
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+publicApiClient.interceptors.response.use(
+  (response: AxiosResponse) => {
+    if (response.data && typeof response.data === "object") {
+      response.data = deepTransformKeys(response.data, camelizeString);
+    }
+    return response;
+  },
+  (error) => Promise.reject(error)
+);
+
 const apiClient: AxiosInstance = axios.create({
   baseURL: `${BASE_URL}/api`,
   timeout: TIMEOUT,
@@ -141,11 +176,14 @@ apiClient.interceptors.response.use(
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       const refreshToken = tokenStorage.getRefreshToken();
+      const accessToken = tokenStorage.getToken();
 
       if (!refreshToken) {
-        tokenStorage.clearAll();
-        setAuthCookies(null, null);
-        if (IS_BROWSER) window.location.href = "/auth/login";
+        if (accessToken) {
+          tokenStorage.clearAll();
+          setAuthCookies(null, null);
+          if (IS_BROWSER) window.location.href = "/auth/login";
+        }
         return Promise.reject(error);
       }
 
@@ -208,4 +246,5 @@ apiClient.interceptors.response.use(
   }
 );
 
+export { publicApiClient };
 export default apiClient;
