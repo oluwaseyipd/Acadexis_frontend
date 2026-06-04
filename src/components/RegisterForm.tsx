@@ -13,54 +13,62 @@ import { type Department, type Faculty, type University } from "@/types/institut
 export type UserRole = "lecturer" | "student";
 
 // ─── Validation Schema ────────────────────────────────────────────────────────
-const registerSchema = z
-  .object({
-    fullName: z
-      .string()
-      .min(1, "Full name is required")
-      .min(2, "Name must be at least 2 characters")
-      .regex(/^[a-zA-Z\s.'-]+$/, "Name contains invalid characters"),
+const baseSchema = z.object({
+  firstName: z
+    .string()
+    .min(1, "First name is required")
+    .min(2, "First name must be at least 2 characters")
+    .regex(/^[a-zA-Z\s.'-]+$/, "First name contains invalid characters"),
 
-    email: z
-      .string()
-      .min(1, "Email is required")
-      .email("Please enter a valid email address")
-      .refine(
-        (val) => {
-          const domain = val.split("@")[1]?.toLowerCase() || "";
-          const isFreeEmail = /^(gmail|yahoo|outlook|hotmail|aol|protonmail|icloud)\.(com|co\.|net|org)$/.test(
-            domain
-          );
-          if (isFreeEmail) return false;
+  lastName: z
+    .string()
+    .min(1, "Last name is required")
+    .min(2, "Last name must be at least 2 characters")
+    .regex(/^[a-zA-Z\s.'-]+$/, "Last name contains invalid characters"),
 
-          const academicPatterns =
-            /\.(edu|ac\.|edu\.[a-z]{2}|co\.[a-z]{2}|org\.[a-z]{2})$/i;
-          const hasAcademicIndicators = /student|staff|faculty|lecturer|prof|alumni/i.test(
-            val
-          );
+  email: z
+    .string()
+    .min(1, "Email is required")
+    .email("Please enter a valid email address")
+    .refine(
+      (val) => {
+        const domain = val.split("@")[1]?.toLowerCase() || "";
+        const isFreeEmail = /^(gmail|yahoo|outlook|hotmail|aol|protonmail|icloud)\.(com|co\.|net|org)$/.test(
+          domain
+        );
+        if (isFreeEmail) return false;
 
-          return academicPatterns.test(domain) || hasAcademicIndicators;
-        },
-        { message: "Please use your institution email address" }
-      ),
+        const academicPatterns =
+          /\.(edu|ac\.|edu\.[a-z]{2}|co\.[a-z]{2}|org\.[a-z]{2})$/i;
+        const hasAcademicIndicators = /student|staff|faculty|lecturer|prof|alumni/i.test(
+          val
+        );
 
-    university: z.string().min(1, "University is required"),
-    faculty: z.string().min(1, "Faculty is required"),
-    department: z.string().min(1, "Department is required"),
+        return academicPatterns.test(domain) || hasAcademicIndicators;
+      },
+      { message: "Please use your institution email address" }
+    ),
 
-    password: z
-      .string()
-      .min(1, "Password is required")
-      .min(8, "Password must be at least 8 characters")
-      .regex(/[A-Z]/, "Must contain at least one uppercase letter")
-      .regex(/[0-9]/, "Must contain at least one number"),
+  university: z.string().min(1, "University is required"),
+  faculty: z.string().min(1, "Faculty is required"),
+  department: z.string().min(1, "Department is required"),
 
-    confirmPassword: z.string().min(1, "Please confirm your password"),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
+  password: z
+    .string()
+    .min(1, "Password is required")
+    .min(8, "Password must be at least 8 characters")
+    .regex(/[A-Z]/, "Must contain at least one uppercase letter")
+    .regex(/[0-9]/, "Must contain at least one number"),
+
+  confirmPassword: z.string().min(1, "Please confirm your password"),
+  identificationNumber: z.string().optional(),
+  level: z.string().optional(),
+});
+
+const registerSchema = baseSchema.refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+});
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
@@ -68,6 +76,99 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 interface RegisterFormProps {
   role: UserRole;
 }
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+// Normalize API responses that might be paginated
+const normalizeArrayResponse = <T,>(payload: unknown): T[] => {
+  if (Array.isArray(payload)) return payload;
+  if (payload && typeof payload === "object" && "results" in payload) {
+    const results = (payload as { results?: unknown }).results;
+    if (Array.isArray(results)) return results;
+  }
+  return [];
+};
+
+// Password strength calculation
+const getPasswordStrength = (password: string) => {
+  let score = 0;
+  if (password.length >= 8) score++;
+  if (password.length >= 12) score++;
+  if (/[A-Z]/.test(password) && /[a-z]/.test(password)) score++;
+  if (/[0-9]/.test(password)) score++;
+
+  const labels = ["Weak", "Fair", "Good", "Strong"];
+  const colors = ["bg-red-500", "bg-yellow-500", "bg-blue-500", "bg-green-500"];
+
+  return {
+    score: Math.min(score, 4),
+    label: labels[Math.min(score, 3)],
+    color: colors[Math.min(score, 3)],
+  };
+};
+
+// Field wrapper component
+const Field = ({
+  label,
+  error,
+  children,
+}: {
+  label: string;
+  error?: string;
+  children: React.ReactNode;
+}) => (
+  <div className="flex flex-col gap-1.5">
+    <label className="text-xs font-semibold text-gray-700 tracking-wider">
+      {label}
+    </label>
+    <div>{children}</div>
+    {error && <p className="text-xs text-red-600 mt-0.5">{error}</p>}
+  </div>
+);
+
+// Input styling helper
+const inputCn = (hasError: boolean) =>
+  `w-full px-4 py-3 border rounded-lg text-sm transition-colors focus:outline-none focus:ring-1 ${
+    hasError
+      ? "border-red-300 bg-red-50 focus:ring-red-400"
+      : "border-gray-200 bg-white focus:ring-green-400 focus:border-green-400"
+  }`;
+
+// Eye toggle component
+const EyeToggle = ({
+  show,
+  onToggle,
+}: {
+  show: boolean;
+  onToggle: () => void;
+}) => (
+  <button
+    type="button"
+    onClick={onToggle}
+    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+  >
+    {show ? <EyeOff size={18} /> : <Eye size={18} />}
+  </button>
+);
+
+// Google Icon component
+const GoogleIcon = () => (
+  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+  </svg>
+);
+
+// Spinner component
+const Spinner = ({ light = false }) => (
+  <div
+    className={`w-4 h-4 rounded-full border-2 border-transparent ${
+      light ? "border-t-white" : "border-t-gray-700"
+    } animate-spin`}
+  />
+);
 
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function RegisterForm({ role }: RegisterFormProps) {
@@ -96,15 +197,7 @@ export default function RegisterForm({ role }: RegisterFormProps) {
   const selectedUniversity = watch("university");
   const selectedFaculty = watch("faculty");
 
-  const normalizeArrayResponse = <T,>(payload: unknown): T[] => {
-    if (Array.isArray(payload)) return payload;
-    if (payload && typeof payload === "object" && "results" in payload) {
-      const results = (payload as { results?: unknown }).results;
-      if (Array.isArray(results)) return results;
-    }
-    return [];
-  };
-
+  // Load universities on mount
   useEffect(() => {
     const loadUniversities = async () => {
       try {
@@ -122,6 +215,7 @@ export default function RegisterForm({ role }: RegisterFormProps) {
     void loadUniversities();
   }, []);
 
+  // Load faculties when university changes
   useEffect(() => {
     if (!selectedUniversity) {
       setFaculties([]);
@@ -149,6 +243,7 @@ export default function RegisterForm({ role }: RegisterFormProps) {
     void loadFaculties();
   }, [selectedUniversity, setValue]);
 
+  // Load departments when faculty changes
   useEffect(() => {
     if (!selectedFaculty) {
       setDepartments([]);
@@ -182,8 +277,9 @@ export default function RegisterForm({ role }: RegisterFormProps) {
     setServerError(null);
 
     try {
-      const payload = {
-        full_name: data.fullName,
+      const payload: Record<string, unknown> = {
+        first_name: data.firstName,
+        last_name: data.lastName,
         email: data.email,
         password: data.password,
         role,
@@ -192,11 +288,27 @@ export default function RegisterForm({ role }: RegisterFormProps) {
         department: data.department,
       };
 
+      if (!isLecturer) {
+        payload.identification_number = data.identificationNumber;
+        payload.level = data.level;
+      }
+
       await apiService.auth.register(payload);
       router.push("/auth/login");
-    } catch (error: any) {
-      const message =
-        error?.response?.data?.message ?? "Registration failed. Please try again.";
+    } catch (error: unknown) {
+      let message = "Registration failed. Please try again.";
+      if (typeof error === "object" && error !== null) {
+        const err = error as Record<string, unknown>;
+        if (err.response && typeof err.response === "object") {
+          const response = err.response as Record<string, unknown>;
+          if (response.data && typeof response.data === "object") {
+            const responseData = response.data as Record<string, unknown>;
+            if (typeof responseData.message === "string") {
+              message = responseData.message;
+            }
+          }
+        }
+      }
       setServerError(message);
     } finally {
       setIsLoading(false);
@@ -268,14 +380,25 @@ export default function RegisterForm({ role }: RegisterFormProps) {
                 noValidate
                 className="flex flex-col gap-5"
               >
-                {/* Full Name */}
-                <Field label="FULL NAME" error={errors.fullName?.message}>
+                {/* First Name */}
+                <Field label="FIRST NAME" error={errors.firstName?.message}>
                   <input
                     type="text"
-                    placeholder="Jane Doe"
-                    autoComplete="name"
-                    className={inputCn(!!errors.fullName)}
-                    {...register("fullName")}
+                    placeholder="Jane"
+                    autoComplete="given-name"
+                    className={inputCn(!!errors.firstName)}
+                    {...register("firstName")}
+                  />
+                </Field>
+
+                {/* Last Name */}
+                <Field label="LAST NAME" error={errors.lastName?.message}>
+                  <input
+                    type="text"
+                    placeholder="Doe"
+                    autoComplete="family-name"
+                    className={inputCn(!!errors.lastName)}
+                    {...register("lastName")}
                   />
                 </Field>
 
@@ -345,6 +468,42 @@ export default function RegisterForm({ role }: RegisterFormProps) {
                     ))}
                   </select>
                 </Field>
+
+                {/* Identification Number (Student Only) */}
+                {!isLecturer && (
+                  <Field
+                    label="IDENTIFICATION NUMBER"
+                    error={errors.identificationNumber?.message}
+                  >
+                    <input
+                      type="text"
+                      placeholder="Enter your ID number"
+                      autoComplete="off"
+                      className={inputCn(!!errors.identificationNumber)}
+                      {...register("identificationNumber")}
+                    />
+                  </Field>
+                )}
+
+                {/* Level (Student Only) */}
+                {!isLecturer && (
+                  <Field label="LEVEL" error={errors.level?.message}>
+                    <select
+                      className={`${inputCn(!!errors.level)} text-gray-700 bg-white cursor-pointer`}
+                      defaultValue=""
+                      {...register("level")}
+                    >
+                      <option value="" disabled>
+                        Select your level
+                      </option>
+                      <option value="100">100 Level</option>
+                      <option value="200">200 Level</option>
+                      <option value="300">300 Level</option>
+                      <option value="400">400 Level</option>
+                      <option value="500">500 Level</option>
+                    </select>
+                  </Field>
+                )}
 
                 {/* Password */}
                 <Field label="PASSWORD" error={errors.password?.message}>
@@ -483,107 +642,5 @@ export default function RegisterForm({ role }: RegisterFormProps) {
         </p>
       </div>
     </main>
-  );
-}
-
-// ─── Helper: input classnames ─────────────────────────────────────────────────
-function inputCn(hasError: boolean) {
-  return `w-full bg-transparent border-0 border-b pb-1.5 text-[0.9375rem] text-gray-900 placeholder-gray-400 outline-none transition-colors focus:border-b-[#0f173e] appearance-none ${
-    hasError ? "border-b-red-500" : "border-b-gray-300"
-  }`;
-}
-
-// ─── Field wrapper ────────────────────────────────────────────────────────────
-function Field({
-  label,
-  error,
-  children,
-}: {
-  label: string;
-  error?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <span className="text-[0.6875rem] font-semibold tracking-widest text-gray-500 uppercase">
-        {label}
-      </span>
-      {children}
-      {error && (
-        <p className="text-xs text-red-500 mt-0.5" role="alert">
-          {error}
-        </p>
-      )}
-    </div>
-  );
-}
-
-// ─── Eye toggle button ────────────────────────────────────────────────────────
-function EyeToggle({ show, onToggle }: { show: boolean; onToggle: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onToggle}
-      aria-label={show ? "Hide password" : "Show password"}
-      className="absolute right-0 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#0f173e] transition-colors p-1"
-    >
-      {show ? <EyeOff size={18} strokeWidth={1.8} /> : <Eye size={18} strokeWidth={1.8} />}
-    </button>
-  );
-}
-
-// ─── Password strength ────────────────────────────────────────────────────────
-function getPasswordStrength(password: string): {
-  score: number;
-  label: string;
-  color: string;
-} {
-  let score = 0;
-  if (password.length >= 8) score++;
-  if (/[A-Z]/.test(password)) score++;
-  if (/[0-9]/.test(password)) score++;
-  if (/[^A-Za-z0-9]/.test(password)) score++;
-
-  if (score <= 1) return { score: 1, label: "Weak", color: "bg-red-400" };
-  if (score === 2) return { score: 2, label: "Fair", color: "bg-yellow-400" };
-  if (score === 3) return { score: 3, label: "Good", color: "bg-blue-400" };
-  return { score: 4, label: "Strong", color: "bg-green-500" };
-}
-
-// ─── Spinner ──────────────────────────────────────────────────────────────────
-function Spinner({ light = false }: { light?: boolean }) {
-  return (
-    <span
-      aria-hidden="true"
-      className={`inline-block w-4 h-4 rounded-full border-2 animate-spin ${
-        light
-          ? "border-white/30 border-t-white"
-          : "border-gray-300/40 border-t-gray-600"
-      }`}
-    />
-  );
-}
-
-// ─── Google Icon ──────────────────────────────────────────────────────────────
-function GoogleIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
-      <path
-        d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z"
-        fill="#4285F4"
-      />
-      <path
-        d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18Z"
-        fill="#34A853"
-      />
-      <path
-        d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332Z"
-        fill="#FBBC05"
-      />
-      <path
-        d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58Z"
-        fill="#EA4335"
-      />
-    </svg>
   );
 }

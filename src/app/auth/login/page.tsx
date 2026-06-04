@@ -17,11 +17,22 @@ const loginSchema = z.object({
     .min(1, "Email is required")
     .email("Please enter a valid email address")
     .refine(
-      (val) =>
-        val.endsWith(".edu") ||
-        val.includes("university") ||
-        val.includes("ac."),
-      { message: "Please use your university email address" }
+      (val) => {
+        const domain = val.split("@")[1]?.toLowerCase() || "";
+        const isFreeEmail = /^(gmail|yahoo|outlook|hotmail|aol|protonmail|icloud)\.(com|co\.|net|org)$/.test(
+          domain
+        );
+        if (isFreeEmail) return false;
+
+        const academicPatterns =
+          /\.(edu|ac\.|edu\.[a-z]{2}|co\.[a-z]{2}|org\.[a-z]{2})$/i;
+        const hasAcademicIndicators = /student|staff|faculty|lecturer|prof|alumni/i.test(
+          val
+        );
+
+        return academicPatterns.test(domain) || hasAcademicIndicators;
+      },
+      { message: "Please use your institution email address" }
     ),
   password: z
     .string()
