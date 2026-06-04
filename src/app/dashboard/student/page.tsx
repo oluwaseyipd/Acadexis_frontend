@@ -53,15 +53,15 @@ export default function OverviewPage() {
   const stats = [
     { label: "Enrolled Courses", value: courses.length.toString(), icon: BookOpen, color: "text-primary" },
     { label: "Study Sessions", value: recentSessions.length.toString(), icon: Clock, color: "text-info" },
-    { label: "Materials Read", value: "38", icon: FileText, color: "text-success" },
-    { label: "AI Questions", value: "156", icon: TrendingUp, color: "text-warning" },
+    { label: "Materials Read", value: "0", icon: FileText, color: "text-success" },
+    { label: "AI Questions", value: "0", icon: TrendingUp, color: "text-warning" },
   ];
     return (
         <div className="max-w-[1500px] mx-auto px-8 py-8 flex flex-col gap-8 font-sans">
       {/* Heading */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">
-          {UI_TEXT.dashboard.welcomeBack}, {user?.profile?.first_name || "User"}
+          {UI_TEXT.dashboard.welcomeBack}, {user?.profile?.firstName || "User"}
         </h1>
         <p className="text-muted-foreground mt-1">Here is what is happening with your courses.</p>
       </div>
