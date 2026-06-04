@@ -1,21 +1,29 @@
 import { create } from "zustand";
 import { AuthUser, AuthUserMapped, UserRole } from "@/types/user";
 
-export const mapBackendUser = (raw: AuthUser): AuthUserMapped => ({
-  ...raw,
-  profile: {
-    ...raw.profile,
-    firstName: raw.profile.first_name,
-    lastName: raw.profile.last_name,
-    identificationNumber: raw.profile.identification_number,
-    level: raw.profile.level,
-    department: raw.profile.department,
-    faculty: raw.profile.faculty ?? null,
-    university: raw.university,
-    avatarUrl: raw.profile.avatar ?? raw.profile.avatar_url,
-    avatar_url: raw.profile.avatar_url ?? raw.profile.avatar,
-  },
-});
+export const mapBackendUser = (raw: AuthUser): AuthUserMapped => {
+  const profileData = raw.profile as Record<string, unknown>;
+  
+  return {
+    ...raw,
+    profile: {
+      ...raw.profile,
+      // Handle both snake_case and camelCase from backend
+      first_name: (profileData.first_name ?? profileData.firstName) as string,
+      last_name: (profileData.last_name ?? profileData.lastName) as string,
+      identification_number: (profileData.identification_number ?? profileData.identificationNumber) as string,
+      firstName: (profileData.first_name ?? profileData.firstName) as string,
+      lastName: (profileData.last_name ?? profileData.lastName) as string,
+      identificationNumber: (profileData.identification_number ?? profileData.identificationNumber) as string,
+      level: raw.profile.level,
+      department: raw.profile.department,
+      faculty: raw.profile.faculty ?? null,
+      university: raw.university,
+      avatarUrl: raw.profile.avatar ?? raw.profile.avatar_url,
+      avatar_url: raw.profile.avatar_url ?? raw.profile.avatar,
+    },
+  };
+};
 
 interface AppState {
   user: AuthUserMapped | null;

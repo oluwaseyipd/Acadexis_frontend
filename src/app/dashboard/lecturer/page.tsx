@@ -39,7 +39,7 @@ export default function LecturerOverview() {
     <div className="max-w-[1500px] mx-auto px-8 py-8 flex flex-col gap-8 font-sans">
       <div>
         <h1 className="text-2xl font-bold text-foreground">
-          {UI_TEXT.dashboard.welcomeBack}, {user?.profile?.firstName || "User"}
+          {UI_TEXT.dashboard.welcomeBack}, {user?.profile?.first_name || "User"}
         </h1>
         <p className="text-muted-foreground mt-1">Your teaching dashboard at a glance.</p>
       </div>
