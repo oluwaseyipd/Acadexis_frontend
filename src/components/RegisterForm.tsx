@@ -469,15 +469,15 @@ export default function RegisterForm({ role }: RegisterFormProps) {
                   </select>
                 </Field>
 
-                {/* Identification Number (Student Only) */}
+                {/* Matric Number (Student Only) */}
                 {!isLecturer && (
                   <Field
-                    label="IDENTIFICATION NUMBER"
+                    label="MATRIC NUMBER"
                     error={errors.identificationNumber?.message}
                   >
                     <input
                       type="text"
-                      placeholder="Enter your ID number"
+                      placeholder="Enter your matric number"
                       autoComplete="off"
                       className={inputCn(!!errors.identificationNumber)}
                       {...register("identificationNumber")}

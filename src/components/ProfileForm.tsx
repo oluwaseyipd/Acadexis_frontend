@@ -34,6 +34,7 @@ export default function ProfileForm() {
     email: "",
     level: "",
     department: "",
+    identification_number: "",
   });
   const [selectedAvatarFile, setSelectedAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -50,6 +51,7 @@ export default function ProfileForm() {
       email: user.email,
       level: user.profile.level,
       department: user.profile.department ?? "",
+      identification_number: user.profile.identification_number,
     });
 
     setAvatarPreview(user.profile.avatar ?? user.profile.avatar_url ?? null);
@@ -93,6 +95,7 @@ export default function ProfileForm() {
         last_name: formState.last_name,
         level: formState.level,
         department: formState.department || null,
+        identification_number: formState.identification_number,
         avatar: selectedAvatarFile ?? undefined,
       };
 
@@ -234,26 +237,22 @@ export default function ProfileForm() {
             />
           </div>
 
-          <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2">
             <label className="text-sm font-medium text-gray-700">Student ID</label>
-            <p className="rounded-md border border-gray-300 bg-gray-100 py-2 px-4 text-sm text-gray-700">
-              {user?.profile?.identification_number ?? "—"}
-            </p>
+            <input
+              type="text"
+              value={formState.identification_number}
+              disabled={!editing || userLoading}
+              onChange={(event) => setFormState((prev) => ({ ...prev, identification_number: event.target.value }))}
+              className={`border border-gray-300 rounded-md py-2 px-4 focus:outline-none ${
+                editing ? "focus:ring-2 focus:ring-green-500 bg-white" : "bg-gray-100 cursor-not-allowed"
+              }`}
+            />
           </div>
         </div>
 
         <h3 className="text-lg font-semibold text-gray-800 px-8">Academic Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 py-2 px-8 gap-6">
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-700">Faculty</label>
-            <input
-              type="text"
-              value={user?.profile?.department ?? ""}
-              disabled={true}
-              className="border border-gray-300 rounded-md py-2 px-4 bg-gray-100 cursor-not-allowed focus:outline-none"
-            />
-          </div>
-
           <div className="flex flex-col gap-2">
             <label className="text-sm font-medium text-gray-700">Department</label>
             <input
@@ -281,17 +280,13 @@ export default function ProfileForm() {
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-700">Gender</label>
-            <select
-              disabled={!editing || userLoading}
-              className={`border border-gray-300 rounded-md py-2 px-4 focus:outline-none ${
-                editing ? "focus:ring-2 focus:ring-green-500 bg-white" : "bg-gray-100 cursor-not-allowed"
-              }`}
-            >
-              <option>Male</option>
-              <option>Female</option>
-              <option>Other</option>
-            </select>
+            <label className="text-sm font-medium text-gray-700">University</label>
+            <input
+              type="text"
+              value={user?.university ?? ""}
+              disabled={true}
+              className="border border-gray-300 rounded-md py-2 px-4 bg-gray-100 cursor-not-allowed focus:outline-none"
+            />
           </div>
         </div>
 

@@ -1,6 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
+import { useMemo } from "react";
 import { usePathname } from "next/navigation";
 import {
   BookOpen,
@@ -14,6 +16,7 @@ import {
   Upload,
   Users,
 } from "lucide-react";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 // ─── Nav config ───────────────────────────────────────────────────────────────
 const STUDENT_NAV_ITEMS = [
@@ -49,10 +52,33 @@ export default function Sidebar({
   isOpen = false,
   onClose,
 }: SidebarProps) {
+  const { user } = useCurrentUser();
   const pathname = usePathname();
   const isLecturer = pathname?.startsWith("/dashboard/lecturer");
   const navItems = isLecturer ? LECTURER_NAV_ITEMS : STUDENT_NAV_ITEMS;
   const profileHref = isLecturer ? "/dashboard/lecturer/profile" : "/dashboard/student/profile";
+
+  const displayName = user?.name ?? userName;
+  const displaySubtitle = user?.profile?.department ?? user?.profile?.level ?? userSubtitle;
+  const displayEmail = user?.email ?? "";
+  const displayAvatarUrl = user?.profile?.avatarUrl;
+  const displayInitials = useMemo(() => {
+    if (user?.name) {
+      return user.name
+        .split(" ")
+        .filter(Boolean)
+        .map((segment) => segment[0].toUpperCase())
+        .slice(0, 2)
+        .join("");
+    }
+
+    return displayName
+      .split(" ")
+      .filter(Boolean)
+      .map((segment) => segment[0].toUpperCase())
+      .slice(0, 2)
+      .join("") || "U";
+  }, [user, displayName]);
 
   return (
     <aside
@@ -124,20 +150,32 @@ export default function Sidebar({
       <div className="py-3 border-t border-border bg-brand-primary/10 hover:bg-brand-primary/15 rounded-lg transition-all duration-150">
         <Link
           href={profileHref}
-          className="flex items-center gap-3 px-3 rounded-lg transition-colors" 
+          className="flex items-center gap-3 px-3 rounded-lg transition-colors"
         >
           {/* Avatar */}
-        <div
-          className="w-8 h-8 rounded-full flex items-center justify-center bg-brand-primary text-white text-xs font-bold shrink-0"
-        >
-          JA
-        </div>
-        <div className="flex flex-col">
-          <p className="text-sm font-medium text-sidebar-foreground leading-tight">
-            John Abiola
-          </p>
-          <p className="text-xs text-muted-foreground mt-0.5">oluwaseyipd@gmail.com</p>
-        </div>
+          <div
+            className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 ${displayAvatarUrl ? "overflow-hidden bg-transparent" : "bg-brand-primary"}`}
+          >
+            {displayAvatarUrl ? (
+              <Image
+                src={displayAvatarUrl}
+                alt={displayName}
+                width={32}
+                height={32}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <span>{displayInitials}</span>
+            )}
+          </div>
+          <div className="flex flex-col">
+            <p className="text-sm font-medium text-sidebar-foreground leading-tight">
+              {displayName}
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {displayEmail || displaySubtitle}
+            </p>
+          </div>
         </Link>
 
       </div>

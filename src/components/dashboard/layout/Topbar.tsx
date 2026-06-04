@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
+import Image from "next/image";
 import { Search, Bell, HelpCircle, X, Menu } from "lucide-react";
 import Link from "next/link";
 import NotificationPanel from "./NotificationPanel";
 import { useNotificationStore } from "@/store/notificationStore";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 interface TopBarProps {
@@ -22,11 +24,27 @@ export default function TopBar({
   onSearch,
   onMenuClick,
 }: TopBarProps) {
+  const { user } = useCurrentUser();
   const unreadCount = useNotificationStore((state) => state.unreadCount);
   const [query, setQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const [showNotifs, setShowNotifs] = useState(false);
   const notifsRef = useRef<HTMLDivElement>(null);
+
+  const displayName = user?.name ?? userName;
+  const displayAvatarUrl = user?.profile?.avatarUrl;
+  const displayInitials = useMemo(() => {
+    if (user?.name) {
+      return user.name
+        .split(" ")
+        .filter(Boolean)
+        .map((segment) => segment[0].toUpperCase())
+        .slice(0, 2)
+        .join("");
+    }
+
+    return userInitials;
+  }, [user, userInitials]);
 
   // Close notification dropdown on outside click
   useEffect(() => {
@@ -129,13 +147,23 @@ export default function TopBar({
         {/* Avatar */}
         <Link
           href="/dashboard/student/settings"
-          className={`w-8 h-8 rounded-full ${avatarColor} flex items-center justify-center text-white text-xs font-bold hover:opacity-90 transition-opacity shrink-0`}
-          aria-label={`${userName}'s profile`}
-          title={userName}
+          className={`w-8 h-8 rounded-full overflow-hidden ${displayAvatarUrl ? "bg-transparent" : avatarColor} flex items-center justify-center text-white text-xs font-bold hover:opacity-90 transition-opacity shrink-0`}
+          aria-label={`${displayName}'s profile`}
+          title={displayName}
         >
-          {userInitials}
+          {displayAvatarUrl ? (
+            <Image
+              src={displayAvatarUrl}
+              alt={displayName}
+              width={32}
+              height={32}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <span>{displayInitials}</span>
+          )}
         </Link>
-      </div>
+      </div> 
     </header>
   );
 }

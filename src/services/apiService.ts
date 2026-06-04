@@ -159,6 +159,7 @@ const apiService = {
         last_name?: string;
         level?: string;
         department?: string | null;
+        identification_number?: string;
         avatar?: File;
       }): Promise<AxiosResponse<UserProfile>> {
         if (data.avatar) {
@@ -167,6 +168,7 @@ const apiService = {
           if (data.last_name !== undefined) formData.append("last_name", data.last_name);
           if (data.level !== undefined) formData.append("level", data.level);
           if (data.department !== undefined && data.department !== null) formData.append("department", data.department);
+          if (data.identification_number !== undefined) formData.append("identification_number", data.identification_number);
           formData.append("avatar", data.avatar);
 
           return apiClient.patch<UserProfile>("/auth/profile/", formData);
