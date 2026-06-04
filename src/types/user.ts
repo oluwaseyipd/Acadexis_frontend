@@ -4,6 +4,7 @@ export interface UserProfile {
   identification_number: string;
   level: string;
   department: string | null;
+  faculty: string | null;
   avatar: string | null;
   avatar_url: string | null;
 }

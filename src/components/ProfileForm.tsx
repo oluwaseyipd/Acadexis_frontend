@@ -283,8 +283,9 @@ export default function ProfileForm() {
             <label className="text-sm font-medium text-gray-700">Faculty</label>
             <input
               type="text"
-              value={user?.faculty ?? ""}
+              value={user?.profile?.faculty ?? ""}
               disabled={true}
+              readOnly
               className="border border-gray-300 rounded-md py-2 px-4 bg-gray-100 cursor-not-allowed focus:outline-none"
             />
           </div>
@@ -293,8 +294,9 @@ export default function ProfileForm() {
             <label className="text-sm font-medium text-gray-700">University</label>
             <input
               type="text"
-              value={user?.university ?? ""}
+              value={user?.profile?.university ?? ""}
               disabled={true}
+              readOnly
               className="border border-gray-300 rounded-md py-2 px-4 bg-gray-100 cursor-not-allowed focus:outline-none"
             />
           </div>

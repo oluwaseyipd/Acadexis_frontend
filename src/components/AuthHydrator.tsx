@@ -17,7 +17,9 @@ type JwtPayload = {
   identification_number?: string;
   level?: string;
   department?: string;
+  faculty?: string;
   avatar?: string;
+  avatar_url?: string;
 };
 
 const decodeJwt = (token: string): JwtPayload | null => {
@@ -59,8 +61,9 @@ export default function AuthHydrator() {
           identification_number: payload.identification_number ?? "",
           level: payload.level ?? "",
           department: payload.department ?? null,
+          faculty: payload.faculty ?? null,
           avatar: payload.avatar ?? null,
-          avatar_url: payload.avatar ?? null,
+          avatar_url: payload.avatar_url ?? payload.avatar ?? null,
         },
       })
     );

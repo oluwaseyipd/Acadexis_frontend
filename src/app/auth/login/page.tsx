@@ -89,8 +89,9 @@ export default function LoginPage() {
             identification_number: user.profile.identification_number,
             level: user.profile.level,
             department: user.profile.department,
+            faculty: user.profile.faculty ?? null,
             avatar: user.profile.avatar,
-            avatar_url: user.profile.avatar,
+            avatar_url: user.profile.avatar_url ?? user.profile.avatar,
           },
         })
       );
