@@ -240,6 +240,18 @@ const apiService = {
       });
     },
 
+    /** Create a new course */
+    createCourse(data: {
+      title: string;
+      code: string;
+      description: string;
+      department: string;
+      level: string;
+      lecturer_remark?: string;
+    }): Promise<AxiosResponse<Course>> {
+      return apiClient.post<Course>("/courses/", data);
+    },
+
     /** Get modules for a course */
     getModules(courseId: string): Promise<AxiosResponse<CourseModule[]>> {
       return apiClient.get<CourseModule[]>("/modules/", {
