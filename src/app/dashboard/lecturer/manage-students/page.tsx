@@ -152,7 +152,7 @@ export default function ManageStudentsPage() {
                       </TableCell>
                       <TableCell>
                         <Badge variant="secondary">
-                          {new Date(s.created_at).toLocaleDateString()}
+                          {s.created_at ? new Date(s.created_at).toLocaleDateString() : "—"}
                         </Badge>
                       </TableCell>
                     </TableRow>
