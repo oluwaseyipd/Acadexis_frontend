@@ -6,15 +6,13 @@ import apiService from "@/services/apiService";
 const severityOptions = ["low", "medium", "high", "critical"] as const;
 
 export default function SupportPage() {
-  const [activeTab, setActiveTab] = useState<"contact" | "report" | "admin">("contact");
+  const [activeTab, setActiveTab] = useState<"contact" | "report">("contact");
   const [contactSubject, setContactSubject] = useState("");
   const [contactBody, setContactBody] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [reportTitle, setReportTitle] = useState("");
   const [reportDescription, setReportDescription] = useState("");
   const [reportSeverity, setReportSeverity] = useState<typeof severityOptions[number]>("low");
-  const [adminReason, setAdminReason] = useState("");
-  const [adminFile, setAdminFile] = useState<File | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -67,34 +65,12 @@ export default function SupportPage() {
     }
   };
 
-  const handleSubmitAdminRequest = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setStatusMessage(null);
-    setErrorMessage(null);
-    setIsSubmitting(true);
-
-    try {
-      await apiService.support.createAdminRequest({
-        reason: adminReason,
-        documentProof: adminFile ?? undefined,
-      });
-
-      setStatusMessage("Admin access request submitted successfully.");
-      setAdminReason("");
-      setAdminFile(null);
-    } catch (error) {
-      setErrorMessage("Failed to submit admin access request. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
       <div className="mb-8">
         <h1 className="text-3xl font-semibold text-gray-900">Support Center</h1>
         <p className="mt-2 text-sm text-gray-600">
-          Choose an option below to contact support, report an issue, or request admin access.
+          Choose an option below to contact support or report an issue.
         </p>
       </div>
 
@@ -103,12 +79,11 @@ export default function SupportPage() {
           {[
             { id: "contact", label: "Contact Support" },
             { id: "report", label: "Report Issue" },
-            { id: "admin", label: "Admin Request" },
           ].map((tab) => (
             <button
               key={tab.id}
               type="button"
-              onClick={() => setActiveTab(tab.id as any)}
+              onClick={() => setActiveTab(tab.id as typeof activeTab)}
               className={`px-4 py-2 text-sm font-medium transition-colors ${
                 activeTab === tab.id
                   ? "bg-brand-primary text-white"
@@ -215,36 +190,6 @@ export default function SupportPage() {
               className="inline-flex items-center justify-center rounded-xl bg-[#0f173e] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#1a2456] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isSubmitting ? "Submitting..." : "Submit Issue Report"}
-            </button>
-          </form>
-        )}
-
-        {activeTab === "admin" && (
-          <form onSubmit={handleSubmitAdminRequest} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Reason for Admin Access</label>
-              <textarea
-                value={adminReason}
-                onChange={(e) => setAdminReason(e.target.value)}
-                className="mt-2 h-40 w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Proof Document (optional)</label>
-              <input
-                type="file"
-                accept="image/*,.pdf,.doc,.docx"
-                onChange={(e) => setAdminFile(e.target.files?.[0] ?? null)}
-                className="mt-2 w-full text-sm text-gray-900"
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="inline-flex items-center justify-center rounded-xl bg-[#0f173e] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#1a2456] disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {isSubmitting ? "Submitting..." : "Request Admin Access"}
             </button>
           </form>
         )}

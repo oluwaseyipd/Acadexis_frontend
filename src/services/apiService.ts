@@ -13,7 +13,7 @@ import type {
   Bookmark,
 } from "@/types/studylab";
 import { TopicStruggle } from "@/types/analytics";
-import { ContactMessage, IssueReport, AdminRequest } from "@/types/admin";
+import { ContactMessage, IssueReport } from "@/types/admin";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -456,15 +456,6 @@ const apiService = {
 
     report(data: { title: string; description: string; severity: "low" | "medium" | "high" | "critical" }): Promise<AxiosResponse<IssueReport>> {
       return apiClient.post<IssueReport>("/support/report/", data);
-    },
-
-    createAdminRequest(data: { reason: string; documentProof?: File }): Promise<AxiosResponse<AdminRequest>> {
-      const formData = new FormData();
-      formData.append("reason", data.reason);
-      if (data.documentProof) {
-        formData.append("document_proof", data.documentProof);
-      }
-      return apiClient.post<AdminRequest>("/support/admin-request/", formData);
     },
   },
 };

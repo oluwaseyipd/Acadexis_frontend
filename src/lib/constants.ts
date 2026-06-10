@@ -88,14 +88,8 @@ export const UI_TEXT = {
     contact: "Contact Team",
     report: "Report Issue",
     helpSupport: "Help & Support",
-    adminRequest: "Request Admin",
     search: "Search courses, materials...",
     logout: "Sign Out",
-    // Admin specific
-    adminDashboard: "Admin Dashboard",
-    adminUsers: "User Management",
-    adminCourses: "Course Management",
-    adminSupport: "Support Queue",
   },
   studyLab: {
     title: "The Study Lab",
