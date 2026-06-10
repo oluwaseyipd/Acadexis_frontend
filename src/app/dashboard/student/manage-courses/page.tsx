@@ -16,7 +16,7 @@ import { toast } from "sonner";
 
 export default function ManageCourses() {
   const [search, setSearch] = useState("");
-  const { courses, isLoading: loading, error, refetch } = useCourses({ mode: "mine", search });
+  const { courses, isLoading: loading, error, refetch } = useCourses({ mode: "all", search });
   const filtered = courses.filter(
     (course) =>
       course.title.toLowerCase().includes(search.toLowerCase()) ||
