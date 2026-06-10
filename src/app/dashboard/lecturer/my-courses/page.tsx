@@ -1,7 +1,7 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
-import { BookOpen, Users, FileText, Trash2, PlusCircle, Loader2 } from "lucide-react";
+import { BookOpen, Users, FileText, PlusCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,18 +9,22 @@ import { Badge } from "@/components/ui/badge";
 import { useAppStore } from "@/store/useAppStore";
 import apiService from "@/services/apiService";
 
-const coursesStat=[
-  { label: "Total Courses", value: 0, icon: BookOpen }, 
-  { label: "Students Enrolled", value: 0, icon: Users },
-  { label: "Published", value: 0, icon: FileText }, 
-  { label: "Draft", value: 0 , icon: Trash2}]
-  ;
-
 export default function CoursesPage() {
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAppStore();
+
+  // Calculate stats from actual data
+  const stats = useMemo(() => {
+    const totalCourses = courses.length;
+    const totalStudents = courses.reduce((sum, c) => sum + (c.students_enrolled || 0), 0);
+    return [
+      { label: "Total Courses", value: totalCourses, icon: BookOpen },
+      { label: "Students Enrolled", value: totalStudents, icon: Users },
+      { label: "Materials", value: courses.reduce((sum, c) => sum + (c.materials_count || 0), 0), icon: FileText },
+    ];
+  }, [courses]);
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -100,8 +104,8 @@ export default function CoursesPage() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mt-5 md:mt-10">
 
         {/* Stat Cards */}
-        <div className="col-span-full grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {coursesStat.map((stat) => (
+        <div className="col-span-full grid grid-cols-2 lg:grid-cols-3 gap-4">
+          {stats.map((stat) => (
             <Card key={stat.label} className="relative shadow-card">
               <span className="absolute left-0 w-1.5 h-full rounded-l-lg bg-brand-primary transition-opacity duration-150"></span>
               <CardContent className="flex items-center gap-4 pt-6">
@@ -130,11 +134,11 @@ export default function CoursesPage() {
                       </div>
                       <span className="text-xs font-mono text-muted-foreground">{course.code}</span>
                     </div>
-                    <Badge variant="secondary" className="text-xs ?${course.status === 'Published' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
-                      {course.status}
+                    <Badge variant="secondary" className="text-xs">
+                      {course.students_enrolled || 0} Students
                     </Badge>
                   </div>
-                  <Link href={`/dashboard/student/library/${course.id}`}>
+                  <Link href={`/dashboard/lecturer/my-courses/${course.id}`}>
                     <CardTitle className="text-base mt-2 hover:text-primary transition-colors cursor-pointer">{course.title}</CardTitle>
                   </Link>
                 </CardHeader>
@@ -142,13 +146,9 @@ export default function CoursesPage() {
                   <p className="text-sm text-muted-foreground line-clamp-2 flex-1">{course.description}</p>
                   <div className="mt-4 flex items-center justify-between">
                     <div className="flex items-center gap-3 text-sm text-brand-muted">
-                      <span>{course.lecturerName}</span>
-                      <span className="flex items-center gap-1"><FileText className="h-3 w-3" />{course.materialsCount}</span>
-                      <span className="flex items-center gap-1"><Users className="h-3 w-3" />{course.studentsEnrolled} Students</span>
+                      <span>{course.lecturer_name}</span>
+                      <span className="flex items-center gap-1"><FileText className="h-3 w-3" />{course.materials_count}</span>
                     </div>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={() => removeCourse(course.id)}>
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
                   </div>
                 </CardContent>
               </Card>

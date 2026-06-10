@@ -240,6 +240,11 @@ const apiService = {
       });
     },
 
+    /** Get students enrolled in a course */
+    getStudents(courseId: string): Promise<AxiosResponse<any[]>> {
+      return apiClient.get<any[]>(`/courses/${courseId}/students/`);
+    },
+
     /** Create a new course */
     createCourse(data: {
       title: string;

@@ -100,8 +100,8 @@ export default function CoursesPage() {
                   <p className="text-sm text-muted-foreground line-clamp-2 flex-1">{course.description}</p>
                   <div className="mt-4 flex items-center justify-between">
                     <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                      <span>{course.lecturerName}</span>
-                      <span className="flex items-center gap-1"><FileText className="h-3 w-3" />{course.materialsCount}</span>
+                      <span>{course.lecturer_name}</span>
+                      <span className="flex items-center gap-1"><FileText className="h-3 w-3" />{course.materials_count}</span>
                     </div>
                     <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={() => removeCourse(course.id)}>
                       <Trash2 className="h-3.5 w-3.5" />
