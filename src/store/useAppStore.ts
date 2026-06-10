@@ -7,6 +7,7 @@ export const mapBackendUser = (raw: AuthUser): AuthUserMapped => ({
     ...raw.profile,
     firstName: raw.profile.first_name,
     lastName: raw.profile.last_name,
+    email: raw.email,
     identificationNumber: raw.profile.identification_number,
     level: raw.profile.level,
     department: raw.profile.department,

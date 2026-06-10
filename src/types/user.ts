@@ -17,13 +17,14 @@ export interface AuthUser {
   role: UserRole;
   university: string;
   name: string;
-  profile: UserProfile;
+  profile: UserProfile; 
 }
 
 export interface AuthUserMapped extends AuthUser {
   profile: UserProfile & {
     firstName: string;
     lastName: string;
+    email: string;
     identificationNumber: string;
     department: string | null;
     faculty: string | null;

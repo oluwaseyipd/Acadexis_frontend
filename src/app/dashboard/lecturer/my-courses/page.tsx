@@ -60,9 +60,11 @@ export default function CoursesPage() {
       </div>
 
       {/* Create New Course Button */}
-      <Button  className="mt-4 bg-brand-primary text-brand-muted hover:bg-brand-primary/90">
-        <PlusCircle className="h-4 w-4" />
-        <Link href="/dashboard/lecturer/add-course">Create Course</Link>
+      <Button asChild className="mt-4 bg-brand-primary text-brand-muted hover:bg-brand-primary/90">
+        <Link href="/dashboard/lecturer/add-course">
+          <PlusCircle className="h-4 w-4 mr-2" />
+          Create Course
+        </Link>
       </Button>
 
     </div>
