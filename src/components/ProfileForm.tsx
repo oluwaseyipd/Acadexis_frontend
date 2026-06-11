@@ -126,42 +126,44 @@ export default function ProfileForm() {
 
   return (
     <div className="max-w-[1500px] mx-auto px-8 py-8 flex flex-col gap-8 font-sans">
-      <div className="bg-white flex flex-col gap-4 rounded-xl">
-        <div className="w-full h-24 rounded-t-xl bg-gradient-to-r from-[#0f173e] to-[#1a2456]" />
+      <div className="bg-white flex flex-col gap-4 rounded-xl shadow-card overflow-hidden">
+        <div className="w-full h-32 rounded-t-xl bg-gradient-to-r from-[#0f173e] to-[#1a2456]" />
 
-        <div className="flex items-center justify-between p-8">
-          <div className="flex items-center gap-4">
-            <button
-              type="button"
-              onClick={() => document.getElementById("avatar-input")?.click()}
-              className="relative rounded-full overflow-hidden w-24 h-24 bg-gray-100 flex items-center justify-center"
-              disabled={!editing}
-            >
-              {avatarSrc ? (
-                <Image
-                  src={avatarSrc}
-                  alt={user?.name ?? "Profile avatar"}
-                  className="h-full w-full object-cover"
-                  width={96}
-                  height={96}
-                />
-              ) : (
-                <span className="text-xl font-semibold text-gray-700">{initials}</span>
-              )}
-              {editing && (
-                <span className="absolute inset-x-0 bottom-0 py-1 text-[0.65rem] uppercase tracking-[0.15em] bg-black/40 text-white text-center">
-                  Upload
-                </span>
-              )}
-            </button>
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between px-8 pb-4 pt-2 gap-4">
+          <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 text-center sm:text-left">
+            <div className="relative -mt-20 z-10">
+              <button
+                type="button"
+                onClick={() => document.getElementById("avatar-input")?.click()}
+                className="relative rounded-full overflow-hidden w-28 h-28 bg-gray-100 flex items-center justify-center border-4 border-white shadow-md focus:outline-none transition-transform hover:scale-105"
+                disabled={!editing}
+              >
+                {avatarSrc ? (
+                  <Image
+                    src={avatarSrc}
+                    alt={user?.name ?? "Profile avatar"}
+                    className="h-full w-full object-cover"
+                    width={112}
+                    height={112}
+                  />
+                ) : (
+                  <span className="text-2xl font-semibold text-gray-700">{initials}</span>
+                )}
+                {editing && (
+                  <span className="absolute inset-x-0 bottom-0 py-1 text-[0.65rem] uppercase tracking-[0.15em] bg-black/40 text-white text-center">
+                    Upload
+                  </span>
+                )}
+              </button>
+            </div>
 
-            <div>
+            <div className="pb-1">
               <h2 className="text-xl font-semibold text-gray-800">{user?.name ?? "User"}</h2>
               <p className="text-sm text-gray-500">{user?.email ?? ""}</p>
             </div>
           </div>
 
-          <div>
+          <div className="pb-1">
             <button
               type="button"
               onClick={() => setEditing((prev) => !prev)}
