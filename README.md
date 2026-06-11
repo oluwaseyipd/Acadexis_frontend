@@ -1,193 +1,138 @@
-# Acadexis Frontend
+# Acadexis
 
-A modern educational platform for universities that bridges the gap between lecturers, students, and AI-powered learning tools. Built with Next.js, React, and TypeScript.
+[![Next.js](https://img.shields.io/badge/Next.js-16.2.4-black?logo=next.js)](https://nextjs.org)
+[![React](https://img.shields.io/badge/React-19.2.4-blue?logo=react)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?logo=tailwind-css)](https://tailwindcss.com)
+[![Zustand](https://img.shields.io/badge/State-Zustand_5.x-orange)](https://github.com/pmndrs/zustand)
+[![Proprietary](https://img.shields.io/badge/License-Proprietary-red)](#license)
 
-## Overview
+Acadexis is a premium, institutional AI-knowledge grounding platform designed for universities. It bridges the gap between official course materials, lecturers, students, and AI-grounded learning tools. 
 
-Acadexis is an institutional AI knowledge grounding platform that empowers universities to deliver AI-enhanced education. The platform enables lecturers to upload and manage course materials, while students benefit from AI-powered study sessions backed by verified course content with precise citations.
+By using official course materials (PDF, DOCX, PPTX) as the direct source of truth, Acadexis provides students with an AI tutor that answers questions with **precise page-level citations**, preventing hallucinations. Simultaneously, it provides lecturers with analytics and **student struggle heatmaps** to identify topics that require further explanation.
 
-## Tech Stack
+---
 
-- **Framework**: [Next.js](https://nextjs.org) 16.2.4 (App Router)
-- **Language**: [TypeScript](https://www.typescriptlang.org/) 5.x
-- **UI Library**: [React](https://react.dev) 19.2.4
-- **Styling**: [Tailwind CSS](https://tailwindcss.com) 3.4.x
-- **Component Primitives**: [Radix UI](https://www.radix-ui.com) (headless, accessible components)
-- **State Management**: [Zustand](https://zustand-demo.pmnd.rs/) 5.x
-- **Form Handling**: [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/)
-- **HTTP Client**: [Axios](https://axios-http.com/)
-- **Charts**: [Recharts](https://recharts.org/)
-- **Animations**: [Framer Motion](https://www.framer.com/motion/)
-- **Icons**: [Lucide React](https://lucide.dev/)
-- **Validation**: [Zod](https://zod.dev/)
+## Key Modules & Features
 
-## Features
+### 🔐 Authentication & Single Sign-On (SSO)
+- **University Google Sign-In:** Fully integrated Google OAuth2 SSO flow.
+- **Academic Email Verification:** Automated domain validation (restricting sign-ups to `.edu`, `.edu.ng`, `.ac.uk` domains) to ensure only verified students and staff can access the portal.
+- **Dynamic Registration Completion:** If a Google user log in for the first time, they are prompted to complete their profile (selecting University, Faculty, Department, Level, and Matric Number) before access is granted.
 
-### Student Features
+### 🎓 Student Workspace
+- **Dashboard Overview:** Personal stats, active study sessions, notifications, and quick action shortcuts.
+- **Study Lab (AI Tutor):** Engage in dynamic study sessions with course material-grounded AI that answers queries citing specific page numbers.
+- **Digital Library:** Download course files (PDFs, PPTX, DOCX) uploaded directly by lecturers.
+- **Quiz Engine:** Timed assessments generated for courses, complete with score summaries and history.
+- **Bookmarks:** Save code blocks, text snippets, and verified answers from the AI tutor for revision.
 
-- **Dashboard**: Personalized overview with study statistics, recent activity, and course progress
-- **Course Management**: Browse, enroll in, and manage enrolled courses
-- **Study Lab**: AI-powered chat interface that answers questions using uploaded course materials with precise page citations
-- **Quiz System**: Take course quizzes with timed assessments and detailed results
-- **Library**: Access and download course materials (PDFs, documents)
-- **Bookmarks**: Save and organize favorite study materials
-- **Profile Management**: Update personal information and preferences
+### 👨‍🏫 Lecturer Workspace
+- **Knowledge Hub:** Easily upload, manage, and delete course syllabi and lecture slides.
+- **Student Analytics & Struggle Heatmaps:** Visual insights derived from students' questions to AI, helping lecturers identify exactly which course modules or concepts students struggle to grasp.
+- **Course & Student Management:** Edit details, view enrolled class lists, and post announcements.
 
-### Lecturer Features
+---
 
-- **Dashboard**: Overview of teaching courses and student analytics
-- **Course Management**: Create, update, and manage courses
-- **Knowledge Hub**: Upload and organize course materials that become the AI's source of truth
-- **Struggle Heatmaps**: View real-time analytics showing where students struggle based on AI interaction data
-- **Student Management**: Track and manage enrolled students
-- **Quiz Creation**: Create and manage course quizzes
+## Technology Stack
 
-### Platform Features
+- **Framework:** [Next.js](https://nextjs.org) 16.2 (App Router)
+- **Language:** [TypeScript](https://www.typescriptlang.org/) 5.x
+- **UI & Iconography:** [Radix UI](https://www.radix-ui.com/), [Framer Motion](https://www.framer.com/motion/), [Lucide React](https://lucide.dev/)
+- **Styling:** Vanilla CSS & [Tailwind CSS](https://tailwindcss.com)
+- **State Management:** [Zustand](https://github.com/pmndrs/zustand) 5.x
+- **Forms & Validation:** [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/)
+- **Charts:** [Recharts](https://recharts.org/)
+- **HTTP Client:** [Axios](https://axios-http.com/) (configured with interceptors for auto-jwt refreshment and key conversion)
 
-- **AI-Grounded Learning**: Chat with AI that references uploaded course PDFs with precise page citations
-- **Real-time Notifications**: Stay updated with course announcements, material uploads, and system alerts
-- **Dark/Light Theme**: System-aware theming support
-- **Responsive Design**: Works seamlessly on desktop and mobile devices
-- **Role-based Access**: Distinct dashboards and features for students and lecturers
+---
+
+## Project Directory Structure
+
+```
+acadexis_frontend/
+├── public/                 # Static assets and icons
+├── src/
+│   ├── app/                # Next.js App Router (Layouts and Pages)
+│   │   ├── auth/           # Login, Register, Google Callback, complete signup
+│   │   ├── dashboard/      # Role-based protected portals (student, lecturer)
+│   │   ├── support/        # Help and issue reporting center
+│   │   └── page.tsx        # Base landing page
+│   ├── components/         # React Components
+│   │   ├── ui/             # Core UI Design System primitives
+│   │   └── dashboard/      # Layout structures (Sidebar, Topbar, AI Tutor panels)
+│   ├── hooks/              # Custom React hooks (e.g. useCurrentUser, useNotifications)
+│   ├── lib/                # Shared utilities and Tailwind overrides
+│   ├── services/           # Axios HTTP Clients and API services
+│   ├── store/              # Zustand global state (e.g. useAppStore)
+│   └── types/              # Domain-specific TypeScript declarations
+```
+
+---
 
 ## Getting Started
 
 ### Prerequisites
+- Node.js `18.x` or higher
+- npm (or yarn / pnpm)
 
-- Node.js 18.x or higher
-- npm or yarn
-
-### Installation
-
+### 1. Installation
+Clone the repository and install all node packages:
 ```bash
-# Clone the repository
-git clone https://github.com/your-org/acadexis_frontend.git
-
-# Navigate to the project directory
+git clone https://github.com/oluwaseyipd/Acadexis_frontend.git
 cd acadexis_frontend
-
-# Install dependencies
 npm install
-
-# or with yarn
-yarn install
 ```
 
-### Development
-
-```bash
-# Start development server
-npm run dev
-
-# The application will be available at http://localhost:3000
-```
-
-### Building for Production
-
-```bash
-# Create production build
-npm run build
-
-# Start production server
-npm run start
-```
-
-## Project Structure
-
-```
-src/
-├── app/                    # Next.js App Router pages
-│   ├── auth/              # Authentication pages (login, register, password reset)
-│   ├── dashboard/        # Protected dashboard routes
-│   │   ├── student/      # Student dashboard and sub-routes
-│   │   └── lecturer/     # Lecturer dashboard and sub-routes
-│   └── page.tsx          # Landing/home page
-├── components/            # React components
-│   ├── ui/               # Reusable UI components (shadcn/ui style)
-│   └── dashboard/        # Dashboard-specific components
-├── hooks/                # Custom React hooks
-├── lib/                  # Utility functions and constants
-├── services/             # API and external services
-├── store/                # Zustand state stores
-└── types/                # TypeScript type definitions
-```
-
-### Key Directories
-
-| Directory | Purpose |
-|-----------|---------|
-| `src/app` | Next.js App Router pages and layouts |
-| `src/components/ui` | Reusable, design-system components |
-| `src/components/dashboard` | Dashboard-specific layouts and features |
-| `src/hooks` | Custom React hooks for data fetching and state |
-| `src/store` | Global state management with Zustand |
-| `src/types` | TypeScript interfaces and types |
-| `src/services` | API client and mock data services |
-
-## Available Scripts
-
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start development server |
-| `npm run build` | Create production build |
-| `npm run start` | Start production server |
-| `npm run lint` | Run ESLint |
-
-## Environment Variables
-
-Create a `.env.local` file in the root directory:
-
+### 2. Configuration
+Create a `.env.local` file in the root directory and configure the variables:
 ```env
 NEXT_PUBLIC_APP_NAME=Acadexis
 NEXT_PUBLIC_API_URL=http://localhost:8000/api
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-google-client-id-here.apps.googleusercontent.com
 ```
 
-## Authentication
+### 3. Development
+Start the local Next.js development server:
+```bash
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) in your browser to view the application.
 
-The application supports two user roles:
+### 4. Build for Production
+To build a highly optimized production bundle and run the server:
+```bash
+npm run build
+npm run start
+```
 
-- **Student**: Access to courses, study lab, quizzes, and library
-- **Lecturer**: Access to course management, knowledge hub, and analytics
+---
 
-Authentication flow:
-1. User registers with email, role, university, faculty, and department
-2. User logs in with email and password
-3. Session is managed via Zustand store and persisted to localStorage
+## Authentication Flow
 
-## API Integration
+> [!NOTE]
+> All incoming and outgoing requests utilize Axios request/response interceptors to automatically append JWT Bearer tokens and gracefully refresh expired access keys.
 
-The project includes a mock API layer (`src/services/api.ts`) for development and testing. To connect to a real backend:
+1. **Email/Password:** Register and log in directly using credential fields.
+2. **Google OAuth2 SSO:** 
+   - Click "Continue with Google".
+   - The frontend requests the redirection URL from the backend `/api/auth/google/university/?role=student`.
+   - On consent, Google redirects the browser back to `/auth/google/callback?code=xyz`.
+   - The callback page posts the code to the backend. If registered, it saves cookies/tokens and redirects to the dashboard. If not registered, it redirects to `/auth/register/complete` to gather academic profile information.
 
-1. Replace mock implementations with actual API calls using Axios
-2. Update environment variables with your backend URL
-3. Implement proper authentication (JWT, session, etc.)
+---
 
-## Contributing
+## Code Guidelines
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+- **TypeScript:** Write type-safe properties. Do not use `any` unless absolutely necessary.
+- **Design Tokens:** Always utilize the theme tokens from `tailwind.config.ts` and `src/app/globals.css` rather than hardcoding colors.
+- **Linting:** Ensure ESLint checks pass before committing:
+  ```bash
+  npm run lint
+  ```
 
-### Code Style
-
-- Use TypeScript for all new code
-- Follow the existing component patterns in `src/components/ui/`
-- Run `npm run lint` before committing
-- Write meaningful commit messages
+---
 
 ## License
 
-This project is proprietary software. All rights reserved.
-
-## Support
-
-For issues and feature requests, please open a GitHub issue or contact the development team.
-
-## Acknowledgments
-
-- [Next.js](https://nextjs.org/) - The React Framework
-- [Radix UI](https://www.radix-ui.com/) - Accessible component primitives
-- [Tailwind CSS](https://tailwindcss.com/) - A utility-first CSS framework
-- [shadcn/ui](https://ui.shadcn.com/) - Beautiful, accessible components built with Radix UI and Tailwind CSS
+This software is **proprietary** and all copyrights belong to the development team. Unauthorized distribution, modification, or copy of this codebase is strictly prohibited.
