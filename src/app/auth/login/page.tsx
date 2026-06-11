@@ -92,6 +92,8 @@ export default function LoginPage() {
             department_name: user.profile.department_name ?? null,
             faculty: user.profile.faculty,
             faculty_name: user.profile.faculty_name ?? null,
+            university: user.university,
+            university_name: user.university_name ?? null,
             avatar: user.profile.avatar,
             avatar_url: user.profile.avatar_url ?? user.profile.avatar,
           },

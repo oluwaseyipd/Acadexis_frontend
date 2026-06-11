@@ -68,6 +68,8 @@ export default function AuthHydrator() {
           department_name: payload.department_name ?? null,
           faculty: payload.faculty ?? null,
           faculty_name: payload.faculty_name ?? null,
+          university: payload.university ?? payload.university_id ?? null,
+          university_name: payload.university_name ?? null,
           avatar: payload.avatar ?? null,
           avatar_url: payload.avatar_url ?? payload.avatar ?? null,
         },
