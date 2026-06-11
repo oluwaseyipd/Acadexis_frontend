@@ -24,11 +24,11 @@ export default function OverviewPage() {
       try {
         const courseResponse = await apiService.courses.getMyCourses();
         if (!isMounted) return;
-        setCourses(courseResponse.data || []);
+        setCourses(Array.isArray(courseResponse.data) ? courseResponse.data : []);
 
         const sessions = await apiService.studyLab.getAllSessions();
         if (!isMounted) return;
-        setRecentSessions(sessions || []);
+        setRecentSessions(Array.isArray(sessions) ? sessions : []);
       } catch {
         if (!isMounted) return;
         setCourses([]);
@@ -46,8 +46,8 @@ export default function OverviewPage() {
   }, []);
 
   const stats = [
-    { label: "Enrolled Courses", value: courses.length.toString(), icon: BookOpen, color: "text-primary" },
-    { label: "Study Sessions", value: recentSessions.length.toString(), icon: Clock, color: "text-info" },
+    { label: "Enrolled Courses", value: (courses?.length ?? 0).toString(), icon: BookOpen, color: "text-primary" },
+    { label: "Study Sessions", value: (recentSessions?.length ?? 0).toString(), icon: Clock, color: "text-info" },
     { label: "Materials Read", value: "0", icon: FileText, color: "text-success" },
     { label: "AI Questions", value: "0", icon: TrendingUp, color: "text-warning" },
   ];

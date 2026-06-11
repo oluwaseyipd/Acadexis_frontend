@@ -17,12 +17,12 @@ export default function CoursesPage() {
 
   // Calculate stats from actual data
   const stats = useMemo(() => {
-    const totalCourses = courses.length;
-    const totalStudents = courses.reduce((sum, c) => sum + (c.studentsEnrolled ?? c.students_enrolled ?? 0), 0);
+    const totalCourses = courses?.length ?? 0;
+    const totalStudents = Array.isArray(courses) ? courses.reduce((sum, c) => sum + (c.studentsEnrolled ?? c.students_enrolled ?? 0), 0) : 0;
     return [
       { label: "Total Courses", value: totalCourses, icon: BookOpen },
       { label: "Students Enrolled", value: totalStudents, icon: Users },
-      { label: "Materials", value: courses.reduce((sum, c) => sum + (c.materialsCount ?? c.materials_count ?? 0), 0), icon: FileText },
+      { label: "Materials", value: Array.isArray(courses) ? courses.reduce((sum, c) => sum + (c.materialsCount ?? c.materials_count ?? 0), 0) : 0, icon: FileText },
     ];
   }, [courses]);
 

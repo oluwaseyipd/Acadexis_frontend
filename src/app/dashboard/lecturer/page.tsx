@@ -25,13 +25,13 @@ export default function LecturerOverview() {
     }
   }, [courses, selectedCourseId]);
 
-  const totalStudents = courses.reduce((s, c) => s + (c.studentsEnrolled ?? c.students_enrolled ?? 0), 0);
+  const totalStudents = Array.isArray(courses) ? courses.reduce((s, c) => s + (c.studentsEnrolled ?? c.students_enrolled ?? 0), 0) : 0;
 
   const stats = [
-    { label: "Active Courses", value: courses.length.toString(), icon: BookOpen, color: "text-primary" },
-    { label: "Total Students", value: totalStudents.toString(), icon: Users, color: "text-info" },
-    { label: "Materials Uploaded", value: courses.reduce((s, c) => s + (c.materialsCount ?? c.materials_count ?? 0), 0).toString(), icon: FileText, color: "text-success" },
-    { label: "Struggle Alerts", value: cells.filter((cell) => cell.avgConfidence < 0.4).length.toString(), icon: AlertTriangle, color: "text-warning" },
+    { label: "Active Courses", value: (courses?.length ?? 0).toString(), icon: BookOpen, color: "text-primary" },
+    { label: "Total Students", value: (totalStudents ?? 0).toString(), icon: Users, color: "text-info" },
+    { label: "Materials Uploaded", value: (Array.isArray(courses) ? courses.reduce((s, c) => s + (c.materialsCount ?? c.materials_count ?? 0), 0) : 0).toString(), icon: FileText, color: "text-success" },
+    { label: "Struggle Alerts", value: (Array.isArray(cells) ? cells.filter((cell) => cell.avgConfidence < 0.4).length : 0).toString(), icon: AlertTriangle, color: "text-warning" },
   ];
 
   return ( 
