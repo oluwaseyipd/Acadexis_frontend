@@ -321,9 +321,9 @@ export default function RegisterForm({ role }: RegisterFormProps) {
     setServerError(null);
 
     try {
-      const response = await apiService.auth.getGoogleAuthUrl();
+      const response = await apiService.auth.getGoogleAuthUrl(role);
       if (response.data?.url) {
-        window.location.href = `${response.data.url}&role=${role}`;
+        window.location.href = response.data.url;
       }
     } catch {
       setServerError("Failed to initiate Google sign-up. Please try again.");

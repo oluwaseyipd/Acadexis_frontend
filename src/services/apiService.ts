@@ -111,8 +111,10 @@ const apiService = {
     },
 
     /** Get the Google OAuth redirect URL for university SSO */
-    getGoogleAuthUrl(): Promise<AxiosResponse<{ url: string }>> {
-      return apiClient.get<{ url: string }>("/auth/google/university/");
+    getGoogleAuthUrl(role?: string): Promise<AxiosResponse<{ url: string }>> {
+      return apiClient.get<{ url: string }>("/auth/google/university/", {
+        params: role ? { role } : undefined,
+      });
     },
 
     /** Exchange Google OAuth code for tokens (called on the callback page) */
