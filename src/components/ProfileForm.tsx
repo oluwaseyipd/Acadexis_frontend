@@ -34,7 +34,6 @@ export default function ProfileForm() {
     lastName: "",
     email: "",
     level: "",
-    department: "",
     identificationNumber: "",
   });
   const [selectedAvatarFile, setSelectedAvatarFile] = useState<File | null>(null);
@@ -51,7 +50,6 @@ export default function ProfileForm() {
       lastName: user.profile.lastName,
       email: user.email,
       level: user.profile.level,
-      department: user.profile.departmentName ?? user.profile.department ?? "",
       identificationNumber: user.profile.identificationNumber,
     });
 
@@ -95,7 +93,6 @@ export default function ProfileForm() {
         first_name: formState.firstName,
         last_name: formState.lastName,
         level: formState.level,
-        department: formState.department || null,
         identification_number: formState.identificationNumber,
         avatar: selectedAvatarFile ?? undefined,
       };
@@ -264,12 +261,10 @@ export default function ProfileForm() {
             <label className="text-sm font-medium text-gray-700">Department</label>
             <input
               type="text"
-              value={formState.department}
-              disabled={!editing || userLoading}
-              onChange={(event) => setFormState((prev) => ({ ...prev, department: event.target.value }))}
-              className={`border border-gray-300 rounded-md py-2 px-4 focus:outline-none ${
-                editing ? "focus:ring-2 focus:ring-green-500 bg-white" : "bg-gray-100 cursor-not-allowed"
-              }`}
+              value={user?.profile?.departmentName ?? user?.profile?.department_name ?? user?.profile?.department ?? ""}
+              disabled={true}
+              readOnly
+              className="border border-gray-300 rounded-md py-2 px-4 bg-gray-100 cursor-not-allowed focus:outline-none"
             />
           </div>
 
