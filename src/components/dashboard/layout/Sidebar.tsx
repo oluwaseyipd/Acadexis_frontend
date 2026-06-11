@@ -20,21 +20,21 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 // ─── Nav config ───────────────────────────────────────────────────────────────
 const STUDENT_NAV_ITEMS = [
-  {label: "Overview", href: "/dashboard/student", icon: LayoutDashboard},
+  { label: "Overview", href: "/dashboard/student", icon: LayoutDashboard },
   { label: "My Library", href: "/dashboard/student/library", icon: Library },
   { label: "Study Lab", href: "/dashboard/student/study-lab", icon: FlaskConical },
   { label: "Course Catalog", href: "/dashboard/student/manage-courses", icon: BookOpen },
   { label: "Quizzes", href: "/dashboard/student/quizzes", icon: ClipboardList },
   { label: "Bookmark", href: "/dashboard/student/bookmark", icon: Bookmark },
-] as const; 
+] as const;
 
 
 const LECTURER_NAV_ITEMS = [
-  {label: "Overview", href: "/dashboard/lecturer", icon: LayoutDashboard},
+  { label: "Overview", href: "/dashboard/lecturer", icon: LayoutDashboard },
   { label: "My Courses", href: "/dashboard/lecturer/my-courses", icon: BookOpen },
   { label: "Uploads", href: "/dashboard/lecturer/knowledge-hub", icon: Upload },
   { label: "Manage Students", href: "/dashboard/lecturer/manage-students", icon: Users },
-] as const; 
+] as const;
 
 
 // ─── Props ────────────────────────────────────────────────────────────────────
@@ -82,29 +82,9 @@ export default function Sidebar({
 
   return (
     <aside
-      className={`fixed inset-y-0 left-0 z-40  w-70 flex flex-col justify-between bg-sidebar py-6 px-4 shrink-0 font-sans transition-transform duration-300 shadow-xl md:relative md:translate-x-0 md:shadow-none ${
-        isOpen ? "translate-x-0" : "-translate-x-full"
-      }`}
+      className={`fixed inset-y-0 left-0 z-40  w-70 flex flex-col justify-between bg-sidebar py-6 px-4 shrink-0 font-sans transition-transform duration-300 shadow-xl md:relative md:translate-x-0 md:shadow-none ${isOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
     >
-      {/* User identity */}
-      <div className="mb-8 px-2 flex items-start justify-between gap-3">
-        <div>
-          <p className="text-sm font-bold text-sidebar-foreground leading-tight">
-            {displayName}
-          </p>
-          <p className="text-xs text-muted-foreground mt-0.5">{displaySubtitle}</p>
-        </div>
-        {onClose && (
-          <button
-            type="button"
-            onClick={onClose}
-            className="md:hidden p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-            aria-label="Close sidebar"
-          >
-            <X size={18} />
-          </button>
-        )}
-      </div>
       {/* Nav links */}
       <nav className="flex flex-col gap-0.5 flex-1">
         {navItems.map(({ label, href, icon: Icon }) => {
@@ -117,11 +97,10 @@ export default function Sidebar({
             <Link
               key={href}
               href={href}
-              className={`relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-[15px] font-medium transition-all duration-150 group ${
-                isActive
+              className={`relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-[15px] font-medium transition-all duration-150 group ${isActive
                   ? "text-brand-primary bg-brand-primary/10"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted"
-              }`}
+                }`}
             >
               <Icon
                 size={17}
@@ -136,9 +115,8 @@ export default function Sidebar({
 
               {/* Active indicator bar */}
               <span
-                className={`absolute right-0 w-1.5 h-full rounded-r-lg bg-brand-primary transition-opacity duration-150 ${
-                  isActive ? "opacity-100" : "opacity-0"
-                }`}
+                className={`absolute right-0 w-1.5 h-full rounded-r-lg bg-brand-primary transition-opacity duration-150 ${isActive ? "opacity-100" : "opacity-0"
+                  }`}
                 aria-hidden="true"
               />
             </Link>
