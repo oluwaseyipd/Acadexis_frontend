@@ -24,14 +24,11 @@ export default function OverviewPage() {
       try {
         const courseResponse = await apiService.courses.getMyCourses();
         if (!isMounted) return;
-        setCourses(courseResponse.data);
+        setCourses(courseResponse.data || []);
 
-        const courseId = courseResponse.data[0]?.id ?? null;
-        if (courseId) {
-          const sessions = await apiService.studyLab.getSessionsForCourse(courseId);
-          if (!isMounted) return;
-          setRecentSessions(sessions.slice(0, 3));
-        }
+        const sessions = await apiService.studyLab.getAllSessions();
+        if (!isMounted) return;
+        setRecentSessions(sessions || []);
       } catch {
         if (!isMounted) return;
         setCourses([]);
@@ -104,7 +101,7 @@ export default function OverviewPage() {
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-mono text-muted-foreground">{courses[0].code}</span>
                     <span className="text-xs text-muted-foreground flex items-center gap-1">
-                      <Users className="h-3 w-3" /> {courses[0].studentsEnrolled}
+                      <Users className="h-3 w-3" /> {courses[0].studentsEnrolled ?? courses[0].students_enrolled ?? 0}
                     </span>
                   </div>
                   <CardTitle className="text-base">{courses[0].title}</CardTitle>
@@ -112,8 +109,8 @@ export default function OverviewPage() {
                 <CardContent className="pt-0">
                   <p className="text-sm text-muted-foreground line-clamp-2">{courses[0].description}</p>
                   <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
-                    <span>{courses[0].lecturerName}</span>
-                    <span className="flex items-center gap-1"><FileText className="h-3 w-3" /> {courses[0].materialsCount} materials</span>
+                    <span>{courses[0].lecturerName ?? courses[0].lecturer_name}</span>
+                    <span className="flex items-center gap-1"><FileText className="h-3 w-3" /> {courses[0].materialsCount ?? courses[0].materials_count ?? 0} materials</span>
                   </div>
                 </CardContent>
               </Card>
@@ -130,7 +127,7 @@ export default function OverviewPage() {
             <Card className="shadow-card"><CardContent className="p-5"><Skeleton className="h-32 w-full" /></CardContent></Card>
           ) : recentSessions.length > 0 ? (
             <div className="space-y-3">
-              {recentSessions.map((session, i) => (
+              {recentSessions.slice(0, 3).map((session, i) => (
                 <motion.div key={session.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
                   <Card className="shadow-card">
                     <CardContent className="p-4 flex items-start gap-3">

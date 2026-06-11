@@ -26,6 +26,7 @@ export interface Course {
   studentsEnrolled?: number;
   thumbnail: string | null;
   is_enrolled: boolean;
+  isEnrolled?: boolean;
   lecturer_remark?: string;
   created_at: string;
   updated_at?: string;

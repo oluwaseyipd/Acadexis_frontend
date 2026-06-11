@@ -67,7 +67,7 @@ export default function ManageCourses() {
                       </div>
                       <span className="text-xs font-mono text-muted-foreground">{course.code}</span>
                     </div>
-                    {course.is_enrolled && <Badge variant="secondary" className="text-xs">Enrolled</Badge>}
+                    {(course.isEnrolled ?? course.is_enrolled) && <Badge variant="secondary" className="text-xs">Enrolled</Badge>}
                   </div>
                   <Link href={`/dashboard/student/manage-courses/${course.id}`}>
                     <CardTitle className="text-base mt-2 hover:text-primary transition-colors cursor-pointer">{course.title}</CardTitle>
@@ -77,11 +77,11 @@ export default function ManageCourses() {
                   <p className="text-sm text-muted-foreground line-clamp-2 flex-1">{course.description}</p>
                   <div className="mt-4 flex items-center justify-between">
                     <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                      <span>{course.lecturer_name}</span>
-                      <span className="flex items-center gap-1"><Users className="h-3 w-3" />{course.students_enrolled}</span>
-                      <span className="flex items-center gap-1"><FileText className="h-3 w-3" />{course.materials_count}</span>
+                      <span>{course.lecturerName ?? course.lecturer_name}</span>
+                      <span className="flex items-center gap-1"><Users className="h-3 w-3" />{course.studentsEnrolled ?? course.students_enrolled ?? 0}</span>
+                      <span className="flex items-center gap-1"><FileText className="h-3 w-3" />{course.materialsCount ?? course.materials_count ?? 0}</span>
                     </div>
-                    {course.is_enrolled ? (
+                    {(course.isEnrolled ?? course.is_enrolled) ? (
                       <Badge className="text-xs">Enrolled</Badge>
                     ) : (
                       <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => handleEnroll(course.id)}>
