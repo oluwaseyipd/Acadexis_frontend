@@ -5,8 +5,7 @@ import { motion } from "framer-motion";
 import { BookOpen, Users, FileText, TrendingUp, Clock, MessageSquare } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useAppStore } from "@/store/useAppStore";
-import apiService from "@/services/apiService";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { UI_TEXT } from "@/lib/constants";
 import type { Course } from "@/types/course";
 import type { StudySession } from "@/types/studylab";
@@ -14,7 +13,7 @@ import type { StudySession } from "@/types/studylab";
 
 
 export default function OverviewPage() {
-    const user = useAppStore((s) => s.user);
+    const { user } = useCurrentUser();
   const [courses, setCourses] = useState<Course[]>([]);
   const [recentSessions, setRecentSessions] = useState<StudySession[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,7 +60,7 @@ export default function OverviewPage() {
       {/* Heading */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">
-          {UI_TEXT.dashboard.welcomeBack}, {user?.profile?.first_name || "User"}
+          {UI_TEXT.dashboard.welcomeBack}, {user?.profile?.firstName || "User"}
         </h1>
         <p className="text-muted-foreground mt-1">Here is what is happening with your courses.</p>
       </div>

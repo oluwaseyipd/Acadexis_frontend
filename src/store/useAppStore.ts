@@ -1,25 +1,31 @@
 import { create } from "zustand";
 import { AuthUser, AuthUserMapped, UserRole } from "@/types/user";
 
-export const mapBackendUser = (raw: AuthUser): AuthUserMapped => ({
-  ...raw,
-  profile: {
-    ...raw.profile,
-    firstName: raw.profile.first_name,
-    lastName: raw.profile.last_name,
-    email: raw.email,
-    identificationNumber: raw.profile.identification_number,
-    level: raw.profile.level,
-    department: raw.profile.department,
-    departmentName: raw.profile.department_name ?? null,
-    faculty: raw.profile.faculty,
-    facultyName: raw.profile.faculty_name ?? null,
-    university: raw.university,
-    universityName: raw.profile.university_name ?? raw.university_name ?? null,
-    avatarUrl: raw.profile.avatar ?? raw.profile.avatar_url,
-    avatar_url: raw.profile.avatar_url ?? raw.profile.avatar,
-  },
-});
+export const mapBackendUser = (raw: AuthUser): AuthUserMapped => {
+  const profile = raw.profile || {};
+  const looseProfile = profile as Record<string, unknown>;
+  const looseRaw = raw as unknown as Record<string, unknown>;
+
+  return {
+    ...raw,
+    profile: {
+      ...profile,
+      firstName: (looseProfile.firstName as string | undefined) ?? profile.first_name ?? "",
+      lastName: (looseProfile.lastName as string | undefined) ?? profile.last_name ?? "",
+      email: raw.email ?? (looseProfile.email as string | undefined) ?? "",
+      identificationNumber: (looseProfile.identificationNumber as string | undefined) ?? profile.identification_number ?? "",
+      level: profile.level ?? "",
+      department: profile.department ?? null,
+      departmentName: (looseProfile.departmentName as string | undefined) ?? profile.department_name ?? null,
+      faculty: profile.faculty ?? null,
+      facultyName: (looseProfile.facultyName as string | undefined) ?? profile.faculty_name ?? null,
+      university: raw.university ?? (looseProfile.university as string | undefined) ?? null,
+      universityName: (looseRaw.universityName as string | undefined) ?? raw.university_name ?? (looseProfile.universityName as string | undefined) ?? profile.university_name ?? null,
+      avatarUrl: (looseProfile.avatarUrl as string | undefined) ?? profile.avatar ?? profile.avatar_url ?? null,
+      avatar_url: (looseProfile.avatarUrl as string | undefined) ?? profile.avatar_url ?? profile.avatar ?? null,
+    },
+  };
+};
 
 interface AppState {
   user: AuthUserMapped | null;
