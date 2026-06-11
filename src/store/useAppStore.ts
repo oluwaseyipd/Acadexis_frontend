@@ -3,7 +3,7 @@ import { AuthUser, AuthUserMapped, UserRole } from "@/types/user";
 
 export const mapBackendUser = (raw: AuthUser): AuthUserMapped => {
   const profile = raw.profile || {};
-  const looseProfile = profile as Record<string, unknown>;
+  const looseProfile = profile as unknown as Record<string, unknown>;
   const looseRaw = raw as unknown as Record<string, unknown>;
 
   return {

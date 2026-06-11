@@ -241,7 +241,9 @@ export default function ProfileForm() {
           </div> 
 
             <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray-700">Matric Number</label>
+            <label className="text-sm font-medium text-gray-700">
+              {user?.role === "student" ? "Matric Number" : "Staff ID"}
+            </label>
             <input
               type="text"
               value={formState.identificationNumber}

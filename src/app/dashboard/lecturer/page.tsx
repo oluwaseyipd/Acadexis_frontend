@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { BookOpen, Users, FileText, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useAppStore } from "@/store/useAppStore";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useCourses } from "@/hooks/useCourses";
 import { useHeatmap } from "@/hooks/useHeatmap";
 import { HeatmapChart } from "@/components/HeatmapChart";
@@ -14,7 +14,7 @@ import { type Course } from "@/types/course";
 import { UI_TEXT } from "@/lib/constants";
 
 export default function LecturerOverview() {
-  const user = useAppStore((s) => s.user);
+  const { user } = useCurrentUser();
   const { courses, isLoading: loading } = useCourses({ mode: "mine" });
   const [selectedCourseId, setSelectedCourseId] = useState("");
   const { cells, isLoading: heatmapLoading, error: heatmapError } = useHeatmap({ courseId: selectedCourseId });

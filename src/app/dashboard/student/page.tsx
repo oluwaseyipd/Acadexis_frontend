@@ -8,9 +8,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { UI_TEXT } from "@/lib/constants";
 import type { Course } from "@/types/course";
+import apiService from "@/services/apiService";
 import type { StudySession } from "@/types/studylab";
-
-
 
 export default function OverviewPage() {
     const { user } = useCurrentUser();

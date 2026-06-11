@@ -90,9 +90,9 @@ export default function Sidebar({
       <div className="mb-8 px-2 flex items-start justify-between gap-3">
         <div>
           <p className="text-sm font-bold text-sidebar-foreground leading-tight">
-            {userName}
+            {displayName}
           </p>
-          <p className="text-xs text-muted-foreground mt-0.5">{userSubtitle}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{displaySubtitle}</p>
         </div>
         {onClose && (
           <button

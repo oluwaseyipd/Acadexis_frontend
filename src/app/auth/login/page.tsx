@@ -80,22 +80,28 @@ export default function LoginPage() {
         document.cookie = `refresh_token=${refresh}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
       }
 
+      const rawUser = user;
+      const rawProfile = user.profile || {};
+      const looseProfile = rawProfile as unknown as Record<string, unknown>;
+      const looseUser = rawUser as unknown as Record<string, unknown>;
+
       useAppStore.getState().setUser(
         mapBackendUser({
-          ...user,
+          ...rawUser,
           profile: {
-            first_name: user.profile.first_name,
-            last_name: user.profile.last_name,
-            identification_number: user.profile.identification_number,
-            level: user.profile.level,
-            department: user.profile.department,
-            department_name: user.profile.department_name ?? null,
-            faculty: user.profile.faculty,
-            faculty_name: user.profile.faculty_name ?? null,
-            university: user.university,
-            university_name: user.university_name ?? null,
-            avatar: user.profile.avatar,
-            avatar_url: user.profile.avatar_url ?? user.profile.avatar,
+            ...rawProfile,
+            first_name: (looseProfile.firstName as string | undefined) ?? rawProfile.first_name ?? "",
+            last_name: (looseProfile.lastName as string | undefined) ?? rawProfile.last_name ?? "",
+            identification_number: (looseProfile.identificationNumber as string | undefined) ?? rawProfile.identification_number ?? "",
+            level: rawProfile.level ?? "",
+            department: rawProfile.department ?? null,
+            department_name: (looseProfile.departmentName as string | undefined) ?? rawProfile.department_name ?? null,
+            faculty: rawProfile.faculty ?? null,
+            faculty_name: (looseProfile.facultyName as string | undefined) ?? rawProfile.faculty_name ?? null,
+            university: rawUser.university ?? (looseProfile.university as string | undefined) ?? null,
+            university_name: (looseUser.universityName as string | undefined) ?? rawUser.university_name ?? (looseProfile.universityName as string | undefined) ?? rawProfile.university_name ?? null,
+            avatar: rawProfile.avatar ?? null,
+            avatar_url: (looseProfile.avatarUrl as string | undefined) ?? rawProfile.avatar_url ?? rawProfile.avatar ?? null,
           },
         })
       );
