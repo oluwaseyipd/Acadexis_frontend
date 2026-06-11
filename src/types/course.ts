@@ -55,4 +55,11 @@ export interface EnrolledStudent {
   course_title: string;
   course_code: string;
   created_at: string;
+  // Mapped/camelCased response properties
+  studentId?: string;
+  studentName?: string;
+  studentEmail?: string;
+  courseTitle?: string;
+  courseCode?: string;
+  createdAt?: string;
 }

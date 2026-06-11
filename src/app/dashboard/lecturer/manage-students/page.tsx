@@ -23,6 +23,13 @@ interface EnrolledStudent {
   course_title: string;
   course_code: string;
   created_at: string;
+  // camelCase formats (from Axios response keys)
+  studentId?: string;
+  studentName?: string;
+  studentEmail?: string;
+  courseTitle?: string;
+  courseCode?: string;
+  createdAt?: string;
 }
 
 export default function ManageStudentsPage() {
@@ -139,21 +146,23 @@ export default function ManageStudentsPage() {
                     <TableRow key={s.id}>
                       <TableCell>
                         <div>
-                          <p className="font-medium text-foreground">{s.student_name}</p>
+                          <p className="font-medium text-foreground">
+                            {s.studentName ?? s.student_name}
+                          </p>
                           <p className="text-xs text-muted-foreground sm:hidden mt-0.5">
-                            {s.student_email}
+                            {s.studentEmail ?? s.student_email}
                           </p>
                         </div>
                       </TableCell>
                       <TableCell className="hidden sm:table-cell text-muted-foreground text-sm">
-                        {s.student_email}
+                        {s.studentEmail ?? s.student_email}
                       </TableCell>
                       <TableCell className="hidden md:table-cell text-muted-foreground text-sm">
-                        {s.course_code}
+                        {s.courseCode ?? s.course_code}
                       </TableCell>
                       <TableCell>
                         <Badge variant="secondary">
-                          {s.created_at ? new Date(s.created_at).toLocaleDateString() : "—"}
+                          {s.createdAt ?? s.created_at ? new Date(s.createdAt ?? s.created_at).toLocaleDateString() : "—"}
                         </Badge>
                       </TableCell>
                     </TableRow>
