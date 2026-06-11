@@ -20,6 +20,7 @@ interface EnrolledStudent {
   student_id: string;
   student_name: string;
   student_email: string;
+  student_identification_number?: string;
   course_title: string;
   course_code: string;
   created_at: string;
@@ -27,6 +28,7 @@ interface EnrolledStudent {
   studentId?: string;
   studentName?: string;
   studentEmail?: string;
+  studentIdentificationNumber?: string;
   courseTitle?: string;
   courseCode?: string;
   createdAt?: string;
@@ -136,6 +138,7 @@ export default function ManageStudentsPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
+                    <TableHead className="hidden sm:table-cell">Matric Number</TableHead>
                     <TableHead className="hidden sm:table-cell">Email</TableHead>
                     <TableHead className="hidden md:table-cell">Course</TableHead>
                     <TableHead>Enrolled Date</TableHead>
@@ -150,9 +153,12 @@ export default function ManageStudentsPage() {
                             {s.studentName ?? s.student_name}
                           </p>
                           <p className="text-xs text-muted-foreground sm:hidden mt-0.5">
-                            {s.studentEmail ?? s.student_email}
+                            ID: {s.studentIdentificationNumber ?? s.student_identification_number ?? "—"} • {s.studentEmail ?? s.student_email}
                           </p>
                         </div>
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell text-muted-foreground text-sm font-mono">
+                        {s.studentIdentificationNumber ?? s.student_identification_number ?? "—"}
                       </TableCell>
                       <TableCell className="hidden sm:table-cell text-muted-foreground text-sm">
                         {s.studentEmail ?? s.student_email}
