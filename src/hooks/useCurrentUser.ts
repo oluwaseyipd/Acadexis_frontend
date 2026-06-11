@@ -23,7 +23,7 @@ export const useCurrentUser = () => {
   };
 
   useEffect(() => {
-    if (!user?.profile?.first_name) {
+    if (!user?.profile?.firstName) {
       refetch();
     }
   }, []);

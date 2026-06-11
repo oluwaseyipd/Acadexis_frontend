@@ -51,7 +51,7 @@ export default function ProfileForm() {
       lastName: user.profile.lastName,
       email: user.email,
       level: user.profile.level,
-      department: user.profile.department ?? "",
+      department: user.profile.departmentName ?? user.profile.department ?? "",
       identificationNumber: user.profile.identificationNumber,
     });
 
@@ -92,11 +92,11 @@ export default function ProfileForm() {
 
     try {
       const profilePayload = {
-        firstName: formState.firstName,
-        lastName: formState.lastName,
+        first_name: formState.firstName,
+        last_name: formState.lastName,
         level: formState.level,
         department: formState.department || null,
-        identificationNumber: formState.identificationNumber,
+        identification_number: formState.identificationNumber,
         avatar: selectedAvatarFile ?? undefined,
       };
 

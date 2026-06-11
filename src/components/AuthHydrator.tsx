@@ -12,12 +12,15 @@ type JwtPayload = {
   exp?: number;
   university?: string;
   university_id?: string;
+  university_name?: string;
   first_name?: string;
   last_name?: string;
   identification_number?: string;
   level?: string;
   department?: string;
+  department_name?: string;
   faculty?: string;
+  faculty_name?: string;
   avatar?: string;
   avatar_url?: string;
 };
@@ -54,6 +57,7 @@ export default function AuthHydrator() {
         email: payload.email,
         role: payload.role as any,
         university: payload.university ?? payload.university_id ?? "",
+        university_name: payload.university_name ?? null,
         name: `${payload.first_name ?? ""} ${payload.last_name ?? ""}`.trim(),
         profile: {
           first_name: payload.first_name ?? "",
@@ -61,7 +65,9 @@ export default function AuthHydrator() {
           identification_number: payload.identification_number ?? "",
           level: payload.level ?? "",
           department: payload.department ?? null,
+          department_name: payload.department_name ?? null,
           faculty: payload.faculty ?? null,
+          faculty_name: payload.faculty_name ?? null,
           avatar: payload.avatar ?? null,
           avatar_url: payload.avatar_url ?? payload.avatar ?? null,
         },
