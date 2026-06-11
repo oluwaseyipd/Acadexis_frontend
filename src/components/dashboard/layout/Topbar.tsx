@@ -65,55 +65,54 @@ export default function TopBar({
   return (
     <header className="sticky top-0 z-30 flex items-center justify-between h-14 px-6 py-8 bg-background border-b border-border gap-4">
       <div className="flex gap-24 items-center flex-1">
-              {/* Brand */}
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={onMenuClick}
-          className="md:hidden p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-          aria-label="Open sidebar"
-        >
-          <Menu size={18} />
-        </button>
-
-       <Link
-        href="/dashboard/student"
-        className="text-md font-bold text-foreground tracking-tight shrink-0 hover:text-brand-primary transition-colors"
-      >
-        The Academic Curator
-      </Link>
-      </div>
-     
-
-      {/* Search */}
-      <form
-        onSubmit={handleSearch}
-        className={`hidden md:flex items-center gap-2 flex-1 max-w-100 bg-muted rounded-full p-3 transition-all duration-200 ${
-          isFocused ? "ring-2 ring-brand-primary/50 bg-card shadow-sm" : ""
-        }`}
-      >
-        <Search size={14} strokeWidth={2} className="text-muted-foreground shrink-0" />
-        <input
-          type="search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          placeholder="Search study materials..."
-          className="bg-transparent text-sm text-foreground placeholder-muted-foreground outline-none flex-1 min-w-0"
-          aria-label="Search study materials"
-        />
-        {query && (
+        {/* Brand */}
+        <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setQuery("")}
-            className="text-muted-foreground hover:text-foreground transition-colors"
-            aria-label="Clear search"
+            onClick={onMenuClick}
+            className="md:hidden p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            aria-label="Open sidebar"
           >
-            <X size={13} strokeWidth={2} />
+            <Menu size={18} />
           </button>
-        )}
-      </form>
+
+          <Link
+            href="/dashboard/student"
+            className="text-md font-bold text-foreground tracking-tight shrink-0 hover:text-brand-primary transition-colors"
+          >
+            Acadexis
+          </Link>
+        </div>
+
+
+        {/* Search */}
+        <form
+          onSubmit={handleSearch}
+          className={`hidden md:flex items-center gap-2 flex-1 max-w-100 bg-muted rounded-full p-3 transition-all duration-200 ${isFocused ? "ring-2 ring-brand-primary/50 bg-card shadow-sm" : ""
+            }`}
+        >
+          <Search size={14} strokeWidth={2} className="text-muted-foreground shrink-0" />
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+            placeholder="Search study materials..."
+            className="bg-transparent text-sm text-foreground placeholder-muted-foreground outline-none flex-1 min-w-0"
+            aria-label="Search study materials"
+          />
+          {query && (
+            <button
+              type="button"
+              onClick={() => setQuery("")}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Clear search"
+            >
+              <X size={13} strokeWidth={2} />
+            </button>
+          )}
+        </form>
 
       </div>
 
@@ -163,7 +162,7 @@ export default function TopBar({
             <span>{displayInitials}</span>
           )}
         </Link>
-      </div> 
+      </div>
     </header>
   );
 }

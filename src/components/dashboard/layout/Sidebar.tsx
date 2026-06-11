@@ -97,6 +97,7 @@ export default function Sidebar({
             <Link
               key={href}
               href={href}
+              onClick={() => onClose?.()}
               className={`relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-[15px] font-medium transition-all duration-150 group ${isActive
                   ? "text-brand-primary bg-brand-primary/10"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted"
@@ -128,6 +129,7 @@ export default function Sidebar({
       <div className="py-3 border-t border-border bg-brand-primary/10 hover:bg-brand-primary/15 rounded-lg transition-all duration-150">
         <Link
           href={profileHref}
+          onClick={() => onClose?.()}
           className="flex items-center gap-3 px-3 rounded-lg transition-colors"
         >
           {/* Avatar */}
@@ -161,6 +163,7 @@ export default function Sidebar({
       <div className="mt-4 py-1 border-t border-border flex flex-col gap-0.5">
         <button
           onClick={() => {
+            onClose?.();
             if (typeof window !== "undefined") {
               localStorage.removeItem("access_token");
               localStorage.removeItem("refresh_token");
