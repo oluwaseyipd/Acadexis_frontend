@@ -53,6 +53,7 @@ export interface EnrolledStudent {
   student_id: string;
   student_name: string;
   student_email: string;
+  identification_number?: string;
   course_title: string;
   course_code: string;
   created_at: string;
@@ -60,6 +61,7 @@ export interface EnrolledStudent {
   studentId?: string;
   studentName?: string;
   studentEmail?: string;
+  identificationNumber?: string;
   courseTitle?: string;
   courseCode?: string;
   createdAt?: string;
