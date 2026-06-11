@@ -46,3 +46,13 @@ export interface HeatmapData {
   avg_confidence: number;
   struggling_students: number;
 }
+
+export interface EnrolledStudent {
+  id: string;
+  student_id: string;
+  student_name: string;
+  student_email: string;
+  course_title: string;
+  course_code: string;
+  created_at: string;
+}

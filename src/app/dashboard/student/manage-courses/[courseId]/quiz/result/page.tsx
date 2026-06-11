@@ -48,7 +48,10 @@ export default function QuizResultPage() {
 
   useEffect(() => {
     const raw = sessionStorage.getItem(`quiz-result-${courseId}`);
-    if (raw) setAttempt(JSON.parse(raw));
+    if (raw) {
+      const parsed = JSON.parse(raw) as QuizAttempt;
+      setTimeout(() => setAttempt(parsed), 0);
+    }
   }, [courseId]);
 
   if (!quiz || !attempt) {

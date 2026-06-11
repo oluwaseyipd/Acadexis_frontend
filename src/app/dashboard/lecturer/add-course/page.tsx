@@ -333,7 +333,7 @@ export default function AddCoursePage() {
         <h3 className="text-sm font-semibold text-blue-800 mb-2">Tips for creating a great course</h3>
         <ul className="text-sm text-blue-700 space-y-1.5">
           <li>• Use a clear, descriptive course title that students can easily find</li>
-          <li>• Make sure the course code matches your institution's official listing</li>
+          <li>• Make sure the course code matches your institution&apos;s official listing</li>
           <li>• Write a detailed description to help students understand the course content</li>
           <li>• Add a remark with any prerequisites or specific requirements</li>
         </ul>

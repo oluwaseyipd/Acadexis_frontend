@@ -8,9 +8,9 @@ import type { QuizData } from "./types";
 // Type helper for data.json structure
 interface DataStore {
   quizzes: QuizData[];
-  courses: any[];
-  modules: any[];
-  recommendations: any[];
+  courses: unknown[];
+  modules: unknown[];
+  recommendations: unknown[];
 }
 
 // Empty data store as fallback since data.json is not available

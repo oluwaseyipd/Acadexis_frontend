@@ -103,9 +103,10 @@ export const useStudySession = ({ courseId, sessionId }: UseStudySessionOptions)
           response.user,
           response.assistant,
         ]);
-      } catch (err: any) {
+      } catch (err: unknown) {
         setMessages((prev) => prev.filter((m) => m.id !== optimisticUserMsg.id));
-        const detail = err?.response?.data?.detail ?? "";
+        const errWithResponse = err as { response?: { data?: { detail?: string } } };
+        const detail = errWithResponse?.response?.data?.detail ?? "";
         if (typeof detail === "string" && detail.toLowerCase().includes("no processed materials")) {
           setError(
             "This course has no processed materials yet. Your lecturer needs to upload and process course content before you can ask questions."

@@ -31,10 +31,8 @@ export const useHeatmap = ({ courseId, autoFetch = true }: UseHeatmapOptions = {
       const response = await apiService.analytics.getHeatmap(params);
       setData(response.data.results);
     } catch (err: unknown) {
-      const status =
-        typeof err === "object" && err !== null && "response" in err && typeof (err as any).response === "object"
-          ? (err as any).response.status
-          : undefined;
+      const errWithResponse = err as { response?: { status?: number } };
+      const status = errWithResponse?.response?.status;
 
       if (status === 403) {
         setError("Heatmap analytics are only available to lecturers.");

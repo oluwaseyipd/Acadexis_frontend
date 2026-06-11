@@ -21,12 +21,11 @@ export default function LecturerOverview() {
 
   useEffect(() => {
     if (!selectedCourseId && courses.length > 0) {
-      setSelectedCourseId(courses[0].id);
+      setTimeout(() => setSelectedCourseId(courses[0].id), 0);
     }
   }, [courses, selectedCourseId]);
 
   const totalStudents = courses.reduce((s, c) => s + c.students_enrolled, 0);
-  const topStruggle = cells[0];
 
   const stats = [
     { label: "Active Courses", value: courses.length.toString(), icon: BookOpen, color: "text-primary" },

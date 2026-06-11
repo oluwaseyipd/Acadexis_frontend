@@ -238,6 +238,7 @@ const ChartTooltipContent = React.forwardRef<HTMLDivElement, ChartTooltipProps>(
     );
   },
 );
+ChartTooltipContent.displayName = "ChartTooltipContent";
 
 function getPayloadConfigFromPayload(config: ChartConfig, item: Record<string, unknown>, key: string) {
   return config[key as keyof typeof config];
@@ -299,6 +300,7 @@ const ChartLegendContent = React.forwardRef<HTMLDivElement, ChartLegendProps>(
     );
   },
 );
+ChartLegendContent.displayName = "ChartLegendContent";
 
 export {
   ChartContainer,

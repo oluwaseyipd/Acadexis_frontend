@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { tokenStorage } from "@/services/api-client";
 import { mapBackendUser, useAppStore } from "@/store/useAppStore";
+import { UserRole } from "@/types/user";
 
 type JwtPayload = {
   user_id?: string;
@@ -55,7 +56,7 @@ export default function AuthHydrator() {
       mapBackendUser({
         id: userId,
         email: payload.email,
-        role: payload.role as any,
+        role: payload.role as UserRole,
         university: payload.university ?? payload.university_id ?? "",
         university_name: payload.university_name ?? null,
         name: `${payload.first_name ?? ""} ${payload.last_name ?? ""}`.trim(),

@@ -8,12 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAppStore } from "@/store/useAppStore";
 import apiService from "@/services/apiService";
+import { Course } from "@/types/course";
 
 export default function CoursesPage() {
-  const [courses, setCourses] = useState<any[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useAppStore();
 
   // Calculate stats from actual data
   const stats = useMemo(() => {
@@ -44,15 +44,7 @@ export default function CoursesPage() {
     fetchCourses();
   }, []);
 
-  const removeCourse = async (id: string) => {
-    try {
-      await apiService.courses.unenroll(id);
-      setCourses((prev) => prev.filter((c) => c.id !== id));
-    } catch (err) {
-      console.error("Failed to remove course:", err);
-      setError("Failed to remove course. Please try again.");
-    }
-  };
+
 
   return (
     // A grid display of courses with cards showing course name, description, and progress

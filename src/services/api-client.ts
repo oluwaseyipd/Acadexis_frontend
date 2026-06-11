@@ -11,13 +11,13 @@ const camelizeString = (value: string): string =>
 const decamelizeString = (value: string): string =>
   value.replace(/([a-z0-9])([A-Z])/g, "$1_$2").toLowerCase();
 
-const deepTransformKeys = (value: any, transform: (key: string) => string): any => {
+const deepTransformKeys = (value: unknown, transform: (key: string) => string): unknown => {
   if (Array.isArray(value)) {
     return value.map((item) => deepTransformKeys(item, transform));
   }
 
   if (value !== null && typeof value === "object") {
-    return Object.entries(value).reduce<Record<string, unknown>>((acc, [key, item]) => {
+    return Object.entries(value as Record<string, unknown>).reduce<Record<string, unknown>>((acc, [key, item]) => {
       acc[transform(key)] = deepTransformKeys(item, transform);
       return acc;
     }, {});

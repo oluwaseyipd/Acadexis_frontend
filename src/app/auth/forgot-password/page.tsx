@@ -30,7 +30,7 @@ function EmailNotification() {
               >
                 Return to Login
               </a>
-        <p className="text-sm text-gray-500">Didn't receive the email?</p>
+        <p className="text-sm text-gray-500">Didn&apos;t receive the email?</p>
         <button 
           onClick={() => window.location.reload()} // Simple way to let them try again
           className="text-green-500 font-medium hover:underline"
@@ -72,7 +72,7 @@ export default function ForgotPasswordPage() {
               Reset Your Password
             </h1>
             <p className="text-sm text-gray-500 leading-relaxed max-w-[300px]">
-              Enter your university email address and we'll send you a link.
+              Enter your university email address and we&apos;ll send you a link.
             </p>
           </header>
 

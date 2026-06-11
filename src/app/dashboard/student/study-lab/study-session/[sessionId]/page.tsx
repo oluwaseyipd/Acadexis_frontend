@@ -311,7 +311,7 @@ export default function StudySession() {
                                     ({UI_TEXT.studyLab.pageRef} {src.page})
                                   </span>
                                   <p className="text-muted-foreground mt-0.5 italic">
-                                    "{src.snippet}"
+                                    &quot;{src.snippet}&quot;
                                   </p>
                                 </div>
                               </button>
@@ -458,7 +458,7 @@ export default function StudySession() {
       <Dialog open={showFeedback} onOpenChange={setShowFeedback}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>How's your study experience?</DialogTitle>
+            <DialogTitle>How&apos;s your study experience?</DialogTitle>
             <DialogDescription>
               Your feedback helps us improve the AI study assistant.
             </DialogDescription>

@@ -70,9 +70,9 @@ export default function RoleSelectPage() {
       {/* Quote block */}
       <div className="mx-auto mt-8 max-w-[640px] w-full bg-white rounded-xl px-6 py-4 border-l-4 border-green-400 shadow-sm">
         <p className="text-sm text-gray-600 leading-relaxed italic">
-          "Our AI curator adapts to your specific role, ensuring whether you're
+          &quot;Our AI curator adapts to your specific role, ensuring whether you&apos;re
           architecting a course or mastering a subject, the interface stays
-          focused on your unique academic goals."
+          focused on your unique academic goals.&quot;
         </p>
       </div>
 

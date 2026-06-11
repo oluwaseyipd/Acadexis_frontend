@@ -157,9 +157,10 @@ export default function SetPasswordPage() {
         document.cookie = `refresh_token=${tokens.refreshToken}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
       }
       // Add navigation or success state here
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errWithResponse = error as { response?: { data?: { message?: string } } };
       const message =
-        error?.response?.data?.message ??
+        errWithResponse?.response?.data?.message ??
         "Registration failed. Please try again.";
       setServerError(message);
     } finally {

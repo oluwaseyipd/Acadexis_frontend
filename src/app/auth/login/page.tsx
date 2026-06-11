@@ -102,9 +102,10 @@ export default function LoginPage() {
 
       const nextRoute = user.role === "lecturer" ? "/dashboard/lecturer" : "/dashboard/student";
       router.push(nextRoute);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errWithResponse = error as { response?: { data?: { message?: string } } };
       const message =
-        error?.response?.data?.message ||
+        errWithResponse?.response?.data?.message ||
         "Invalid credentials. Please try again.";
       setServerError(message);
     } finally {
@@ -122,7 +123,7 @@ export default function LoginPage() {
       if (response.data?.url) {
         window.location.href = response.data.url;
       }
-    } catch (error: any) {
+    } catch {
       setServerError("Failed to initiate Google login. Please try again.");
       setIsGoogleLoading(false);
     }
@@ -297,7 +298,7 @@ export default function LoginPage() {
 
         {/* Footer note */}
         <p className="text-sm text-gray-500">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <a
             href="/auth/register"
             className="font-medium text-green-600 hover:text-green-700 hover:underline transition-colors"

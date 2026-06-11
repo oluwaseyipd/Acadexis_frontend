@@ -13,6 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import apiService from "@/services/apiService";
+import { Course } from "@/types/course";
 
 interface EnrolledStudent {
   id: string;
@@ -26,7 +27,7 @@ interface EnrolledStudent {
 
 export default function ManageStudentsPage() {
   const [students, setStudents] = useState<EnrolledStudent[]>([]);
-  const [courses, setCourses] = useState<any[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCourse, setSelectedCourse] = useState<string>("");

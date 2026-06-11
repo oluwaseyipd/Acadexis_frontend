@@ -1,7 +1,7 @@
 import { AxiosRequestConfig, AxiosResponse } from "axios";
 import apiClient, { publicApiClient, tokenStorage } from "./api-client";
 import { AuthUser, UserProfile } from "@/types/user";
-import { Course, CourseModule, PaginatedResponse } from "@/types/course";
+import { Course, CourseModule, PaginatedResponse, EnrolledStudent } from "@/types/course";
 import { Notification } from "@/types/notification";
 import type { CourseMaterial } from "@/types/material";
 import { University, Faculty, Department } from "@/types/institution";
@@ -241,8 +241,8 @@ const apiService = {
     },
 
     /** Get students enrolled in a course */
-    getStudents(courseId: string): Promise<AxiosResponse<any[]>> {
-      return apiClient.get<any[]>(`/courses/${courseId}/students/`);
+    getStudents(courseId: string): Promise<AxiosResponse<EnrolledStudent[]>> {
+      return apiClient.get<EnrolledStudent[]>(`/courses/${courseId}/students/`);
     },
 
     /** Create a new course */
