@@ -25,12 +25,12 @@ export default function LecturerOverview() {
     }
   }, [courses, selectedCourseId]);
 
-  const totalStudents = courses.reduce((s, c) => s + c.students_enrolled, 0);
+  const totalStudents = courses.reduce((s, c) => s + (c.studentsEnrolled ?? c.students_enrolled ?? 0), 0);
 
   const stats = [
     { label: "Active Courses", value: courses.length.toString(), icon: BookOpen, color: "text-primary" },
     { label: "Total Students", value: totalStudents.toString(), icon: Users, color: "text-info" },
-    { label: "Materials Uploaded", value: courses.reduce((s, c) => s + c.materials_count, 0).toString(), icon: FileText, color: "text-success" },
+    { label: "Materials Uploaded", value: courses.reduce((s, c) => s + (c.materialsCount ?? c.materials_count ?? 0), 0).toString(), icon: FileText, color: "text-success" },
     { label: "Struggle Alerts", value: cells.filter((cell) => cell.avgConfidence < 0.4).length.toString(), icon: AlertTriangle, color: "text-warning" },
   ];
 
@@ -121,14 +121,14 @@ export default function LecturerOverview() {
                     <CardHeader className="pb-2">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-mono text-muted-foreground">{course.code}</span>
-                        <span className="text-xs text-muted-foreground flex items-center gap-1"><Users className="h-3 w-3" /> {course.students_enrolled}</span>
+                        <span className="text-xs text-muted-foreground flex items-center gap-1"><Users className="h-3 w-3" /> {course.studentsEnrolled ?? course.students_enrolled ?? 0}</span>
                       </div>
                       <CardTitle className="text-base">{course.title}</CardTitle>
                     </CardHeader>
                     <CardContent className="pt-0">
                       <p className="text-sm text-muted-foreground line-clamp-2">{course.description}</p>
                       <div className="mt-3 text-xs text-muted-foreground flex items-center gap-1">
-                        <FileText className="h-3 w-3" /> {course.materials_count} materials
+                        <FileText className="h-3 w-3" /> {course.materialsCount ?? course.materials_count ?? 0} materials
                       </div>
                     </CardContent>
                   </Card>

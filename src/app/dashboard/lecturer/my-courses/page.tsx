@@ -18,11 +18,11 @@ export default function CoursesPage() {
   // Calculate stats from actual data
   const stats = useMemo(() => {
     const totalCourses = courses.length;
-    const totalStudents = courses.reduce((sum, c) => sum + (c.students_enrolled || 0), 0);
+    const totalStudents = courses.reduce((sum, c) => sum + (c.studentsEnrolled ?? c.students_enrolled ?? 0), 0);
     return [
       { label: "Total Courses", value: totalCourses, icon: BookOpen },
       { label: "Students Enrolled", value: totalStudents, icon: Users },
-      { label: "Materials", value: courses.reduce((sum, c) => sum + (c.materials_count || 0), 0), icon: FileText },
+      { label: "Materials", value: courses.reduce((sum, c) => sum + (c.materialsCount ?? c.materials_count ?? 0), 0), icon: FileText },
     ];
   }, [courses]);
 
@@ -127,7 +127,7 @@ export default function CoursesPage() {
                       <span className="text-xs font-mono text-muted-foreground">{course.code}</span>
                     </div>
                     <Badge variant="secondary" className="text-xs">
-                      {course.students_enrolled || 0} Students
+                      {course.studentsEnrolled ?? course.students_enrolled ?? 0} Students
                     </Badge>
                   </div>
                   <Link href={`/dashboard/lecturer/my-courses/${course.id}`}>
@@ -138,8 +138,8 @@ export default function CoursesPage() {
                   <p className="text-sm text-muted-foreground line-clamp-2 flex-1">{course.description}</p>
                   <div className="mt-4 flex items-center justify-between">
                     <div className="flex items-center gap-3 text-sm text-brand-muted">
-                      <span>{course.lecturer_name}</span>
-                      <span className="flex items-center gap-1"><FileText className="h-3 w-3" />{course.materials_count}</span>
+                      <span>{course.lecturerName ?? course.lecturer_name}</span>
+                      <span className="flex items-center gap-1"><FileText className="h-3 w-3" />{course.materialsCount ?? course.materials_count ?? 0}</span>
                     </div>
                   </div>
                 </CardContent>
