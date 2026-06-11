@@ -35,7 +35,7 @@ export default function LecturerOverview() {
     { label: "Struggle Alerts", value: cells.filter((cell) => cell.avgConfidence < 0.4).length.toString(), icon: AlertTriangle, color: "text-warning" },
   ];
 
-  return (
+  return ( 
     <div className="max-w-[1500px] mx-auto px-8 py-8 flex flex-col gap-8 font-sans">
       <div>
         <h1 className="text-2xl font-bold text-foreground">

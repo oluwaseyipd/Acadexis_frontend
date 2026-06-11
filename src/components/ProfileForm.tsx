@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import apiService from "@/services/apiService";
 import { useAppStore } from "@/store/useAppStore";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import Image from "next/image";
 
 const allowedAvatarTypes = ["image/jpeg", "image/png", "image/webp"];
 const maxAvatarSize = 10 * 1024 * 1024;
@@ -29,12 +30,12 @@ export default function ProfileForm() {
 
   const [editing, setEditing] = useState(false);
   const [formState, setFormState] = useState({
-    first_name: "",
-    last_name: "",
+    firstName: "",
+    lastName: "",
     email: "",
     level: "",
     department: "",
-    identification_number: "",
+    identificationNumber: "",
   });
   const [selectedAvatarFile, setSelectedAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -46,12 +47,12 @@ export default function ProfileForm() {
     if (!user) return;
 
     setFormState({
-      first_name: user.profile.first_name,
-      last_name: user.profile.last_name,
+      firstName: user.profile.firstName,
+      lastName: user.profile.lastName,
       email: user.email,
       level: user.profile.level,
       department: user.profile.department ?? "",
-      identification_number: user.profile.identification_number,
+      identificationNumber: user.profile.identificationNumber,
     });
 
     setAvatarPreview(user.profile.avatar ?? user.profile.avatar_url ?? null);
@@ -91,11 +92,11 @@ export default function ProfileForm() {
 
     try {
       const profilePayload = {
-        first_name: formState.first_name,
-        last_name: formState.last_name,
+        firstName: formState.firstName,
+        lastName: formState.lastName,
         level: formState.level,
         department: formState.department || null,
-        identification_number: formState.identification_number,
+        identificationNumber: formState.identificationNumber,
         avatar: selectedAvatarFile ?? undefined,
       };
 
@@ -137,10 +138,12 @@ export default function ProfileForm() {
               disabled={!editing}
             >
               {avatarSrc ? (
-                <img
+                <Image
                   src={avatarSrc}
                   alt={user?.name ?? "Profile avatar"}
                   className="h-full w-full object-cover"
+                  width={96}
+                  height={96}
                 />
               ) : (
                 <span className="text-xl font-semibold text-gray-700">{initials}</span>
@@ -202,9 +205,9 @@ export default function ProfileForm() {
             <label className="text-sm font-medium text-gray-700">First Name</label>
             <input
               type="text"
-              value={formState.first_name}
+              value={formState.firstName}
               disabled={!editing || userLoading}
-              onChange={(event) => setFormState((prev) => ({ ...prev, first_name: event.target.value }))}
+              onChange={(event) => setFormState((prev) => ({ ...prev, firstName: event.target.value }))}
               className={`border border-gray-300 rounded-md py-2 px-4 focus:outline-none ${
                 editing ? "focus:ring-2 focus:ring-green-500 bg-white" : "bg-gray-100 cursor-not-allowed"
               }`}
@@ -215,9 +218,9 @@ export default function ProfileForm() {
             <label className="text-sm font-medium text-gray-700">Last Name</label>
             <input
               type="text"
-              value={formState.last_name}
+              value={formState.lastName}
               disabled={!editing || userLoading}
-              onChange={(event) => setFormState((prev) => ({ ...prev, last_name: event.target.value }))}
+              onChange={(event) => setFormState((prev) => ({ ...prev, lastName: event.target.value }))}
               className={`border border-gray-300 rounded-md py-2 px-4 focus:outline-none ${
                 editing ? "focus:ring-2 focus:ring-green-500 bg-white" : "bg-gray-100 cursor-not-allowed"
               }`}
@@ -235,15 +238,15 @@ export default function ProfileForm() {
                 editing ? "focus:ring-2 focus:ring-green-500 bg-white" : "bg-gray-100 cursor-not-allowed"
               }`}
             />
-          </div>
+          </div> 
 
             <div className="flex flex-col gap-2">
             <label className="text-sm font-medium text-gray-700">Matric Number</label>
             <input
               type="text"
-              value={formState.identification_number}
+              value={formState.identificationNumber}
               disabled={!editing || userLoading}
-              onChange={(event) => setFormState((prev) => ({ ...prev, identification_number: event.target.value }))}
+              onChange={(event) => setFormState((prev) => ({ ...prev, identificationNumber: event.target.value }))}
               className={`border border-gray-300 rounded-md py-2 px-4 focus:outline-none ${
                 editing ? "focus:ring-2 focus:ring-green-500 bg-white" : "bg-gray-100 cursor-not-allowed"
               }`}
