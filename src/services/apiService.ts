@@ -179,7 +179,11 @@ const apiService = {
           if (data.identification_number !== undefined) formData.append("identification_number", data.identification_number);
           formData.append("avatar", data.avatar);
 
-          return apiClient.patch<UserProfile>("/auth/profile/", formData);
+          return apiClient.patch<UserProfile>("/auth/profile/", formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          });
         }
 
         const { avatar: _avatar, ...jsonData } = data;
@@ -290,7 +294,11 @@ const apiService = {
       const body = new FormData();
       body.append("course", courseId);
       body.append("file", file);
-      return apiClient.post<CourseMaterial>("/materials/", body);
+      return apiClient.post<CourseMaterial>("/materials/", body, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
     },
   },
 
@@ -406,7 +414,11 @@ const apiService = {
     },
 
     uploadCourseMaterial(formData: FormData): Promise<AxiosResponse<CourseMaterial>> {
-      return apiClient.post<CourseMaterial>("/materials/", formData);
+      return apiClient.post<CourseMaterial>("/materials/", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
     },
 
     renameMaterial(materialId: string, data: { file_name: string }): Promise<AxiosResponse<CourseMaterial>> {
