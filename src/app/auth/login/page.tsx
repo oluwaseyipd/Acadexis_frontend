@@ -109,9 +109,24 @@ export default function LoginPage() {
       const nextRoute = user.role === "lecturer" ? "/dashboard/lecturer" : "/dashboard/student";
       router.push(nextRoute);
     } catch (error: unknown) {
-      const errWithResponse = error as { response?: { data?: { message?: string } } };
+      const errWithResponse = error as {
+        response?: {
+          data?: {
+            message?: string;
+            detail?: string;
+            emailVerificationRequired?: boolean;
+          };
+        };
+      };
+
+      if (errWithResponse?.response?.data?.emailVerificationRequired) {
+        router.push(`/auth/verify-email?email=${encodeURIComponent(data.email)}`);
+        return;
+      }
+
       const message =
         errWithResponse?.response?.data?.message ||
+        errWithResponse?.response?.data?.detail ||
         "Invalid credentials. Please try again.";
       setServerError(message);
     } finally {

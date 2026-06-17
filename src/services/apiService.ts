@@ -132,6 +132,16 @@ const apiService = {
       return apiClient.post<{ message: string }>("/auth/forgot-password/", { email });
     },
 
+    /** Verify user's email using 6-digit code */
+    verifyEmail(email: string, code: string): Promise<AxiosResponse<{ success: boolean; message: string }>> {
+      return publicApiClient.post<{ success: boolean; message: string }>("/auth/verify-email/", { email, code });
+    },
+
+    /** Resend 6-digit verification code */
+    resendVerificationCode(email: string): Promise<AxiosResponse<{ success: boolean; message: string }>> {
+      return publicApiClient.post<{ success: boolean; message: string }>("/auth/resend-verification/", { email });
+    },
+
     /** Complete password reset with the token from the email */
     resetPassword(
       token: string,

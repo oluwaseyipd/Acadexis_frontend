@@ -294,7 +294,7 @@ export default function RegisterForm({ role }: RegisterFormProps) {
       }
 
       await apiService.auth.register(payload);
-      router.push("/auth/login");
+      router.push(`/auth/verify-email?email=${encodeURIComponent(data.email)}`);
     } catch (error: unknown) {
       let message = "Registration failed. Please try again.";
       if (typeof error === "object" && error !== null) {
