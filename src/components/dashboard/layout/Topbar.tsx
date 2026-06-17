@@ -146,7 +146,7 @@ export default function TopBar({
         {/* Avatar */}
         <Link
           href={user?.role === "lecturer" ? "/dashboard/lecturer/profile" : "/dashboard/student/profile"}
-          className={`w-8 h-8 rounded-full overflow-hidden ${displayAvatarUrl ? "bg-transparent" : avatarColor} flex items-center justify-center text-white text-xs font-bold hover:opacity-90 transition-opacity shrink-0`}
+          className={`w-8 h-8 rounded-full overflow-hidden ${displayAvatarUrl ? "bg-transparent" : "bg-brand-primary"} flex items-center justify-center text-white text-xs font-bold hover:opacity-90 transition-opacity shrink-0`}
           aria-label={`${displayName}'s profile`}
           title={displayName}
         >

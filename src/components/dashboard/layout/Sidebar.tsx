@@ -99,8 +99,8 @@ export default function Sidebar({
               href={href}
               onClick={() => onClose?.()}
               className={`relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-[15px] font-medium transition-all duration-150 group ${isActive
-                  ? "text-brand-primary bg-brand-primary/10"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                ? "text-brand-primary bg-brand-primary/10"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 }`}
             >
               <Icon
