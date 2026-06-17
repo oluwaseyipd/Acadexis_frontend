@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Sidebar from "./Sidebar";
 import TopBar from "./Topbar";
-import Askai from "./Askai";
+// import Askai from "./Askai";
 import { useNotifications } from "@/hooks/useNotifications";
 
 // ─── Props ────────────────────────────────────────────────────────────────────
@@ -33,13 +33,13 @@ export default function DashboardLayout({
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-[#f4f6f9]">
-       {/* TopBar */}
-        <TopBar
-          userName={userName}
-          userInitials={userInitials}
-          avatarColor={avatarColor}
-          onMenuClick={() => setSidebarOpen(true)}
-        />
+      {/* TopBar */}
+      <TopBar
+        userName={userName}
+        userInitials={userInitials}
+        avatarColor={avatarColor}
+        onMenuClick={() => setSidebarOpen(true)}
+      />
 
       {/* ── Main area ─────────────────────────────────────────────────────── */}
       <div className="flex flex-1 min-w-0 overflow-hidden">
@@ -67,11 +67,11 @@ export default function DashboardLayout({
       </div>
 
       {/* ── Floating AI ───────────────────────────────────────────────────── */}
-      <Askai
+      {/* <Askai
         courseContext={courseContext}
         isOpen={aiOpen}
         onOpenChange={setAiOpen}
-      />
+      /> */}
     </div>
   );
 }
