@@ -26,6 +26,15 @@ const deepTransformKeys = (value: unknown, transform: (key: string) => string): 
   return value;
 };
 
+const isFormData = (value: unknown): boolean => {
+  if (!value || typeof value !== "object") return false;
+  return (
+    value instanceof FormData ||
+    value.constructor?.name === "FormData" ||
+    typeof (value as any).append === "function"
+  );
+};
+
 // ─── Token Helpers ────────────────────────────────────────────────────────────
 const TOKEN_KEY = "access_token";
 const REFRESH_TOKEN_KEY = "refresh_token";
@@ -90,7 +99,7 @@ const publicApiClient: AxiosInstance = axios.create({
 
 publicApiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
-    if (config.data && !(config.data instanceof FormData)) {
+    if (config.data && !isFormData(config.data)) {
       config.data = deepTransformKeys(config.data, decamelizeString);
     }
 
@@ -134,7 +143,7 @@ apiClient.interceptors.request.use(
       }
     }
 
-    if (config.data && !(config.data instanceof FormData)) {
+    if (config.data && !isFormData(config.data)) {
       config.data = deepTransformKeys(config.data, decamelizeString);
     }
 
