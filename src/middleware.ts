@@ -10,6 +10,9 @@ const PUBLIC_PATHS = [
   "/auth/register",
   "/auth/forgot-password",
   "/auth/reset-password",
+  "/auth/verify-email",
+  "/auth/google/callback",
+  "/auth/expired-link",
 ];
 
 export function middleware(request: NextRequest) {
