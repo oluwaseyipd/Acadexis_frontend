@@ -46,16 +46,19 @@ function KnowledgeHubContent() {
 
   useEffect(() => {
     const firstNotification = notifications[0];
+    if (!firstNotification) return;
+
+    const type = firstNotification.notificationType ?? firstNotification.notification_type;
+    const courseId = firstNotification.data?.courseId ?? firstNotification.data?.course_id;
 
     if (
-      !firstNotification ||
       firstNotification.id === prevFirstNotificationId.current ||
-      firstNotification.notification_type !== "material_ready"
+      type !== "material_ready"
     ) {
       return;
     }
 
-    if (firstNotification.data?.course_id === selectedCourse) {
+    if (courseId === selectedCourse) {
       prevFirstNotificationId.current = firstNotification.id;
       void refresh();
     }

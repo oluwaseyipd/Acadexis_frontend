@@ -14,11 +14,13 @@ export interface Notification {
   title: string;
   body: string; // Primary key — use this in new code
   message: string; // Alias for body — present for compat
-  notification_type: NotificationType; // Primary key — use this in new code
-  type: NotificationType; // Alias for notification_type — present for compat
+  notification_type?: NotificationType; // Primary key — use this in new code
+  notificationType?: NotificationType; // camelCase fallback
+  type?: NotificationType; // Alias for notification_type — present for compat
   read: boolean;
   data: Record<string, string>;
-  created_at: string;
+  created_at?: string;
+  createdAt?: string;
 }
 
 export interface WsNotificationPayload {

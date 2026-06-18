@@ -76,10 +76,12 @@ export const useNotifications = () => {
         body: payload.body,
         message: payload.body,
         notification_type: payload.notification_type,
+        notificationType: payload.notification_type,
         type: payload.notification_type,
         read: payload.read,
         data: payload.data ?? {},
         created_at: payload.created_at,
+        createdAt: payload.created_at,
       };
       prependNotification(notification);
     };

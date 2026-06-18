@@ -86,13 +86,17 @@ export default function NotificationPanel({ onClose }: NotificationPanelProps) {
                 !notification.read ? "bg-card" : "bg-background"
               } hover:bg-muted`}
             >
-              <span className="text-lg mt-1 shrink-0">{NOTIFICATION_ICONS[notification.notification_type] ?? "🔔"}</span>
+              <span className="text-lg mt-1 shrink-0">
+                {NOTIFICATION_ICONS[notification.notificationType ?? notification.notification_type ?? ""] ?? "🔔"}
+              </span>
               <div className="min-w-0 flex-1">
                 <p className={`text-sm ${!notification.read ? "font-semibold" : "font-medium"} text-foreground`}>
                   {notification.title}
                 </p>
                 <p className="text-xs text-muted-foreground truncate mt-1">{notification.body}</p>
-                <p className="text-[11px] text-muted-foreground mt-1">{formatTimeAgo(notification.created_at)}</p>
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  {formatTimeAgo(notification.createdAt ?? notification.created_at ?? "")}
+                </p>
               </div>
               {!notification.read && (
                 <span className="mt-2 h-2 w-2 rounded-full bg-brand-primary shrink-0" />
@@ -106,20 +110,22 @@ export default function NotificationPanel({ onClose }: NotificationPanelProps) {
 }
 
 function handleNotificationNavigation(notification: Notification) {
-  const { data, notification_type } = notification;
+  const { data } = notification;
+  const type = notification.notificationType ?? notification.notification_type;
+  const courseId = data?.courseId ?? data?.course_id;
 
-  if (notification_type === "material_ready" && data?.course_id) {
-    window.location.href = `/dashboard/lecturer/knowledge-hub?courseId=${data.course_id}`;
+  if (type === "material_ready" && courseId) {
+    window.location.href = `/dashboard/lecturer/knowledge-hub?courseId=${courseId}`;
     return;
   }
 
-  if (notification_type === "new_enrollment" && data?.course_id) {
-    window.location.href = `/dashboard/lecturer?courseId=${data.course_id}`;
+  if (type === "new_enrollment" && courseId) {
+    window.location.href = `/dashboard/lecturer?courseId=${courseId}`;
     return;
   }
 
-  if (notification_type === "course" && data?.course_id) {
-    window.location.href = `/dashboard/student/library/${data.course_id}`;
+  if (type === "course" && courseId) {
+    window.location.href = `/dashboard/student/library/${courseId}`;
     return;
   }
 }
