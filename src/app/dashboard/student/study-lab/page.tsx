@@ -29,9 +29,6 @@ export default function StudyLab() {
       try {
         const response = await apiService.courses.getMyCourses();
         setCourses(response.data);
-        if (response.data.length > 0) {
-          setSelectedCourse(response.data[0].id);
-        }
       } catch {
         setCourses([]);
       } finally {
@@ -43,15 +40,12 @@ export default function StudyLab() {
   }, []);
 
   useEffect(() => {
-    if (!selectedCourse) {
-      setSessions([]);
-      return;
-    }
-
     const loadSessions = async () => {
       setLoadingSessions(true);
       try {
-        const data = await apiService.studyLab.getSessionsForCourse(selectedCourse);
+        const data = selectedCourse
+          ? await apiService.studyLab.getSessionsForCourse(selectedCourse)
+          : await apiService.studyLab.getAllSessions();
         setSessions(data);
       } catch {
         setSessions([]);
@@ -107,12 +101,13 @@ export default function StudyLab() {
           <p className="text-sm text-muted-foreground">{UI_TEXT.studyLab.subtitle}</p>
         </div>
         <div className="flex items-center gap-3">
-          {courses.length > 1 && (
-            <Select value={selectedCourse} onValueChange={setSelectedCourse}>
+          {courses.length > 0 && (
+            <Select value={selectedCourse || "all"} onValueChange={(val) => setSelectedCourse(val === "all" ? "" : val)}>
               <SelectTrigger className="w-56">
-                <SelectValue placeholder="Select a course" />
+                <SelectValue placeholder="All Courses" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="all">All Courses</SelectItem>
                 {courses.map((courseItem) => (
                   <SelectItem key={courseItem.id} value={courseItem.id}>
                     {courseItem.code} - {courseItem.title}
@@ -123,8 +118,13 @@ export default function StudyLab() {
           )}
           <Button
             variant="hero"
-            disabled={!selectedCourse}
-            onClick={() => router.push(`/dashboard/student/study-lab/study-session/new?courseId=${selectedCourse}`)}
+            disabled={courses.length === 0}
+            onClick={() => {
+              const url = selectedCourse
+                ? `/dashboard/student/study-lab/study-session/new?courseId=${selectedCourse}`
+                : `/dashboard/student/study-lab/study-session/new`;
+              router.push(url);
+            }}
             className="gap-2"
           >
             <Plus className="h-4 w-4" /> New Study
