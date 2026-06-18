@@ -36,8 +36,11 @@ export interface StudySession {
   title: string;
   description: string;
   confidence_score: number;
+  confidenceScore?: number;
   created_at: string;
+  createdAt?: string;
   updated_at: string;
+  updatedAt?: string;
 }
 
 export interface SessionFeedbackPayload {

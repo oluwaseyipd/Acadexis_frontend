@@ -148,7 +148,7 @@ export default function StudyLab() {
 ) : (
           sessions.map((session, idx) => {
             const courseItem = courses.find((item) => item.id === session.course);
-            const confidencePercent = Math.round(session.confidence_score * 100);
+            const confidencePercent = Math.round((session.confidenceScore ?? session.confidence_score ?? 0) * 100);
 
             return (
               <motion.div
@@ -198,7 +198,7 @@ export default function StudyLab() {
 
                     <div className="flex items-center justify-between pt-2 border-t border-border">
                       <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                        <Calendar className="h-3 w-3" /> {formatDate(session.created_at)}
+                        <Calendar className="h-3 w-3" /> {formatDate(session.createdAt ?? session.created_at)}
                       </div>
                       <div
                         className={cn(
