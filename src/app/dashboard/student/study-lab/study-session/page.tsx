@@ -270,11 +270,93 @@ const basePath = pathname.includes("/lecturer/")
             {loading ? (
               Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-20 w-full" />)
             ) : messages.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-3">
-                <div className="h-14 w-14 rounded-2xl bg-gradient-primary flex items-center justify-center">
-                  <MessageSquare className="h-7 w-7 text-primary-foreground" />
-                </div>
-                <p className="text-sm">Ask a question about your course materials</p>
+              <div className="flex flex-col items-center justify-center h-full max-w-xl mx-auto text-center px-4 py-8 select-none">
+                {/* Visual Icon with soft pulsing background glow */}
+                <motion.div 
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.5 }}
+                  className="relative mb-6"
+                >
+                  <div className="absolute inset-0 rounded-3xl bg-primary/10 blur-xl animate-pulse" />
+                  <div className="relative h-16 w-16 rounded-2xl bg-gradient-primary flex items-center justify-center shadow-lg border border-primary/20">
+                    <MessageSquare className="h-8 w-8 text-primary-foreground" />
+                  </div>
+                </motion.div>
+
+                {/* Engaging large greeting heading */}
+                <motion.h2 
+                  initial={{ y: 10, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.1, duration: 0.5 }}
+                  className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl"
+                >
+                  What do you want to study today?
+                </motion.h2>
+
+                {/* Supportive subtitle description */}
+                <motion.p 
+                  initial={{ y: 10, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.2, duration: 0.5 }}
+                  className="mt-3 text-sm text-muted-foreground leading-relaxed max-w-sm"
+                >
+                  Select a course and type your query below to get started. Our AI study assistant is ready to help you analyze and learn your materials.
+                </motion.p>
+
+                {/* Interactive suggestion cards for a fresh start */}
+                <motion.div 
+                  initial={{ y: 15, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.3, duration: 0.5 }}
+                  className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg"
+                >
+                  {[
+                    {
+                      title: "Summarize slides",
+                      description: "Get a high-level overview of key concepts.",
+                      prompt: "Summarize the core concepts of this course and highlight the most important parts I need to know.",
+                      icon: "📝"
+                    },
+                    {
+                      title: "Quiz preparation",
+                      description: "Generate practice questions with feedback.",
+                      prompt: "Create a 5-question multiple choice quiz based on the course materials so I can test my knowledge.",
+                      icon: "❓"
+                    },
+                    {
+                      title: "Explain concepts",
+                      description: "Break down complex topics into simple terms.",
+                      prompt: "Explain the most challenging topics in this course in simple, easy-to-understand terms.",
+                      icon: "🔍"
+                    },
+                    {
+                      title: "Study strategy",
+                      description: "Design a plan to master this course.",
+                      prompt: "Help me design a personalized study plan to prepare for examinations in this course.",
+                      icon: "📅"
+                    }
+                  ].map((sug, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setInput(sug.prompt)}
+                      className="text-left p-4 rounded-xl border border-border bg-card hover:bg-accent/40 hover:border-primary/40 transition-all duration-200 group relative overflow-hidden cursor-pointer"
+                    >
+                      <div className="flex gap-3">
+                        <span className="text-2xl shrink-0 group-hover:scale-110 transition-transform">{sug.icon}</span>
+                        <div>
+                          <h4 className="font-semibold text-xs text-foreground group-hover:text-primary transition-colors">
+                            {sug.title}
+                          </h4>
+                          <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-2">
+                            {sug.description}
+                          </p>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </motion.div>
               </div>
             ) : (
               messages.map((msg) => (
