@@ -130,7 +130,7 @@ export default function CoursesPage() {
                       {course.studentsEnrolled ?? course.students_enrolled ?? 0} Students
                     </Badge>
                   </div>
-                  <Link href={`/dashboard/lecturer/my-courses/${course.id}`}>
+                  <Link href={`/dashboard/lecturer/knowledge-hub?courseId=${course.id}`}>
                     <CardTitle className="text-base mt-2 hover:text-primary transition-colors cursor-pointer">{course.title}</CardTitle>
                   </Link>
                 </CardHeader>

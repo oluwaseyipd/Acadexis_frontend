@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, Suspense } from "react";
 import { motion } from "framer-motion";
 import { FileText, CheckCircle, Loader2, X, Cloud, ChevronRight, BookOpen, Users } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -14,9 +15,11 @@ import { useMaterials } from "@/hooks/useMaterials";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import { useNotificationStore } from "@/store/notificationStore";
 
-export default function KnowledgeHub() {
+function KnowledgeHubContent() {
+  const searchParams = useSearchParams();
+  const queryCourseId = searchParams.get("courseId") ?? "";
   const [courses, setCourses] = useState<Course[]>([]);
-  const [selectedCourse, setSelectedCourse] = useState("");
+  const [selectedCourse, setSelectedCourse] = useState(queryCourseId);
   const [loading, setLoading] = useState(true);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [dragOver, setDragOver] = useState(false);
@@ -334,5 +337,13 @@ export default function KnowledgeHub() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function KnowledgeHub() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-muted-foreground flex items-center justify-center min-h-[400px]">Loading Knowledge Hub...</div>}>
+      <KnowledgeHubContent />
+    </Suspense>
   );
 }
