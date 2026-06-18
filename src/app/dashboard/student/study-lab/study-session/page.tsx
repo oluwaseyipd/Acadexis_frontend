@@ -164,7 +164,7 @@ export default function StudySession() {
 
   /* ── Open PDF viewer ─────────────────────────────────────────── */
   const openPdf = (materialName: string) => {
-    const mat = materials.find((m) => m.file_name === materialName);
+    const mat = materials.find((m) => (m.fileName ?? m.file_name) === materialName);
     if (mat) {
       setActivePdf(mat);
       setPdfOpen(true);
@@ -302,14 +302,15 @@ const basePath = pathname.includes("/lecturer/")
                       {msg.sources && msg.sources.length > 0 && (
                         <div className="mt-3 space-y-1.5 border-t border-border/30 pt-2">
                           {msg.sources.map((src, i) => {
-                            const materialName = src.material?.file_name ?? "Document";
+                            const materialName = src.material?.fileName ?? src.material?.file_name ?? "Document";
                             return (
                               <button
                                 key={i}
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  if (src.material?.file_name) {
-                                    openPdf(src.material.file_name);
+                                  const name = src.material?.fileName ?? src.material?.file_name;
+                                  if (name) {
+                                    openPdf(name);
                                   }
                                 }}
                                 className="w-full flex items-start gap-2 text-xs bg-background/50 rounded-md p-2 cursor-pointer hover:bg-background/80 transition-colors text-left"
@@ -398,9 +399,9 @@ const basePath = pathname.includes("/lecturer/")
                   >
                     <FileText className="h-4 w-4 text-primary/60 shrink-0" />
                     <div className="min-w-0">
-                      <p className="text-xs font-medium text-foreground truncate">{mat.file_name}</p>
+                      <p className="text-xs font-medium text-foreground truncate">{mat.fileName ?? mat.file_name}</p>
                       <p className="text-[10px] text-muted-foreground">
-                        {mat.page_count ?? 0} pages
+                        {mat.pageCount ?? mat.page_count ?? 0} pages
                       </p>
                     </div>
                   </button>
@@ -446,9 +447,9 @@ const basePath = pathname.includes("/lecturer/")
                       <FileText className="h-8 w-8 text-muted-foreground/50" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-foreground">{activePdf.file_name}</p>
+                      <p className="text-sm font-medium text-foreground">{activePdf.fileName ?? activePdf.file_name}</p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        {activePdf.page_count ?? 0} pages • {(activePdf.file_size / 1024 / 1024).toFixed(1)} MB
+                        {activePdf.pageCount ?? activePdf.page_count ?? 0} pages • {(((activePdf.fileSize ?? activePdf.file_size ?? 0) / 1024 / 1024).toFixed(1))} MB
                       </p>
                     </div>
                     <p className="text-xs text-muted-foreground">

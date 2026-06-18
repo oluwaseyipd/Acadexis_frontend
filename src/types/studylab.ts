@@ -5,6 +5,7 @@ export interface MessageSource {
     | {
         id: string;
         file_name: string;
+        fileName?: string;
         file: string;
         course: string;
       }

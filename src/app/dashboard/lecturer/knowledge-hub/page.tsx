@@ -304,10 +304,10 @@ export default function KnowledgeHub() {
                               <FileText className="h-5 w-5 text-accent-foreground" />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-foreground truncate">{mat.file_name}</p>
+                              <p className="text-sm font-medium text-foreground truncate">{mat.fileName ?? mat.file_name}</p>
                               <p className="text-xs text-muted-foreground">
-                                {(mat.page_count ?? 0) > 0 ? `${mat.page_count} pages • ` : ""}
-                                {(mat.file_size / 1024 / 1024).toFixed(1)} MB
+                                {(mat.pageCount ?? mat.page_count ?? 0) > 0 ? `${mat.pageCount ?? mat.page_count} pages • ` : ""}
+                                {(((mat.fileSize ?? mat.file_size ?? 0) / 1024 / 1024).toFixed(1))} MB
                               </p>
                             </div>
                             <div className="flex items-center gap-2">
