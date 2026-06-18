@@ -14,6 +14,16 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import type { Course } from "@/types/course";
 import type { StudySession } from "@/types/studylab";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function StudyLab() {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -21,6 +31,8 @@ export default function StudyLab() {
   const [sessions, setSessions] = useState<StudySession[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingSessions, setLoadingSessions] = useState(false);
+  const [sessionToDelete, setSessionToDelete] = useState<string | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -57,13 +69,15 @@ export default function StudyLab() {
     void loadSessions();
   }, [selectedCourse]);
 
-  const handleDeleteSession = async (sessionId: string) => {
-    if (!confirm("Are you sure you want to delete this study session? This will permanently remove the chat history.")) return;
+  const confirmDeleteSession = async (sessionId: string) => {
     try {
       await apiService.studyLab.deleteSession(sessionId);
       setSessions((prev) => prev.filter((s) => s.id !== sessionId));
     } catch (err) {
       console.error("Failed to delete session:", err);
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setSessionToDelete(null);
     }
   };
 
@@ -178,7 +192,8 @@ export default function StudyLab() {
                         className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
                         onClick={(e) => {
                           e.stopPropagation();
-                          void handleDeleteSession(session.id);
+                          setSessionToDelete(session.id);
+                          setIsDeleteDialogOpen(true);
                         }}
                       >
                         <Trash2 className="h-4 w-4" />
@@ -217,6 +232,30 @@ export default function StudyLab() {
           })
         )}
       </div>
+
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete your study session and all associated chat history.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (sessionToDelete) {
+                  void confirmDeleteSession(sessionToDelete);
+                }
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
