@@ -134,7 +134,7 @@ export default function OverviewPage() {
                       <div className="text-primary mt-0.5"><MessageSquare className="h-4 w-4" /></div>
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-card-foreground line-clamp-2">{session.title}</p>
-                        <p className="text-xs text-muted-foreground mt-1">{new Date(session.created_at).toLocaleDateString()}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{new Date(session.createdAt ?? session.created_at).toLocaleDateString()}</p>
                       </div>
                     </CardContent>
                   </Card>
