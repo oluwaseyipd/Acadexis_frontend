@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Plus, BookOpen, Calendar, TrendingUp } from "lucide-react";
+import { Plus, BookOpen, Calendar, TrendingUp, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -62,6 +62,16 @@ export default function StudyLab() {
 
     void loadSessions();
   }, [selectedCourse]);
+
+  const handleDeleteSession = async (sessionId: string) => {
+    if (!confirm("Are you sure you want to delete this study session? This will permanently remove the chat history.")) return;
+    try {
+      await apiService.studyLab.deleteSession(sessionId);
+      setSessions((prev) => prev.filter((s) => s.id !== sessionId));
+    } catch (err) {
+      console.error("Failed to delete session:", err);
+    }
+  };
 
   const course = courses.find((courseItem) => courseItem.id === selectedCourse);
 
@@ -152,13 +162,27 @@ export default function StudyLab() {
                   onClick={() => router.push(`/dashboard/student/study-lab/study-session/${session.id}?courseId=${selectedCourse}`)}
                 >
                   <div className="p-5 space-y-4">
-                    <div>
-                      <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-1">
-                        {session.title}
-                      </h3>
-                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                        {session.description || "No description available."}
-                      </p>
+                    <div className="flex justify-between items-start gap-4">
+                      <div className="min-w-0">
+                        <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-1">
+                          {session.title}
+                        </h3>
+                        <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                          {session.description || "No description available."}
+                        </p>
+                      </div>
+                      <Button
+                        size="icon"
+                        type="button"
+                        variant="ghost"
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          void handleDeleteSession(session.id);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
 
                     <Badge variant="secondary" className="text-xs">

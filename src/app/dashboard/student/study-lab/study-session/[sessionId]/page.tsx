@@ -11,6 +11,8 @@ import {
   X,
   Star,
   MessageSquare,
+  Pencil,
+  Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -69,6 +71,7 @@ export default function StudySession() {
 
   const {
     activeSession,
+    setActiveSession,
     messages,
     isLoadingHistory,
     isAsking,
@@ -81,6 +84,33 @@ export default function StudySession() {
     courseId: selectedCourse,
     sessionId: isNew ? undefined : sessionId,
   });
+
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editedTitle, setEditedTitle] = useState("");
+  const [isSavingTitle, setIsSavingTitle] = useState(false);
+
+  useEffect(() => {
+    if (activeSession) {
+      setEditedTitle(activeSession.title);
+    }
+  }, [activeSession]);
+
+  const handleSaveTitle = async () => {
+    if (!activeSession || !editedTitle.trim() || isSavingTitle) return;
+    setIsSavingTitle(true);
+    try {
+      const updated = await apiService.studyLab.updateSession(activeSession.id, {
+        title: editedTitle.trim(),
+      });
+      setActiveSession(updated);
+      setIsEditingTitle(false);
+    } catch (err) {
+      console.error("Failed to update session title:", err);
+      setError("Failed to update the session title. Please try again.");
+    } finally {
+      setIsSavingTitle(false);
+    }
+  };
 
   const { materials, loading: materialsLoading, refresh: refreshMaterials } = useMaterials(selectedCourse || null);
   const messageRefs = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -196,9 +226,67 @@ export default function StudySession() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-lg font-bold text-foreground">
-              {activeSession ? activeSession.title : isNew ? "New Study Session" : "Study Session"}
-            </h1>
+            {isEditingTitle && activeSession ? (
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={editedTitle}
+                  onChange={(e) => setEditedTitle(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      void handleSaveTitle();
+                    } else if (e.key === "Escape") {
+                      setIsEditingTitle(false);
+                      setEditedTitle(activeSession.title);
+                    }
+                  }}
+                  disabled={isSavingTitle}
+                  className="text-lg font-bold text-foreground bg-background border border-border rounded px-2 py-0.5 focus:outline-none focus:border-primary w-64"
+                  autoFocus
+                />
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-8 w-8 text-success hover:text-success hover:bg-success/10"
+                  onClick={() => void handleSaveTitle()}
+                  disabled={isSavingTitle || !editedTitle.trim()}
+                >
+                  {isSavingTitle ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Check className="h-4 w-4" />
+                  )}
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                  onClick={() => {
+                    setIsEditingTitle(false);
+                    setEditedTitle(activeSession.title);
+                  }}
+                  disabled={isSavingTitle}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 group/title">
+                <h1 className="text-lg font-bold text-foreground truncate max-w-[350px] sm:max-w-[500px]">
+                  {activeSession ? activeSession.title : isNew ? "New Study Session" : "Study Session"}
+                </h1>
+                {activeSession && (
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-6 w-6 opacity-0 group-hover/title:opacity-100 focus:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
+                    onClick={() => setIsEditingTitle(true)}
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                )}
+              </div>
+            )}
             <p className="text-xs text-muted-foreground">{UI_TEXT.studyLab.subtitle}</p>
           </div>
         </div>

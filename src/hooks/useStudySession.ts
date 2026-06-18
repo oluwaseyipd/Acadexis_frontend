@@ -162,6 +162,7 @@ export const useStudySession = ({ courseId, sessionId }: UseStudySessionOptions)
   return {
     sessions,
     activeSession,
+    setActiveSession,
     messages,
     isLoadingSessions,
     isLoadingHistory,
