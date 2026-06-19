@@ -112,7 +112,7 @@ const apiService = {
 
     /** Get the Google OAuth redirect URL for university SSO */
     getGoogleAuthUrl(role?: string): Promise<AxiosResponse<{ url: string }>> {
-      return apiClient.get<{ url: string }>("/auth/google/url/", {
+      return apiClient.get<{ url: string }>("/auth/google/university/", {
         params: role ? { role } : undefined,
       });
     },
@@ -129,7 +129,7 @@ const apiService = {
 
     /** Request a password-reset email */
     forgotPassword(email: string): Promise<AxiosResponse<{ message: string }>> {
-      return apiClient.post<{ message: string }>("/auth/password/reset/", { email });
+      return apiClient.post<{ message: string }>("/auth/forgot-password/", { email });
     },
 
     /** Verify user's email using 6-digit code */
@@ -147,10 +147,9 @@ const apiService = {
       token: string,
       newPassword: string
     ): Promise<AxiosResponse<{ message: string }>> {
-      return apiClient.post<{ message: string }>("/auth/password/reset/confirm/", {
+      return apiClient.post<{ message: string }>("/auth/reset-password/", {
         token,
         new_password: newPassword,
-        new_password_confirm: newPassword,
       });
     },
   },
@@ -160,17 +159,17 @@ const apiService = {
   user: {
     /** Get the full authenticated user object */
     me(): Promise<AxiosResponse<AuthUser>> {
-      return apiClient.get<AuthUser>("/users/me/");
+      return apiClient.get<AuthUser>("/auth/me/");
     },
 
     /** Update email only */
     updateEmail(data: { email: string }): Promise<AxiosResponse<AuthUser>> {
-      return apiClient.patch<AuthUser>("/users/me/", data);
+      return apiClient.patch<AuthUser>("/auth/me/", data);
     },
 
     profile: {
       get(): Promise<AxiosResponse<UserProfile>> {
-        return apiClient.get<UserProfile>("/users/profile/");
+        return apiClient.get<UserProfile>("/auth/profile/");
       },
 
       update(data: {
@@ -190,7 +189,7 @@ const apiService = {
           if (data.identification_number !== undefined) formData.append("identification_number", data.identification_number);
           formData.append("avatar", data.avatar);
 
-          return apiClient.patch<UserProfile>("/users/profile/", formData, {
+          return apiClient.patch<UserProfile>("/auth/profile/", formData, {
             headers: {
               "Content-Type": "multipart/form-data",
             },
@@ -198,7 +197,7 @@ const apiService = {
         }
 
         const { avatar: _avatar, ...jsonData } = data;
-        return apiClient.patch<UserProfile>("/users/profile/", jsonData);
+        return apiClient.patch<UserProfile>("/auth/profile/", jsonData);
       },
     },
 
@@ -207,10 +206,9 @@ const apiService = {
       currentPassword: string,
       newPassword: string
     ): Promise<AxiosResponse<{ message: string }>> {
-      return apiClient.put<{ message: string }>("/auth/password/change/", {
-        old_password: currentPassword,
+      return apiClient.post<{ message: string }>("/auth/change-password/", {
+        current_password: currentPassword,
         new_password: newPassword,
-        new_password_confirm: newPassword,
       });
     },
   },
