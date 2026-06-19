@@ -88,7 +88,7 @@ const setAuthCookies = (accessToken: string | null, refreshToken: string | null)
 };
 
 const publicApiClient: AxiosInstance = axios.create({
-  baseURL: `${BASE_URL}/api`,
+  baseURL: `${BASE_URL}/api/v1`,
   timeout: TIMEOUT,
   withCredentials: false,
   headers: {
@@ -123,7 +123,7 @@ publicApiClient.interceptors.response.use(
 );
 
 const apiClient: AxiosInstance = axios.create({
-  baseURL: `${BASE_URL}/api`,
+  baseURL: `${BASE_URL}/api/v1`,
   timeout: TIMEOUT,
   withCredentials: true,
   headers: {
@@ -214,7 +214,7 @@ apiClient.interceptors.response.use(
 
       try {
         const { data } = await axios.post(
-          `${BASE_URL}/api/auth/token/refresh/`,
+          `${BASE_URL}/api/v1/auth/token/refresh/`,
           { refresh: refreshToken },
           { headers: { "Content-Type": "application/json" }, withCredentials: true }
         );
