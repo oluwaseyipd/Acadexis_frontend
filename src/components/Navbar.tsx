@@ -1,11 +1,20 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 const Navbar: React.FC = () => {
-  const [activeItem, setActiveItem] = useState<string>('Features');
+  const pathname = usePathname();
+  const [activeItem, setActiveItem] = useState<string>('');
   const [mobileOpen, setMobileOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!pathname) return;
+    const normalized = pathname.replace(/\/+$/g, '') || '/';
+    const activeNav = navItems.find(item => item.url === normalized);
+    setActiveItem(activeNav ? activeNav.name : '');
+  }, [pathname]);
 
   const navItems = [
     { name: 'Features', url: '/features' },
@@ -14,7 +23,7 @@ const Navbar: React.FC = () => {
   ];
 
   return (
-    <nav className="bg-white shadow-md">
+    <nav className="sticky top-0 z-50 bg-white shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
