@@ -2,7 +2,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Link from 'next/link';
-import { BookOpenCheck, Check, ShieldCheck, SquareFunction } from "lucide-react";
+import { BookOpenCheck, Check, MapPin, ShieldCheck, ShieldCogCorner, SquareFunction } from "lucide-react";
 
 export default function Home() {
   return (
@@ -52,7 +52,7 @@ export default function Home() {
           </p>
         </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center py-16 md:py-32 space-x-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center py-16 md:py-32 space-x-0 md:space-x-4">
        {/* Student Card */}
         <div className="flex flex-col items-start bg-white p-8 space-y-4 rounded-2xl shadow-md">
           <div className="flex items-center justify-center w-16 h-16 bg-[#002147]/70 rounded-xl">
@@ -110,6 +110,46 @@ export default function Home() {
         </div>
       </div>
       </div>
+
+
+    {/* Product Advantage point */}
+    <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8  space-y-16 md:space-y-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center py-16 md:py-32 space-x-4">
+              <div className="w-full md:w-[700px] h-[600px] bg-[#d2d7f1] rounded-2xl flex items-center justify-center"></div>
+      <div className="flex flex-col items-start space-y-6 w-full md:max-w-xl">
+        <h1 className="text-3xl md:text-5xl font-semibold text-[#191C1D]">Beyond the Black Box.</h1>
+        <p className="text-[#44474E]">Most AI "hallucinates" when it doesn't know the answer. We built a proprietary verification engine that forces the AI to visually anchor every response to a specific coordinate within your documents.</p>
+     
+     
+       <div className="flex flex-row items-start justify-between space-x-4 mt-8">
+  <span className="flex items-center justify-center w-12 h-12 md:w-16 md:h-16 bg-gray-200 rounded-full flex-shrink-0">
+    <MapPin className="w-6 h-6 md:w-8 md:h-8 text-[#191C1D]" />
+  </span>
+  <div className="flex flex-col items-start space-y-2">
+    <h2 className="text-xl font-bold text-[#191C1D]">Coordinate-Level Citations</h2>
+    <p className="text-[#44474E]">
+      Click any answer to jump exactly to the line and paragraph of the source material.
+    </p>
+  </div>
+</div>
+
+   <div className="flex flex-row items-start justify-between space-x-4 mt-8">
+  <span className="flex items-center justify-center w-12 h-12 md:w-16 md:h-16 bg-gray-200 rounded-full flex-shrink-0">
+    <ShieldCogCorner className="w-6 h-6 md:w-8 md:h-8 text-[#191C1D]" />
+  </span>
+  <div className="flex flex-col items-start space-y-2">
+    <h2 className="text-xl font-bold text-[#191C1D]">Hallucination Blocking</h2>
+    <p className="text-[#44474E]">
+      If the truth isn't in your data, the AI says "I don't know" rather than inventing facts.
+    </p>
+  </div>
+</div>
+
+      </div>
+      </div>
+    </div> 
+
+
 
 
     <div className="flex flex-col bg-[#002147] space-y-4">
