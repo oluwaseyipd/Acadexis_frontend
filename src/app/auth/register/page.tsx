@@ -11,9 +11,14 @@ export default function RoleSelectPage() {
 
       {/* Hero */}
       <section className="flex flex-col items-center text-center mt-10 gap-4">
-        <div className="w-[64px] h-[64px] rounded-2xl bg-[#0f173e] flex items-center justify-center text-green-400">
+        <button
+          type="button"
+          onClick={() => router.push("/")}
+          aria-label="Go to homepage"
+          className="w-[64px] h-[64px] rounded-2xl bg-[#0f173e] flex items-center justify-center text-green-400"
+        >
           <Landmark size={28} strokeWidth={1.6} />
-        </div>
+        </button>
 
         <h1 className="text-4xl sm:text-5xl font-bold text-[#0f173e] tracking-tight leading-[1.15] font-serif max-w-[900px]">
           Welcome to Academic Curator

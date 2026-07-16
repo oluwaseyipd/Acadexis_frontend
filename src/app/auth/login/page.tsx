@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, GraduationCap } from "lucide-react";
 import apiService from "@/services/apiService";
@@ -164,20 +165,22 @@ export default function LoginPage() {
 
       <div className="relative w-full max-w-[480px] flex flex-col items-center gap-6">
         {/* ── Header ─────────────────────────────────────────────────────── */}
-        <header className="flex flex-col items-center gap-3 text-center mb-4">
-          <div className="w-[52px] h-[52px] rounded-[14px] bg-[#0f173e] flex items-center justify-center text-green-500">
-            <GraduationCap size={24} strokeWidth={1.8} />
-          </div>
+        <Link href="/" className="w-full">
+          <header className="flex flex-col items-center gap-3 text-center mb-4 cursor-pointer">
+            <div className="w-[52px] h-[52px] rounded-[14px] bg-[#0f173e] flex items-center justify-center text-green-500">
+              <GraduationCap size={24} strokeWidth={1.8} />
+            </div>
 
-          <h1 className="text-[2rem] font-bold text-[#0f173e] tracking-tight leading-tight font-serif">
-            Acadexis
-          </h1>
+            <h1 className="text-[2rem] font-bold text-[#0f173e] tracking-tight leading-tight font-serif">
+              Acadexis
+            </h1>
 
-          <p className="text-sm text-gray-500 leading-relaxed max-w-[300px]">
-            Sign in to your lecturer workspace to manage your digital
-            athenaeum.
-          </p>
-        </header>
+            <p className="text-sm text-gray-500 leading-relaxed max-w-[300px]">
+              Sign in to your lecturer workspace to manage your digital
+              athenaeum.
+            </p>
+          </header>
+        </Link>
 
         {/* ── Card ───────────────────────────────────────────────────────── */}
         <div className="w-full bg-white rounded-4xl px-8 py-9 flex flex-col gap-5">
