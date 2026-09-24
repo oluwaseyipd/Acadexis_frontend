@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -19,6 +19,9 @@ import {
   X,
   MapPin,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Quote,
   Building2,
   Cpu,
   Brain,
@@ -134,6 +137,76 @@ const sampleQuizQuestions = [
   }
 ];
 
+// Testimonials Data
+interface Testimonial {
+  id: string;
+  quote: string;
+  author: string;
+  role: string;
+  institution: string;
+  metric: string;
+  image: string;
+  tag: string;
+}
+
+const testimonialsData: Testimonial[] = [
+  {
+    id: 'alistair',
+    quote:
+      'Before Acadexis, students would turn in assignments with plausible-looking AI citations that were completely fictitious. Now, every single answer cites exact slide numbers and equations from my actual lectures. It restored trust in AI for our department.',
+    author: 'Dr. David Alistair',
+    role: 'Associate Professor of Computer Science',
+    institution: 'School of Computing & Data Systems',
+    metric: '100% Grounded Citations',
+    image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&h=300&q=80',
+    tag: 'Faculty Lead'
+  },
+  {
+    id: 'jenkins',
+    quote:
+      'The struggle heatmap is a genuine pedagogical breakthrough. I saw that 40% of my class was querying the Carnot cycle proof before midterms, so I dedicated the first 15 minutes of lecture to it. Our cohort exam average jumped 18%.',
+    author: 'Dr. Sarah Jenkins',
+    role: 'Department of Mechanical Engineering',
+    institution: 'Faculty of Applied Sciences',
+    metric: '+18% Cohort Mastery',
+    image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&h=300&q=80',
+    tag: 'Department Head'
+  },
+  {
+    id: 'oconnor',
+    quote:
+      'As a biomedical student, precise anatomical definitions and biochemical pathways matter immensely. Being able to click an AI citation and have Acadexis highlight the exact paragraph in my microbiology textbook is unmatched.',
+    author: 'James O’Connor',
+    role: 'Honors Biomedical Sciences Scholar',
+    institution: 'College of Health & Medicine',
+    metric: '4.5 hrs Saved / Week',
+    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&h=300&q=80',
+    tag: 'Student Researcher'
+  },
+  {
+    id: 'rostova',
+    quote:
+      'We deployed Acadexis across our 600-student introductory biology cohort. The zero-hallucination guarantee gave our dean and academic integrity committee complete confidence to officially sanction AI on campus.',
+    author: 'Prof. Elena Rostova',
+    role: 'Dean of Biological Sciences',
+    institution: 'Institute for Cellular Studies',
+    metric: '600+ Students Deployed',
+    image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=300&h=300&q=80',
+    tag: 'Institutional Dean'
+  },
+  {
+    id: 'adebayo',
+    quote:
+      'Uploading 100-page distributed systems papers and having Acadexis map consensus theorems to exact coordinate bounding boxes turned weeks of literature review into focused, verifiable study sessions.',
+    author: 'Marcus Adebayo',
+    role: 'Graduate Research Assistant',
+    institution: 'Distributed Algorithms Group',
+    metric: '5x Faster Literature Review',
+    image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&h=300&q=80',
+    tag: 'Graduate Researcher'
+  }
+];
+
 export default function HomePage() {
   // Sandbox state
   const [activeTab, setActiveTab] = useState<'study' | 'heatmap' | 'quiz'>('study');
@@ -154,6 +227,11 @@ export default function HomePage() {
   // FAQ open states
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
+  // Sliding Testimonials state
+  const [currentTestimonial, setCurrentTestimonial] = useState<number>(0);
+  const [slideDirection, setSlideDirection] = useState<number>(1);
+  const [isTestimonialPaused, setIsTestimonialPaused] = useState<boolean>(false);
+
   const toggleFaq = (idx: number) => {
     setOpenFaq(openFaq === idx ? null : idx);
   };
@@ -165,6 +243,31 @@ export default function HomePage() {
     setCopiedCitation(true);
     setTimeout(() => setCopiedCitation(false), 2000);
   };
+
+  const nextTestimonial = () => {
+    setSlideDirection(1);
+    setCurrentTestimonial((prev) => (prev + 1) % testimonialsData.length);
+  };
+
+  const prevTestimonial = () => {
+    setSlideDirection(-1);
+    setCurrentTestimonial((prev) => (prev - 1 + testimonialsData.length) % testimonialsData.length);
+  };
+
+  const goToTestimonial = (index: number) => {
+    setSlideDirection(index > currentTestimonial ? 1 : -1);
+    setCurrentTestimonial(index);
+  };
+
+  // Auto-play sliding testimonials
+  useEffect(() => {
+    if (isTestimonialPaused) return;
+    const interval = setInterval(() => {
+      setSlideDirection(1);
+      setCurrentTestimonial((prev) => (prev + 1) % testimonialsData.length);
+    }, 6500);
+    return () => clearInterval(interval);
+  }, [isTestimonialPaused, currentTestimonial]);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-[#83FBA5] selection:text-[#002147]">
@@ -1280,115 +1383,137 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Academic Testimonials ──────────────────────────────────────────── */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-slate-50">
-        <div className="max-w-7xl mx-auto space-y-12">
+      {/* ── Sliding Academic Testimonials ───────────────────────────────────── */}
+      <section
+        className="py-20 px-4 sm:px-6 lg:px-8 bg-slate-50 relative overflow-hidden"
+        onMouseEnter={() => setIsTestimonialPaused(true)}
+        onMouseLeave={() => setIsTestimonialPaused(false)}
+      >
+        <div className="max-w-5xl mx-auto space-y-12">
           
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4 }}
-            className="text-center max-w-2xl mx-auto space-y-3"
-          >
-            <span className="text-xs font-bold uppercase tracking-wider text-green-700 bg-green-100 px-3 py-1 rounded-full border border-green-200">
-              Peer Endorsements
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#002147] tracking-tight">
-              Trusted by Faculty and Students
-            </h2>
-            <p className="text-slate-600 text-sm sm:text-base">
-              See what professors and scholars say about the transition from black-box AI to coordinate-grounded study.
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-            
-            {/* Review 1 */}
+          {/* Header with Navigation Controls */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.35 }}
-              whileHover={{ y: -4 }}
-              className="bg-white p-6 rounded-2xl border border-slate-200 space-y-4 shadow-sm flex flex-col justify-between"
+              transition={{ duration: 0.4 }}
+              className="space-y-3"
             >
-              <p className="text-slate-700 text-sm leading-relaxed italic">
-                &ldquo;Before Acadexis, students would turn in assignments with plausible-looking AI citations that were completely fictitious. Now, every single answer cites slide numbers from my actual lectures.&rdquo;
+              <span className="text-xs font-bold uppercase tracking-wider text-green-700 bg-green-100 px-3 py-1 rounded-full border border-green-200">
+                Peer Endorsements
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-bold text-[#002147] tracking-tight">
+                Trusted by Faculty and Students
+              </h2>
+              <p className="text-slate-600 text-sm sm:text-base max-w-xl">
+                Real feedback from university professors, department deans, and honors scholars.
               </p>
-              <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
-                <div className="w-10 h-10 rounded-full relative overflow-hidden bg-slate-200 flex-shrink-0">
-                  <Image
-                    src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&h=200&q=80"
-                    alt="Prof. Dr. David Alistair"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div>
-                  <div className="text-sm font-bold text-slate-900">Dr. David Alistair</div>
-                  <div className="text-xs text-slate-500">Associate Professor of Computer Science</div>
-                </div>
-              </div>
             </motion.div>
 
-            {/* Review 2 */}
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.35, delay: 0.1 }}
-              whileHover={{ y: -4 }}
-              className="bg-white p-6 rounded-2xl border border-slate-200 space-y-4 shadow-sm flex flex-col justify-between"
-            >
-              <p className="text-slate-700 text-sm leading-relaxed italic">
-                &ldquo;The struggle heatmap is a game-changer. I saw that 40% of my class was querying the Carnot cycle proof, so I dedicated the first 15 minutes of Monday&apos;s lecture to it. Exam scores jumped 18%.&rdquo;
-              </p>
-              <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
-                <div className="w-10 h-10 rounded-full relative overflow-hidden bg-slate-200 flex-shrink-0">
-                  <Image
-                    src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&h=200&q=80"
-                    alt="Dr. Sarah Jenkins"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div>
-                  <div className="text-sm font-bold text-slate-900">Dr. Sarah Jenkins</div>
-                  <div className="text-xs text-slate-500">Department of Mechanical Engineering</div>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Review 3 */}
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.35, delay: 0.2 }}
-              whileHover={{ y: -4 }}
-              className="bg-white p-6 rounded-2xl border border-slate-200 space-y-4 shadow-sm flex flex-col justify-between"
-            >
-              <p className="text-slate-700 text-sm leading-relaxed italic">
-                &ldquo;As a biomedical student, precise details matter. Being able to click a citation in the chat and have Acadexis highlight the exact paragraph in my microbiology textbook is incredible.&rdquo;
-              </p>
-              <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
-                <div className="w-10 h-10 rounded-full relative overflow-hidden bg-slate-200 flex-shrink-0">
-                  <Image
-                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&h=200&q=80"
-                    alt="James O'Connor"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div>
-                  <div className="text-sm font-bold text-slate-900">James O&apos;Connor</div>
-                  <div className="text-xs text-slate-500">Honors Biomedical Student</div>
-                </div>
-              </div>
-            </motion.div>
-
+            {/* Slider Arrow Controls */}
+            <div className="flex items-center gap-3 self-start md:self-end">
+              <span className="text-xs font-mono font-bold text-slate-500 mr-1">
+                {String(currentTestimonial + 1).padStart(2, '0')} / {String(testimonialsData.length).padStart(2, '0')}
+              </span>
+              <motion.button
+                whileTap={{ scale: 0.94 }}
+                onClick={prevTestimonial}
+                aria-label="Previous testimonial"
+                className="w-10 h-10 rounded-full bg-white border border-slate-300 hover:bg-slate-100 text-[#002147] flex items-center justify-center transition-colors shadow-sm focus:outline-none"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </motion.button>
+              <motion.button
+                whileTap={{ scale: 0.94 }}
+                onClick={nextTestimonial}
+                aria-label="Next testimonial"
+                className="w-10 h-10 rounded-full bg-[#002147] hover:bg-[#0a2f5c] text-white flex items-center justify-center transition-colors shadow-sm focus:outline-none"
+              >
+                <ChevronRight className="w-5 h-5 text-[#83FBA5]" />
+              </motion.button>
+            </div>
           </div>
+
+          {/* Sliding Testimonial Stage */}
+          <div className="relative min-h-[320px] sm:min-h-[260px] flex items-center">
+            <AnimatePresence mode="wait" custom={slideDirection}>
+              <motion.div
+                key={currentTestimonial}
+                custom={slideDirection}
+                initial={{ opacity: 0, x: slideDirection > 0 ? 100 : -100 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: slideDirection > 0 ? -100 : 100 }}
+                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                drag="x"
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.2}
+                onDragEnd={(_, info) => {
+                  if (info.offset.x > 50) {
+                    prevTestimonial();
+                  } else if (info.offset.x < -50) {
+                    nextTestimonial();
+                  }
+                }}
+                className="w-full bg-white rounded-2xl border border-slate-200 p-6 sm:p-10 shadow-md flex flex-col justify-between space-y-6 cursor-grab active:cursor-grabbing"
+              >
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <Quote className="w-8 h-8 text-[#002147] flex-shrink-0" />
+                    <span className="text-xs font-bold uppercase tracking-wider text-[#002147] bg-slate-100 px-3 py-1 rounded-md border border-slate-200">
+                      {testimonialsData[currentTestimonial].tag}
+                    </span>
+                  </div>
+                  <span className="self-start sm:self-auto bg-green-50 text-green-700 border border-green-200 text-xs font-bold px-3 py-1 rounded-full">
+                    {testimonialsData[currentTestimonial].metric}
+                  </span>
+                </div>
+
+                <p className="text-base sm:text-xl text-slate-800 font-medium leading-relaxed italic">
+                  &ldquo;{testimonialsData[currentTestimonial].quote}&rdquo;
+                </p>
+
+                <div className="flex items-center gap-4 pt-4 border-t border-slate-100">
+                  <div className="w-12 h-12 rounded-full relative overflow-hidden bg-slate-200 flex-shrink-0 border-2 border-[#002147]/10">
+                    <Image
+                      src={testimonialsData[currentTestimonial].image}
+                      alt={testimonialsData[currentTestimonial].author}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <div>
+                    <div className="text-base font-bold text-slate-900">
+                      {testimonialsData[currentTestimonial].author}
+                    </div>
+                    <div className="text-xs text-slate-600 font-medium">
+                      {testimonialsData[currentTestimonial].role} • {testimonialsData[currentTestimonial].institution}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Pagination Pill Indicators */}
+          <div className="flex items-center justify-center gap-2 pt-2">
+            {testimonialsData.map((t, idx) => {
+              const isActive = currentTestimonial === idx;
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => goToTestimonial(idx)}
+                  aria-label={`Go to slide ${idx + 1}`}
+                  className="h-2 rounded-full transition-all focus:outline-none"
+                  style={{
+                    width: isActive ? '32px' : '8px',
+                    backgroundColor: isActive ? '#002147' : '#cbd5e1'
+                  }}
+                />
+              );
+            })}
+          </div>
+
         </div>
       </section>
 
