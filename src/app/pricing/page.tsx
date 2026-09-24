@@ -1,189 +1,337 @@
+'use client';
 
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import { CircleCheck, ShieldCheck, Landmark, ShieldPlus } from "lucide-react";
+import React, { useState } from 'react';
+import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
+import {
+  CircleCheck,
+  ShieldCheck,
+  Landmark,
+  ShieldPlus,
+  ArrowRight,
+  Check,
+  HelpCircle,
+  Zap,
+  Building2,
+  GraduationCap
+} from 'lucide-react';
 
-
-type PricingPlan = {
+interface PricingPlan {
   name: string;
-  price: string;
+  monthlyPrice: string;
+  annualPrice: string;
+  period: string;
+  badge?: string;
+  popular?: boolean;
   about: string;
   features: string[];
   cta: string;
-};
-
+  ctaLink: string;
+}
 
 const pricingPlans: PricingPlan[] = [
   {
-    name: "Scholar",
-    price: "$0",
-    about:"Essential tools for individual students and independent learners.",
+    name: 'Scholar',
+    monthlyPrice: '$0',
+    annualPrice: '$0',
+    period: 'forever',
+    about: 'Essential verified study tools for individual students and independent learners.',
     features: [
-      "AI Curation (10 papers/month)",
-      "Standard Academic Integrity Check",
-      "1GB Cloud Storage",
+      'Grounded AI Tutor (10 document packs/mo)',
+      'Coordinate-level citations on PDF courseware',
+      'Flashcard & practice quiz generator',
+      'Standard academic integrity guard',
+      '1 GB Cloud document storage'
     ],
-    cta:"Start Learning",
+    cta: 'Start Learning Free',
+    ctaLink: '/auth/register'
   },
   {
-    name: "Researcher",
-    price: "$24",
-    about:"Advanced tools for serious researchers and academic professionals.",
+    name: 'Researcher & Faculty',
+    monthlyPrice: '$19',
+    annualPrice: '$15',
+    period: 'per month',
+    badge: 'MOST POPULAR',
+    popular: true,
+    about: 'Advanced tools for serious researchers, teaching assistants, and university faculty.',
     features: [
-      "Unlimited AI Processing",
-      "AI Curation (50 papers/month)",
-      "Enhanced Academic Integrity Check",
-      "10GB Cloud Storage",
-      "Advanced Analytics and Reporting",
+      'Unlimited courseware grounding (PDF, PPTX, DOCX)',
+      'High-priority coordinate citation engine',
+      'Faculty struggle heatmap & student analytics',
+      'Automated midterm exam question generator',
+      '20 GB Cloud document storage',
+      'Direct LaTeX math & code snippet export'
     ],
-    cta:"Upgrade to Pro",
+    cta: 'Upgrade to Faculty Pro',
+    ctaLink: '/auth/register'
   },
   {
-    name: "Institutional",
-    price: "Custom",
-    about:"Tailored solutions for educational institutions and research organizations.",
+    name: 'Institutional Department',
+    monthlyPrice: 'Custom',
+    annualPrice: 'Custom',
+    period: 'annual billing',
+    badge: 'CAMPUS LICENSE',
+    about: 'Tailored campus deployment for university faculties, academic deans, and research labs.',
     features: [
-      "AI Curation (Unlimited)",
-      "Enterprise Academic Integrity Check",
-      "Unlimited Cloud Storage",
-      "Dedicated Support and Training",
+      'Unlimited departmental seats & storage',
+      'Institutional Google & SAML Single Sign-On (.edu)',
+      'Canvas, Blackboard, & Moodle LMS Integration',
+      'FERPA compliance & custom data sovereignty',
+      'Dedicated faculty onboarding & academic SLA',
+      'University-wide student struggle diagnostics'
     ],
-    cta:"Contact Sales",
-  },
-]
+    cta: 'Contact Institutional Sales',
+    ctaLink: '/support'
+  }
+];
 
+const comparisonRows = [
+  { feature: 'Grounded AI Study Lab', scholar: '10 packs/mo', researcher: 'Unlimited', institutional: 'Unlimited' },
+  { feature: 'Coordinate Bounding Box Citations', scholar: 'Included', researcher: 'Included', institutional: 'Included' },
+  { feature: 'Supported Formats', scholar: 'PDF, TXT', researcher: 'PDF, PPTX, DOCX, LaTeX', institutional: 'All Formats + LMS' },
+  { feature: 'Faculty Struggle Heatmaps', scholar: '—', researcher: 'Included', institutional: 'Included (Dept Wide)' },
+  { feature: 'Automated Exam & Quiz Generator', scholar: 'Standard', researcher: 'Advanced', institutional: 'Enterprise Bank' },
+  { feature: 'University Domain SSO (.edu)', scholar: '—', researcher: 'Optional', institutional: 'SAML / Google SSO' },
+  { feature: 'FERPA & Data Sovereignty Agreement', scholar: 'Standard Terms', researcher: 'Standard Terms', institutional: 'Custom SLA & DPA' },
+  { feature: 'Dedicated Faculty Support', scholar: 'Community', researcher: 'Priority Email', institutional: 'Dedicated Account Lead' }
+];
 
-export default function Pricing() {
+export default function PricingPage() {
+  const [billingInterval, setBillingInterval] = useState<'monthly' | 'annual'>('annual');
+
   return (
-    <div>
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-[#83FBA5] selection:text-[#002147]">
       <Navbar />
-    
-      <main className="px-4 md:px-8 lg:px-16 py-8 bg-gray-50 min-h-screen">
-        
-        {/* Hero Section */}
-        <div className="max-w-4xl mt-12 flex flex-col items-center justify-center space-y-4 mx-auto text-center">
-          <h1 className="text-3xl md:text-6xl font-semibold text-gray-800">
-          Academic Excellence, <br/><span className="text-green-600">Sustainably Scaled.</span>
-        </h1>
-        <p className="max-w-3xl mt-3 text-sm md:text-lg text-gray-600">
-          Choose the plan that fits your research journey. From solo scholars to global institutions, our AI-curated intelligence adapts to your specific academic needs.
-        </p>
-        </div>
 
-        {/* Pricing Plans */}
-        <div className="max-w-full md:max-w-[1500px] mt-20 grid grid-cols-1 md:grid-cols-3 gap-8 space-y-8 md:space-y-0 mx-auto">
-          {pricingPlans.map((plan, index) => (
-            <div key={index} className={`relative rounded-lg shadow-sm p-6 flex flex-col items-start justify-between text-left  ${plan.name === "Researcher" ? 'bg-[#1a2456] text-white' : 'bg-white text-gray-800' }`}>
-              <h2 className="text-2xl font-semibold ">{plan.name}</h2>
-              <div className="mb-6">
-              <div className="flex items-baseline mt-2">
-              <p className="mt-4 text-4xl font-bold ">{plan.price}</p>
-              <span>{plan.name === "Scholar" ? "/forever" : plan.name === "Researcher" ? "/monthly" : ""}</span>
-              </div>
-               <p className="mt-4 ">{plan.about}</p>
-              </div>
-              <ul className="mt-2 space-y-2">
-                {plan.features.map((feature, idx) => (
-                  <li key={idx} className="flex items-center">
-                    <CircleCheck className="mr-2 text-green-500" /> {feature}
-                  </li>
-                ))}
-              </ul>
+      <main className="px-4 sm:px-6 lg:px-8 py-12 sm:py-20 min-h-screen">
+        {/* ── Hero Section ─────────────────────────────────────────────────── */}
+        <div className="max-w-4xl mx-auto text-center space-y-4">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="inline-flex items-center gap-2 bg-slate-200 border border-slate-300 text-[#002147] text-xs font-semibold px-3.5 py-1.5 rounded-full"
+          >
+            <GraduationCap className="w-4 h-4 text-green-700" />
+            <span>Transparent Academic Pricing</span>
+          </motion.div>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.08 }}
+            className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-[#002147] leading-tight"
+          >
+            Academic Excellence, <span className="text-green-700">Sustainably Scaled</span>.
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.16 }}
+            className="max-w-2xl mx-auto text-sm sm:text-base text-slate-600 leading-relaxed"
+          >
+            Choose the tier tailored to your academic journey—from free tools for undergraduate scholars to enterprise grounding for university departments.
+          </motion.p>
+
+          {/* Billing Interval Toggle */}
+          <div className="pt-6 flex items-center justify-center">
+            <div className="flex items-center bg-slate-200 p-1 rounded-xl border border-slate-300 relative">
               <button
-                className={`mt-12 w-full px-4 py-3 rounded-lg transition font-bold text-[#1a2456]`}
-                style={
-                  plan.name === "Scholar" ? { backgroundColor: 'transparent', border: '2px solid #1a2456' }
-                    : plan.name === "Researcher" ? { backgroundColor: '#50C878' } // green
-                    : { backgroundColor: '#F2F2F2' } // grey for Custom/Institutional
-                }
+                onClick={() => setBillingInterval('monthly')}
+                className={`relative px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-colors z-10 ${
+                  billingInterval === 'monthly' ? 'text-white' : 'text-slate-700 hover:text-slate-900'
+                }`}
               >
-                {plan.cta}
+                {billingInterval === 'monthly' && (
+                  <motion.div
+                    layoutId="billingIndicator"
+                    className="absolute inset-0 bg-[#002147] rounded-lg -z-10 shadow-sm"
+                    transition={{ type: 'spring', stiffness: 450, damping: 32 }}
+                  />
+                )}
+                Monthly Billing
               </button>
-              {plan.name === "Researcher" && (
-                <span className="absolute -top-3 left-1/3 bg-green-500 text-white px-4 py-1 rounded-2xl text-sm font-semibold">
-                  MOST POPULAR
+              <button
+                onClick={() => setBillingInterval('annual')}
+                className={`relative px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-colors z-10 flex items-center gap-1.5 ${
+                  billingInterval === 'annual' ? 'text-white' : 'text-slate-700 hover:text-slate-900'
+                }`}
+              >
+                {billingInterval === 'annual' && (
+                  <motion.div
+                    layoutId="billingIndicator"
+                    className="absolute inset-0 bg-[#002147] rounded-lg -z-10 shadow-sm"
+                    transition={{ type: 'spring', stiffness: 450, damping: 32 }}
+                  />
+                )}
+                <span>Annual Billing</span>
+                <span className="bg-[#83FBA5] text-[#002147] text-[10px] font-bold px-1.5 py-0.5 rounded">
+                  Save 25%
                 </span>
-              )}
-            </div>
-          ))}
-
-        </div>
-
-          {/*  */}
-          <div className="mt-[70px] max-w-3xl flex  items-center justify-between mx-auto">
-            <span className="flex items-center justify-center font-semibold text-gray-500">
-                <ShieldCheck className="mr-2" />
-                Secure Payment
-            </span>
-            <span className="flex items-center justify-center font-semibold text-gray-500">
-              <Landmark className="mr-2" />
-              Institutional Billing
-            </span>
-            <span className="flex items-center justify-center font-semibold text-gray-500">
-              <ShieldPlus className="mr-2" />
-              FERPA Compliant
-            </span>
-          </div>
-        
-        {/* Comparison Table */}
-        <div className="mt-[70px] max-w-full bg-gray-100 p-8 rounded-lg">
-          <h2 className="text-4xl font-semibold text-gray-800 text-center">Detailed Feature Comparison</h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-14">
-            {/* Column 1 */}
-            <div className="flex flex-col items-start justify-start space-y-10">
-              <h2 className="text-xl text-gray-600">Core Features</h2>
-              <p className="text-black">AI Processing Power</p>
-              <p className="text-black">Academic Integrity Tools</p>
-              <p className="text-black">Customizable Reporting</p>
-              <p className="text-black">24/7 Customer Support</p>
-              <p className="text-black">Integration with LMS</p>
-            </div>
-
-            {/* Column 2 */}
-            <div className="flex flex-col items-start justify-start space-y-10">
-              <h2 className="text-xl text-gray-600">Sholar</h2>
-              <p className="text-black">Advanced Analytics</p>
-              <p className="text-black">Priority Support</p>
-              <p className="text-black">Custom Integrations</p>
-              <p className="text-black">Dedicated Account Manager</p>
-              <p className="text-black">Early Access to New Features</p>
-            </div>
-
-            {/* Column 3 */}
-            <div className="flex flex-col items-start justify-start space-y-10">
-              <h2 className="text-xl text-green-500">Researcher</h2>
-              <p className="text-green-600">Single Sign-On (SSO)</p>
-              <p className="text-black">Advanced Security Measures</p>
-              <p className="text-black">Dedicated Implementation Support</p>
-              <p className="text-black">Custom Training Programs</p>
-              <p className="text-black">White-labeling Options</p>
-            </div>
-
-            {/* Column 4 */}
-            <div className="flex flex-col items-start justify-start space-y-10">
-              <h2 className="text-xl text-gray-600">Enterprise</h2>
-              <p className="text-black">Custom Solutions</p>
-              <p className="text-black font-semibold">Dedicated Resources</p>
-              <p className="text-black">Priority Access</p>
-              <p className="text-black font-semibold">Tailored Integrations</p>
-              <p className="text-black font-semibold">Enhanced Support</p>
+              </button>
             </div>
           </div>
         </div>
 
-        {/* CTA */}
-        <div className="mt-[70px] relative overflow-hidden rounded-3xl">
-          <div className="absolute inset-0 bg-[url('/cta-img.jpg')] bg-cover bg-center" />
-          <div className="absolute inset-0 bg-gradient-to-t from-green-800/40 to-black/40" />
-          <div className="relative px-6 py-32 text-center">
-            <h2 className="text-4xl font-semibold text-white">Ready to Elevate your Academic Journey?</h2>
-            <p className="text-lg text-white/90 mt-4">
-              Join thousands of satisfied users and experience the difference today.
+        {/* ── Pricing Plans Grid ────────────────────────────────────────────── */}
+        <div className="max-w-7xl mx-auto mt-14 grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+          {pricingPlans.map((plan, index) => {
+            const isPopular = plan.popular;
+            const price =
+              billingInterval === 'annual' ? plan.annualPrice : plan.monthlyPrice;
+
+            return (
+              <motion.div
+                key={plan.name}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, delay: index * 0.08 }}
+                whileHover={{ y: -4 }}
+                className={`relative rounded-2xl p-6 sm:p-8 flex flex-col justify-between text-left transition-all ${
+                  isPopular
+                    ? 'bg-[#002147] text-white border-2 border-[#83FBA5] shadow-xl'
+                    : 'bg-white text-slate-800 border border-slate-200 shadow-sm'
+                }`}
+              >
+                {plan.badge && (
+                  <div
+                    className={`absolute -top-3.5 left-1/2 -translate-x-1/2 px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
+                      isPopular
+                        ? 'bg-[#83FBA5] text-[#002147] border border-[#002147]'
+                        : 'bg-[#002147] text-[#83FBA5] border border-[#003366]'
+                    }`}
+                  >
+                    {plan.badge}
+                  </div>
+                )}
+
+                <div>
+                  <h3 className="text-2xl font-bold">{plan.name}</h3>
+                  <p className={`text-xs sm:text-sm mt-2 leading-relaxed ${isPopular ? 'text-slate-300' : 'text-slate-600'}`}>
+                    {plan.about}
+                  </p>
+
+                  <div className="my-6 pt-4 border-t border-slate-200/40">
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-4xl sm:text-5xl font-extrabold tracking-tight">{price}</span>
+                      <span className={`text-xs sm:text-sm ${isPopular ? 'text-slate-300' : 'text-slate-500'}`}>
+                        /{plan.period}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Features checklist */}
+                  <ul className="space-y-3 text-xs sm:text-sm">
+                    {plan.features.map((feature, idx) => (
+                      <li key={idx} className="flex items-start gap-2.5">
+                        <Check
+                          className={`w-4 h-4 flex-shrink-0 mt-0.5 ${
+                            isPopular ? 'text-[#83FBA5]' : 'text-green-600'
+                          }`}
+                        />
+                        <span className={isPopular ? 'text-slate-200' : 'text-slate-700'}>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="mt-8 pt-4">
+                  <motion.div whileTap={{ scale: 0.98 }}>
+                    <Link
+                      href={plan.ctaLink}
+                      className={`w-full py-3.5 px-4 rounded-lg font-bold text-center block text-sm transition-colors ${
+                        isPopular
+                          ? 'bg-[#83FBA5] hover:bg-[#6ee791] text-[#002147]'
+                          : 'bg-[#002147] hover:bg-[#0a2f5c] text-white'
+                      }`}
+                    >
+                      {plan.cta}
+                    </Link>
+                  </motion.div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+
+        {/* ── Trust & Institutional Compliance Badges ──────────────────────── */}
+        <div className="mt-16 max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+          <div className="p-4 rounded-xl bg-white border border-slate-200 flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold text-slate-700">
+            <ShieldCheck className="w-5 h-5 text-green-600" />
+            <span>256-bit Encrypted Courseware</span>
+          </div>
+          <div className="p-4 rounded-xl bg-white border border-slate-200 flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold text-slate-700">
+            <Landmark className="w-5 h-5 text-green-600" />
+            <span>University Invoicing & Purchase Orders</span>
+          </div>
+          <div className="p-4 rounded-xl bg-white border border-slate-200 flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold text-slate-700">
+            <ShieldPlus className="w-5 h-5 text-green-600" />
+            <span>FERPA & Academic Integrity Compliant</span>
+          </div>
+        </div>
+
+        {/* ── Detailed Comparison Matrix ───────────────────────────────────── */}
+        <div className="mt-20 max-w-7xl mx-auto bg-white p-6 sm:p-10 rounded-2xl border border-slate-200 shadow-sm space-y-8">
+          <div className="text-center space-y-2">
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#002147]">Detailed Feature Comparison</h2>
+            <p className="text-xs sm:text-sm text-slate-600">
+              Full breakdown of capabilities across individual, faculty, and campus licenses.
             </p>
-            <button className="mt-6 bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg transition duration-300">
-              Start Your Free Trial
-            </button>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs sm:text-sm border-collapse min-w-[600px]">
+              <thead>
+                <tr className="border-b-2 border-slate-200 text-slate-900">
+                  <th className="py-3 px-4 font-bold">Feature</th>
+                  <th className="py-3 px-4 font-bold">Scholar ($0)</th>
+                  <th className="py-3 px-4 font-bold text-green-700">Researcher ($15/mo)</th>
+                  <th className="py-3 px-4 font-bold text-[#002147]">Institutional</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {comparisonRows.map((row, idx) => (
+                  <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                    <td className="py-3.5 px-4 font-medium text-slate-800">{row.feature}</td>
+                    <td className="py-3.5 px-4 text-slate-600">{row.scholar}</td>
+                    <td className="py-3.5 px-4 font-semibold text-green-700">{row.researcher}</td>
+                    <td className="py-3.5 px-4 font-semibold text-[#002147]">{row.institutional}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* ── Final Pricing CTA Banner (Solid Navy, Zero Gradients) ────────── */}
+        <div className="mt-20 max-w-7xl mx-auto bg-[#002147] text-white p-8 sm:p-16 rounded-2xl border border-[#003366] text-center space-y-6">
+          <h2 className="text-3xl sm:text-4xl font-bold text-white">
+            Need a custom department or university pilot?
+          </h2>
+          <p className="text-sm sm:text-base text-slate-300 max-w-xl mx-auto">
+            Our academic liaisons work directly with faculty heads and university IT to configure SSO, LMS integrations, and campus-wide licensing.
+          </p>
+          <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <motion.div whileTap={{ scale: 0.98 }}>
+              <Link
+                href="/support"
+                className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#83FBA5] hover:bg-[#6ee791] text-[#002147] font-bold rounded-lg text-sm transition-colors shadow-sm"
+              >
+                <span>Request Department Pilot</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </motion.div>
+            <motion.div whileTap={{ scale: 0.98 }}>
+              <Link
+                href="/auth/register"
+                className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#001733] hover:bg-[#0a2f5c] text-white border border-slate-600 font-semibold rounded-lg text-sm transition-colors"
+              >
+                <span>Create Free Scholar Account</span>
+              </Link>
+            </motion.div>
           </div>
         </div>
       </main>
